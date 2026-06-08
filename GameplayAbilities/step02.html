@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STEP 02 最小構成のセットアップ | GameplayAbilities 入門</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      background: #0f0f1a;
+      color: #e0e0e0;
+      line-height: 1.9;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      padding: 40px 20px;
+      border-bottom: 2px solid #e94560;
+    }
+
+    .header-inner {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .breadcrumb {
+      font-size: 0.8rem;
+      color: #6070a0;
+      margin-bottom: 16px;
+    }
+
+    .breadcrumb a { color: #7ec8e3; text-decoration: none; }
+    .breadcrumb a:hover { color: #e94560; }
+
+    .step-label {
+      font-size: 0.8rem;
+      color: #e94560;
+      font-weight: bold;
+      letter-spacing: 0.15em;
+      margin-bottom: 12px;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    header p { color: #a0a8c0; font-size: 0.95rem; }
+
+    main {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 48px 20px 80px;
+    }
+
+    h2 {
+      font-size: 1.3rem;
+      color: #7ec8e3;
+      margin: 52px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #2a2a4a;
+    }
+
+    h2:first-child { margin-top: 0; }
+
+    h3 {
+      font-size: 1rem;
+      color: #c8d8f0;
+      margin: 28px 0 10px;
+    }
+
+    p { margin-bottom: 16px; color: #c8d0e0; }
+
+    /* ステップ番号付きボックス */
+    .step-block {
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      margin: 24px 0;
+      overflow: hidden;
+    }
+
+    .step-block .step-head {
+      background: #1a2a4a;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .step-block .step-num {
+      background: #e94560;
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: bold;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .step-block .step-title {
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: bold;
+    }
+
+    .step-block .step-body {
+      padding: 20px 24px;
+    }
+
+    .step-block .step-body p { margin-bottom: 12px; }
+    .step-block .step-body p:last-child { margin-bottom: 0; }
+
+    /* コードブロック */
+    .code-wrap {
+      margin: 16px 0;
+    }
+
+    .code-label {
+      background: #2a2a4a;
+      color: #8090a8;
+      font-size: 0.75rem;
+      padding: 5px 14px;
+      border-radius: 4px 4px 0 0;
+      font-family: "Consolas", "Courier New", monospace;
+      display: inline-block;
+    }
+
+    pre {
+      background: #0a0a14;
+      border: 1px solid #2a2a4a;
+      border-radius: 0 4px 4px 4px;
+      padding: 20px;
+      overflow-x: auto;
+      margin: 0;
+    }
+
+    code {
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 0.85rem;
+      line-height: 1.8;
+    }
+
+    .c-comment { color: #4a7060; }
+    .c-keyword { color: #c792ea; }
+    .c-string  { color: #c3e88d; }
+    .c-type    { color: #ffcb6b; }
+    .c-macro   { color: #82aaff; }
+    .c-add     { color: #a0e8a0; }
+
+    /* インラインコード */
+    p code, li code {
+      background: #1a2a3a;
+      color: #7ec8e3;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.85em;
+    }
+
+    /* ポイントボックス */
+    .point-box {
+      background: #16213e;
+      border-left: 4px solid #e94560;
+      padding: 18px 22px;
+      border-radius: 4px;
+      margin: 20px 0;
+    }
+
+    .point-box p { margin-bottom: 0; }
+
+    /* 補足ボックス */
+    .note-box {
+      background: #131c2e;
+      border: 1px solid #2a2a4a;
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin: 16px 0;
+    }
+
+    .note-box .note-label {
+      font-size: 0.75rem;
+      color: #6070a0;
+      font-weight: bold;
+      letter-spacing: 0.1em;
+      margin-bottom: 6px;
+    }
+
+    .note-box p { margin-bottom: 0; font-size: 0.9rem; color: #8090a8; }
+
+    /* 確認リスト */
+    .check-list {
+      list-style: none;
+      margin: 16px 0;
+    }
+
+    .check-list li {
+      padding: 8px 0 8px 32px;
+      position: relative;
+      color: #c8d0e0;
+      border-bottom: 1px solid #1a2030;
+    }
+
+    .check-list li:last-child { border-bottom: none; }
+
+    .check-list li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #a0e8a0;
+      font-weight: bold;
+    }
+
+    /* ページナビ */
+    .page-nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 64px;
+      padding-top: 24px;
+      border-top: 1px solid #2a2a4a;
+    }
+
+    .page-nav a {
+      color: #7ec8e3;
+      text-decoration: none;
+      font-size: 0.9rem;
+      padding: 10px 20px;
+      border: 1px solid #2a2a4a;
+      border-radius: 4px;
+      transition: border-color 0.2s;
+    }
+
+    .page-nav a:hover { border-color: #7ec8e3; }
+    .page-nav .next { margin-left: auto; }
+
+    footer {
+      text-align: center;
+      padding: 28px;
+      color: #4a5068;
+      font-size: 0.82rem;
+      border-top: 1px solid #2a2a4a;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="breadcrumb">
+      <a href="../">UchidenoIndustry</a> &rsaquo;
+      <a href="./">GameplayAbilities 入門</a> &rsaquo;
+      STEP 02
+    </div>
+    <div class="step-label">STEP 02</div>
+    <h1>最小構成のセットアップ</h1>
+    <p>プロジェクトに GAS を追加して、コンパイルが通るところまで進める。</p>
+  </div>
+</header>
+
+<main>
+
+  <h2>このステップのゴール</h2>
+
+  <p>
+    このステップでは、GAS を使い始めるために必要な最小限のセットアップを行います。
+    アビリティをまだ作らなくてよいです。「GAS が動く状態にする」ことだけを目標にします。
+  </p>
+
+  <ul class="check-list">
+    <li>GAS プラグインを有効化する</li>
+    <li>ビルド設定に GAS を追加する</li>
+    <li>キャラクターに AbilitySystemComponent を追加する</li>
+    <li>エラーなくコンパイルが通る</li>
+  </ul>
+
+  <div class="point-box">
+    <p>
+      <strong style="color:#fff">C++ コードが登場します。</strong><br>
+      C++ に慣れていなくても、このステップのコードはほぼコピペで動きます。
+      「なぜそう書くのか」は後のステップで自然と分かってくるので、
+      今は動かすことを優先してください。
+    </p>
+  </div>
+
+  <h2>前提条件</h2>
+
+  <p>
+    GAS を使うには <strong style="color:#fff">C++ プロジェクト</strong> が必要です。
+    「ブループリントのみ」のプロジェクトでは、後のステップで必要になる
+    AttributeSet（ステータス定義）が作れません。
+  </p>
+
+  <p>
+    新しくプロジェクトを作る場合は、プロジェクト作成画面で
+    <strong style="color:#fff">「C++」を選択してください</strong>（「ブループリント」ではなく）。
+    テンプレートは「サードパーソン」が動作確認しやすくおすすめです。
+  </p>
+
+  <div class="note-box">
+    <div class="note-label">既存のブループリントプロジェクトを使いたい場合</div>
+    <p>
+      UE エディタのメニューから「ツール → 新規 C++ クラス」で
+      任意の C++ クラスを追加すると、C++ プロジェクトに変換されます。
+    </p>
+  </div>
+
+  <h2>セットアップ手順</h2>
+
+  <!-- STEP 1 -->
+  <div class="step-block">
+    <div class="step-head">
+      <div class="step-num">1</div>
+      <div class="step-title">GameplayAbilities プラグインを有効化する</div>
+    </div>
+    <div class="step-body">
+      <p>
+        UE エディタのメニューから <strong style="color:#fff">「編集 → プラグイン」</strong> を開き、
+        検索欄に <code>Gameplay Abilities</code> と入力します。
+        見つかったら <strong style="color:#fff">「有効」チェックボックスをオン</strong> にして、
+        エディタを再起動してください。
+      </p>
+      <p>
+        再起動後、プロジェクトフォルダの <code>[プロジェクト名].uproject</code> を
+        テキストエディタで開いて確認すると、以下のように追加されているはずです。
+      </p>
+      <div class="code-wrap">
+        <div class="code-label">[プロジェクト名].uproject（確認用）</div>
+        <pre><code><span class="c-string">"Plugins"</span>: [
+  {
+    <span class="c-string">"Name"</span>: <span class="c-string">"GameplayAbilities"</span>,
+    <span class="c-string">"Enabled"</span>: <span class="c-keyword">true</span>
+  }
+]</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step-block">
+    <div class="step-head">
+      <div class="step-num">2</div>
+      <div class="step-title">Build.cs に依存モジュールを追加する</div>
+    </div>
+    <div class="step-body">
+      <p>
+        <code>Source/[プロジェクト名]/[プロジェクト名].Build.cs</code> を
+        テキストエディタまたは Visual Studio / Rider で開きます。
+      </p>
+      <p>
+        <code>PublicDependencyModuleNames</code> の行を探して、
+        <strong style="color:#a0e8a0">緑色の3行</strong>を追加してください。
+      </p>
+      <div class="code-wrap">
+        <div class="code-label">[プロジェクト名].Build.cs</div>
+        <pre><code>PublicDependencyModuleNames.AddRange(<span class="c-keyword">new</span> <span class="c-type">string</span>[] {
+    <span class="c-string">"Core"</span>,
+    <span class="c-string">"CoreUObject"</span>,
+    <span class="c-string">"Engine"</span>,
+    <span class="c-string">"InputCore"</span>,
+    <span class="c-add c-string">"GameplayAbilities"</span><span class="c-add">,</span>  <span class="c-add c-comment">// 追加</span>
+    <span class="c-add c-string">"GameplayTags"</span><span class="c-add">,</span>       <span class="c-add c-comment">// 追加</span>
+    <span class="c-add c-string">"GameplayTasks"</span>       <span class="c-add c-comment">// 追加</span>
+});</code></pre>
+      </div>
+      <div class="note-box">
+        <div class="note-label">Build.cs とは</div>
+        <p>
+          「このプロジェクトはどのモジュール（機能群）を使うか」を Unreal Build Tool に伝えるファイルです。
+          GAS 関連の機能を使うには、この3つのモジュールを明示する必要があります。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step-block">
+    <div class="step-head">
+      <div class="step-num">3</div>
+      <div class="step-title">キャラクターのヘッダーファイルを編集する</div>
+    </div>
+    <div class="step-body">
+      <p>
+        <code>Source/[プロジェクト名]/[プロジェクト名]Character.h</code> を開きます。
+        <strong style="color:#a0e8a0">緑色の行</strong>を追加してください。
+      </p>
+      <div class="code-wrap">
+        <div class="code-label">[プロジェクト名]Character.h</div>
+        <pre><code><span class="c-macro">#pragma once</span>
+
+<span class="c-macro">#include</span> <span class="c-string">"CoreMinimal.h"</span>
+<span class="c-macro">#include</span> <span class="c-string">"GameFramework/Character.h"</span>
+<span class="c-add"><span class="c-macro">#include</span> <span class="c-string">"AbilitySystemInterface.h"</span>  <span class="c-comment">// 追加</span></span>
+<span class="c-macro">#include</span> <span class="c-string">"[プロジェクト名]Character.generated.h"</span>
+
+<span class="c-add"><span class="c-keyword">class</span> <span class="c-type">UAbilitySystemComponent</span>;  <span class="c-comment">// 追加</span></span>
+
+UCLASS()
+<span class="c-keyword">class</span> <span class="c-type">A[プロジェクト名]Character</span> : <span class="c-keyword">public</span> <span class="c-type">ACharacter</span><span class="c-add">, <span class="c-keyword">public</span> <span class="c-type">IAbilitySystemInterface</span></span>
+{
+    GENERATED_BODY()
+
+<span class="c-keyword">public</span>:
+    <span class="c-type">A[プロジェクト名]Character</span>();
+
+    <span class="c-add"><span class="c-comment">// IAbilitySystemInterface の実装（GAS に必要）</span>
+    <span class="c-keyword">virtual</span> <span class="c-type">UAbilitySystemComponent</span>* GetAbilitySystemComponent() <span class="c-keyword">const override</span>;</span>
+
+<span class="c-keyword">protected</span>:
+    <span class="c-add">UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = <span class="c-string">"GAS"</span>)
+    TObjectPtr&lt;<span class="c-type">UAbilitySystemComponent</span>&gt; AbilitySystemComponent;</span>
+
+    <span class="c-comment">// 既存のコードはそのまま...</span>
+};</code></pre>
+      </div>
+
+      <div class="note-box">
+        <div class="note-label">IAbilitySystemInterface とは</div>
+        <p>
+          「このキャラクターは GAS を持っている」と Unreal に伝えるための約束事（インターフェース）です。
+          これを継承することで、他のコードからこのキャラクターの ASC を取得できるようになります。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step-block">
+    <div class="step-head">
+      <div class="step-num">4</div>
+      <div class="step-title">キャラクターの cpp ファイルを編集する</div>
+    </div>
+    <div class="step-body">
+      <p>
+        <code>Source/[プロジェクト名]/[プロジェクト名]Character.cpp</code> を開きます。
+        <strong style="color:#a0e8a0">緑色の行</strong>を追加してください。
+      </p>
+      <div class="code-wrap">
+        <div class="code-label">[プロジェクト名]Character.cpp</div>
+        <pre><code><span class="c-macro">#include</span> <span class="c-string">"[プロジェクト名]Character.h"</span>
+<span class="c-add"><span class="c-macro">#include</span> <span class="c-string">"AbilitySystemComponent.h"</span>  <span class="c-comment">// 追加</span></span>
+
+<span class="c-type">A[プロジェクト名]Character</span>::<span class="c-type">A[プロジェクト名]Character</span>()
+{
+    <span class="c-comment">// 既存のコードはそのまま...</span>
+
+    <span class="c-add"><span class="c-comment">// AbilitySystemComponent を作成する</span>
+    AbilitySystemComponent = CreateDefaultSubobject&lt;<span class="c-type">UAbilitySystemComponent</span>&gt;(TEXT(<span class="c-string">"AbilitySystemComponent"</span>));</span>
+}
+
+<span class="c-add"><span class="c-type">UAbilitySystemComponent</span>* <span class="c-type">A[プロジェクト名]Character</span>::GetAbilitySystemComponent() <span class="c-keyword">const</span>
+{
+    <span class="c-keyword">return</span> AbilitySystemComponent;
+}</span></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="step-block">
+    <div class="step-head">
+      <div class="step-num">5</div>
+      <div class="step-title">コンパイルして確認する</div>
+    </div>
+    <div class="step-body">
+      <p>
+        UE エディタのツールバーにある <strong style="color:#fff">「コンパイル」ボタン</strong> をクリックするか、
+        Visual Studio / Rider からビルドを実行します。
+      </p>
+      <p>
+        エラーなくコンパイルが完了したら成功です。
+        レベルに配置されているキャラクターを選択して
+        <strong style="color:#fff">「詳細」パネルを確認すると、「GAS」カテゴリに
+        AbilitySystemComponent が表示されている</strong>はずです。
+      </p>
+    </div>
+  </div>
+
+  <h2>うまくいかないときの確認ポイント</h2>
+
+  <p>コンパイルエラーが出た場合、以下を確認してください。</p>
+
+  <ul class="check-list">
+    <li>Build.cs に3つのモジュールを追加したか（スペルミスに注意）</li>
+    <li><code>AbilitySystemInterface.h</code> のインクルードが .h ファイルに追加されているか</li>
+    <li><code>AbilitySystemComponent.h</code> のインクルードが .cpp ファイルに追加されているか</li>
+    <li><code>IAbilitySystemInterface</code> の継承を追加したあと、既存のカンマが残っているか（<code>public ACharacter,</code> のカンマ）</li>
+  </ul>
+
+  <h2>このステップのまとめ</h2>
+
+  <div class="point-box">
+    <p>
+      これで GAS を使う準備が整いました。<br>
+      キャラクターに AbilitySystemComponent（司令塔）が追加され、
+      GAS の機能を呼び出せる状態になっています。
+    </p>
+  </div>
+
+  <p>
+    次のステップでは、実際にアビリティを作成して発動させます。
+    ここからはブループリントが中心になるので、C++ の作業は一段落です。
+  </p>
+
+  <div class="page-nav">
+    <a href="step01.html">&#8592; STEP 01 GAS とは何か</a>
+    <a class="next" href="step03.html">STEP 03 最初の Ability を作る &#8594;</a>
+  </div>
+
+</main>
+
+<footer>
+  <p>GameplayAbilities 入門 &mdash; UchidenoIndustry</p>
+</footer>
+
+</body>
+</html>
