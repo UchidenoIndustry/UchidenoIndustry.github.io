@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "PowerShell(New-Item -ItemType Directory -Path \"f:\\\\www\\\\GitHubIO\\\\GameplayAbilities\\\\GameplayAbilities\" -Force)",
-      "PowerShell(Move-Item \"f:\\\\www\\\\GitHubIO\\\\GameplayAbilities\\\\index.html\" \"f:\\\\www\\\\GitHubIO\\\\GameplayAbilities\\\\GameplayAbilities\\\\index.html\")"
-    ]
-  }
-}
