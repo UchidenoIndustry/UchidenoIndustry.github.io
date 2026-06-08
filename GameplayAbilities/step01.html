@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STEP 01 GAS とは何か | GameplayAbilities 入門</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      background: #0f0f1a;
+      color: #e0e0e0;
+      line-height: 1.9;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      padding: 40px 20px;
+      border-bottom: 2px solid #e94560;
+    }
+
+    .header-inner {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .breadcrumb {
+      font-size: 0.8rem;
+      color: #6070a0;
+      margin-bottom: 16px;
+    }
+
+    .breadcrumb a { color: #7ec8e3; text-decoration: none; }
+    .breadcrumb a:hover { color: #e94560; }
+
+    header h1 {
+      font-size: 1.8rem;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    header .step-label {
+      font-size: 0.8rem;
+      color: #e94560;
+      font-weight: bold;
+      letter-spacing: 0.15em;
+      margin-bottom: 12px;
+    }
+
+    header p {
+      color: #a0a8c0;
+      font-size: 0.95rem;
+    }
+
+    main {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 48px 20px 80px;
+    }
+
+    h2 {
+      font-size: 1.3rem;
+      color: #7ec8e3;
+      margin: 48px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #2a2a4a;
+    }
+
+    h2:first-child { margin-top: 0; }
+
+    h3 {
+      font-size: 1.05rem;
+      color: #e0e0e0;
+      margin: 28px 0 10px;
+    }
+
+    p { margin-bottom: 16px; color: #c8d0e0; }
+
+    .point-box {
+      background: #16213e;
+      border-left: 4px solid #e94560;
+      padding: 20px 24px;
+      border-radius: 4px;
+      margin: 24px 0;
+    }
+
+    .point-box p { margin-bottom: 0; }
+
+    .info-box {
+      background: #16213e;
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin: 24px 0;
+    }
+
+    .info-box p { margin-bottom: 0; color: #8090a8; font-size: 0.9rem; }
+
+    /* GAS コンポーネント図 */
+    .component-list {
+      display: grid;
+      gap: 12px;
+      margin: 24px 0;
+    }
+
+    .component-item {
+      background: #16213e;
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      padding: 18px 22px;
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .component-item .name {
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 0.9rem;
+      color: #7ec8e3;
+      font-weight: bold;
+    }
+
+    .component-item .name .jp {
+      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      display: block;
+      font-size: 0.78rem;
+      color: #6070a0;
+      font-weight: normal;
+      margin-top: 2px;
+    }
+
+    .component-item .desc {
+      font-size: 0.9rem;
+      color: #a0b0c0;
+      line-height: 1.7;
+    }
+
+    /* 関係図（テキストベース） */
+    .diagram {
+      background: #16213e;
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      padding: 28px;
+      margin: 24px 0;
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 0.85rem;
+      color: #7ec8e3;
+      line-height: 2;
+      overflow-x: auto;
+    }
+
+    .diagram .comment {
+      color: #4a6080;
+    }
+
+    /* ページナビ */
+    .page-nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 64px;
+      padding-top: 24px;
+      border-top: 1px solid #2a2a4a;
+    }
+
+    .page-nav a {
+      color: #7ec8e3;
+      text-decoration: none;
+      font-size: 0.9rem;
+      padding: 10px 20px;
+      border: 1px solid #2a2a4a;
+      border-radius: 4px;
+      transition: border-color 0.2s;
+    }
+
+    .page-nav a:hover { border-color: #7ec8e3; }
+    .page-nav .next { margin-left: auto; }
+
+    footer {
+      text-align: center;
+      padding: 28px;
+      color: #4a5068;
+      font-size: 0.82rem;
+      border-top: 1px solid #2a2a4a;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="breadcrumb">
+      <a href="../">UchidenoIndustry</a> &rsaquo;
+      <a href="./">GameplayAbilities 入門</a> &rsaquo;
+      STEP 01
+    </div>
+    <div class="step-label">STEP 01</div>
+    <h1>GAS とは何か</h1>
+    <p>Gameplay Ability System の概要と、なぜ使うのかを理解する。</p>
+  </div>
+</header>
+
+<main>
+
+  <h2>GAS が解決する問題</h2>
+
+  <p>
+    アクションゲームやRPGを作るとき、キャラクターは多くの「能力」を持ちます。
+    通常攻撃、スキル、バフ、デバフ……これらをすべて自分でコーディングすると、
+    どんな問題が起きるでしょうか？
+  </p>
+
+  <div class="point-box">
+    <p>
+      「スキルAを使用中はスキルBが使えない」<br>
+      「炎属性のデバフと氷属性のデバフは同時に乗るのか？」<br>
+      「HPが0になったとき、実行中のスキルはどう止める？」
+    </p>
+  </div>
+
+  <p>
+    アビリティが増えるほど、こうした「アビリティ同士の関係」を管理するコードが膨れ上がります。
+    バグも増え、新しいアビリティを追加するたびに既存のコードを壊してしまうことも起きます。
+  </p>
+
+  <p>
+    <strong style="color:#fff">GAS（Gameplay Ability System）</strong> は、
+    このような問題をまとめて解決するために Unreal Engine が用意したフレームワークです。
+    アビリティの定義・発動・中断・状態管理・ステータス変化といった仕組みが、
+    あらかじめ設計されて提供されています。
+  </p>
+
+  <h2>GAS を構成する5つの要素</h2>
+
+  <p>GAS は次の5つの主要な要素から成り立っています。最初は名前だけ覚えれば十分です。</p>
+
+  <div class="component-list">
+
+    <div class="component-item">
+      <div class="name">
+        AbilitySystemComponent
+        <span class="jp">アビリティシステムコンポーネント（ASC）</span>
+      </div>
+      <div class="desc">
+        GAS の司令塔。このコンポーネントをキャラクターに追加することで、
+        そのキャラクターが GAS を利用できるようになります。
+        アビリティの管理・発動・ステータスの保持など、すべてここを通じて行います。
+      </div>
+    </div>
+
+    <div class="component-item">
+      <div class="name">
+        GameplayAbility
+        <span class="jp">ゲームプレイアビリティ</span>
+      </div>
+      <div class="desc">
+        「アビリティ（能力）」そのものを定義するクラスです。
+        「発動したときに何をするか」「どんな条件なら使えるか」「クールダウンはあるか」
+        などをここに記述します。
+      </div>
+    </div>
+
+    <div class="component-item">
+      <div class="name">
+        AttributeSet
+        <span class="jp">アトリビュートセット</span>
+      </div>
+      <div class="desc">
+        HP・MP・攻撃力などのステータス（数値）を管理するクラスです。
+        GAS が管理するステータスは「Attribute」と呼ばれ、
+        このクラスにまとめて定義します。
+      </div>
+    </div>
+
+    <div class="component-item">
+      <div class="name">
+        GameplayEffect
+        <span class="jp">ゲームプレイエフェクト</span>
+      </div>
+      <div class="desc">
+        Attribute を変化させる「効果」を定義するクラスです。
+        ダメージ・回復・バフ・デバフはすべて GameplayEffect として表現します。
+        コードを書かずにブループリントだけで設定できます。
+      </div>
+    </div>
+
+    <div class="component-item">
+      <div class="name">
+        GameplayTag
+        <span class="jp">ゲームプレイタグ</span>
+      </div>
+      <div class="desc">
+        状態を表すラベルです。「状態異常.炎上」「アビリティ.使用中」のように
+        階層構造で定義します。「このタグがついているときはアビリティを使えない」
+        といった制御に使います。
+      </div>
+    </div>
+
+  </div>
+
+  <h2>全体のイメージ</h2>
+
+  <p>5つの要素がどう関係しているか、大まかなイメージを示します。</p>
+
+  <div class="diagram">
+    キャラクター<br>
+    └── <span style="color:#e94560">AbilitySystemComponent</span>（司令塔）<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;├── <span style="color:#7ec8e3">GameplayAbility</span>（アビリティ定義）× 複数<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── 発動すると → <span style="color:#a0e8a0">GameplayEffect</span> を適用する<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;├── <span style="color:#a0e8a0">GameplayEffect</span>（効果定義）<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span style="color:#f0c060">AttributeSet</span> の値を変化させる<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;├── <span style="color:#f0c060">AttributeSet</span>（HP・MP などの数値）<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;└── <span style="color:#c090e0">GameplayTag</span>（現在の状態ラベル）
+  </div>
+
+  <div class="info-box">
+    <p>
+      このイメージは「最初に把握するための簡略版」です。
+      実際にはもう少し複雑ですが、まずはこの関係性を頭に入れた状態で
+      次のステップに進むと理解が早くなります。
+    </p>
+  </div>
+
+  <h2>GAS を使わない選択肢はあるか？</h2>
+
+  <p>
+    小規模なゲームや、アビリティの種類が少ないゲームであれば、
+    GAS を使わず自前で実装する方が早い場合もあります。
+  </p>
+
+  <p>
+    ただし、アビリティが増えてくると GAS の恩恵が大きくなります。
+    また、エピックゲームズが公開している大規模サンプル（Lyra など）も
+    GAS を前提に設計されているため、それらを参照する場合は GAS の理解が必要です。
+  </p>
+
+  <div class="point-box">
+    <p>
+      <strong style="color:#fff">このチュートリアルの方針：</strong><br>
+      いきなり全部を理解しようとせず、「まず動かす」を優先します。
+      STEP 02 では、最小限のセットアップで GAS を動作させることを目標にします。
+    </p>
+  </div>
+
+  <div class="page-nav">
+    <a href="./">&#8592; 一覧に戻る</a>
+    <a class="next" href="step02.html">STEP 02 最小構成のセットアップ &#8594;</a>
+  </div>
+
+</main>
+
+<footer>
+  <p>GameplayAbilities 入門 &mdash; UchidenoIndustry</p>
+</footer>
+
+</body>
+</html>
