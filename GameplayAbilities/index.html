@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GameplayAbilities 入門</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      background: #0f0f1a;
+      color: #e0e0e0;
+      line-height: 1.8;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      padding: 60px 20px;
+      text-align: center;
+      border-bottom: 2px solid #e94560;
+    }
+
+    header h1 {
+      font-size: 2.4rem;
+      color: #fff;
+      margin-bottom: 12px;
+      letter-spacing: 0.05em;
+    }
+
+    header p {
+      font-size: 1.1rem;
+      color: #a0a8c0;
+    }
+
+    nav {
+      background: #16213e;
+      padding: 12px 20px;
+      text-align: center;
+      border-bottom: 1px solid #2a2a4a;
+    }
+
+    nav a {
+      color: #7ec8e3;
+      text-decoration: none;
+      margin: 0 16px;
+      font-size: 0.95rem;
+    }
+
+    nav a:hover {
+      color: #e94560;
+    }
+
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .intro {
+      background: #16213e;
+      border-left: 4px solid #e94560;
+      padding: 24px 28px;
+      border-radius: 4px;
+      margin-bottom: 40px;
+    }
+
+    .intro p {
+      margin-bottom: 8px;
+      color: #c8d0e0;
+    }
+
+    h2 {
+      font-size: 1.4rem;
+      color: #7ec8e3;
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #2a2a4a;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 20px;
+      margin-bottom: 48px;
+    }
+
+    .card {
+      background: #16213e;
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      padding: 24px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .card:hover {
+      border-color: #7ec8e3;
+      transform: translateY(-2px);
+    }
+
+    .card .number {
+      font-size: 0.8rem;
+      color: #e94560;
+      font-weight: bold;
+      margin-bottom: 8px;
+      letter-spacing: 0.1em;
+    }
+
+    .card h3 {
+      font-size: 1rem;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+
+    .card p {
+      font-size: 0.88rem;
+      color: #8090a8;
+    }
+
+    .card.coming-soon {
+      opacity: 0.5;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #e94560;
+      color: #fff;
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    footer {
+      text-align: center;
+      padding: 32px;
+      color: #4a5068;
+      font-size: 0.85rem;
+      border-top: 1px solid #2a2a4a;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>GameplayAbilities 入門</h1>
+    <p>Unreal Engine の GAS (Gameplay Ability System) を、ゼロから学ぶサイトです。</p>
+  </header>
+
+  <nav>
+    <a href="index.html">ホーム</a>
+    <a href="#">チュートリアル</a>
+    <a href="#">リファレンス</a>
+  </nav>
+
+  <main>
+
+    <div class="intro">
+      <p>GameplayAbilities（GAS）は強力なシステムですが、既存のドキュメントは初心者には難しいものが多いです。</p>
+      <p>このサイトでは、「まず動かす」を目標に、順を追って解説していきます。</p>
+    </div>
+
+    <h2>チュートリアル一覧</h2>
+
+    <div class="card-grid">
+
+      <div class="card coming-soon">
+        <div class="number">STEP 01</div>
+        <h3>GAS とは何か</h3>
+        <p>AbilitySystemComponent の役割と、GAS が解決する問題を理解する。</p>
+      </div>
+
+      <div class="card coming-soon">
+        <div class="number">STEP 02</div>
+        <h3>最小構成のセットアップ</h3>
+        <p>プロジェクトに GAS を追加して、動作確認するまでの手順。</p>
+      </div>
+
+      <div class="card coming-soon">
+        <div class="number">STEP 03</div>
+        <h3>最初の Ability を作る</h3>
+        <p>UGameplayAbility を継承して、ボタンで発動する簡単なアビリティを実装する。</p>
+      </div>
+
+      <div class="card coming-soon">
+        <div class="number">STEP 04</div>
+        <h3>AttributeSet の基本</h3>
+        <p>HP などのステータスを GAS で管理する方法を学ぶ。</p>
+      </div>
+
+      <div class="card coming-soon">
+        <div class="number">STEP 05</div>
+        <h3>GameplayEffect でダメージを与える</h3>
+        <p>Attribute を変化させる GameplayEffect の仕組みを理解する。</p>
+      </div>
+
+      <div class="card coming-soon">
+        <div class="number">STEP 06</div>
+        <h3>GameplayTag を使う</h3>
+        <p>状態管理やアビリティの制御に欠かせない GameplayTag の基礎。</p>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <p>GameplayAbilities 入門 &mdash; UchidenoIndustry</p>
+  </footer>
+
+</body>
+</html>
