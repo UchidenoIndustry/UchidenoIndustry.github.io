@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STEP 03 最初の Ability を作る | GameplayAbilities 入門</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      background: #0f0f1a;
+      color: #e0e0e0;
+      line-height: 1.9;
+    }
+
+    /* ===== HEADER ===== */
+    header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      padding: 18px 20px;
+      border-bottom: 2px solid #e94560;
+    }
+
+    .header-inner {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+
+    .breadcrumb { font-size: 0.8rem; color: #6070a0; margin-bottom: 6px; }
+    .breadcrumb a { color: #7ec8e3; text-decoration: none; }
+    .breadcrumb a:hover { color: #e94560; }
+
+    .step-label {
+      font-size: 0.8rem;
+      color: #e94560;
+      font-weight: bold;
+      letter-spacing: 0.15em;
+      margin-bottom: 4px;
+    }
+
+    header h1 { font-size: 1.4rem; color: #fff; margin-bottom: 4px; }
+    header p { color: #a0a8c0; font-size: 0.88rem; }
+
+    /* ===== LAYOUT ===== */
+    .layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      align-items: start;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      background: #111120;
+      border-right: 1px solid #2a2a4a;
+      padding: 24px 0;
+      scrollbar-width: thin;
+      scrollbar-color: #2a2a4a transparent;
+    }
+
+    .sidebar-heading {
+      font-size: 0.72rem;
+      color: #4a5068;
+      letter-spacing: 0.12em;
+      padding: 0 20px 14px;
+      border-bottom: 1px solid #1a1a2e;
+      margin-bottom: 8px;
+    }
+
+    .sidebar-heading a { color: #4a5068; text-decoration: none; }
+    .sidebar-heading a:hover { color: #7ec8e3; }
+
+    .nav-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 20px;
+      text-decoration: none;
+      transition: background 0.15s;
+      cursor: pointer;
+    }
+
+    .nav-item.current { background: #1a2040; }
+    .nav-item.done:hover { background: #161830; }
+
+    .nav-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+
+    .nav-item.done    .nav-dot { background: #a0e8a0; }
+    .nav-item.current .nav-dot { background: #e94560; box-shadow: 0 0 7px #e94560aa; }
+    .nav-item.coming  .nav-dot { background: transparent; border: 1px solid #2a2a4a; }
+
+    .nav-text { display: flex; flex-direction: column; }
+
+    .nav-step { font-size: 0.7rem; letter-spacing: 0.08em; display: block; color: #3a4a5a; }
+    .nav-item.done    .nav-step { color: #4a7860; }
+    .nav-item.current .nav-step { color: #e94560; }
+
+    .nav-title { font-size: 0.83rem; display: block; line-height: 1.45; margin-top: 2px; }
+    .nav-item.done    .nav-title { color: #90a8a0; }
+    .nav-item.current .nav-title { color: #e0e8f8; }
+    .nav-item.coming  .nav-title { color: #2e3548; }
+    .nav-item.coming  .nav-step  { color: #2a3040; }
+    .nav-item.coming { cursor: default; }
+
+    /* ===== MAIN ===== */
+    main { padding: 48px 40px 80px; max-width: 760px; margin: 0 auto; }
+
+    /* ===== MOBILE ===== */
+    .menu-toggle {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      background: #16213e;
+      border: 1px solid #2a2a4a;
+      color: #7ec8e3;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      margin-bottom: 24px;
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 99;
+    }
+
+    .overlay.open { display: block; }
+
+    @media (max-width: 860px) {
+      .header-inner { padding-left: 20px; }
+      .layout { grid-template-columns: 1fr; }
+
+      .sidebar {
+        position: fixed;
+        left: -260px;
+        top: 0;
+        height: 100%;
+        width: 240px;
+        z-index: 100;
+        transition: left 0.25s ease;
+      }
+
+      .sidebar.open {
+        left: 0;
+        box-shadow: 4px 0 24px rgba(0,0,0,0.6);
+      }
+
+      .header-inner { padding: 0 20px; }
+      main { padding: 32px 20px 60px; max-width: 100%; }
+      .menu-toggle { display: flex; }
+    }
+
+    /* ===== CONTENT STYLES ===== */
+    h2 {
+      font-size: 1.3rem;
+      color: #7ec8e3;
+      margin: 52px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #2a2a4a;
+    }
+
+    h2:first-of-type { margin-top: 0; }
+    p { margin-bottom: 16px; color: #c8d0e0; }
+
+    .step-block {
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      margin: 24px 0;
+      overflow: hidden;
+    }
+
+    .step-block .step-head {
+      background: #1a2a4a;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .step-block .step-num {
+      background: #e94560;
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: bold;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .step-block .step-title { color: #fff; font-size: 0.95rem; font-weight: bold; }
+    .step-block .step-body { padding: 20px 24px; }
+    .step-block .step-body p { margin-bottom: 12px; }
+    .step-block .step-body p:last-child { margin-bottom: 0; }
+
+    .code-wrap { margin: 16px 0; }
+
+    .code-label {
+      background: #2a2a4a;
+      color: #8090a8;
+      font-size: 0.75rem;
+      padding: 5px 14px;
+      border-radius: 4px 4px 0 0;
+      font-family: "Consolas", "Courier New", monospace;
+      display: inline-block;
+    }
+
+    pre {
+      background: #0a0a14;
+      border: 1px solid #2a2a4a;
+      border-radius: 0 4px 4px 4px;
+      padding: 20px;
+      overflow-x: auto;
+      margin: 0;
+    }
+
+    code {
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 0.85rem;
+      line-height: 1.8;
+    }
+
+    .c-comment { color: #4a7060; }
+    .c-keyword  { color: #c792ea; }
+    .c-string   { color: #c3e88d; }
+    .c-type     { color: #ffcb6b; }
+    .c-macro    { color: #82aaff; }
+    .c-add      { color: #a0e8a0; }
+
+    p code, li code {
+      background: #1a2a3a;
+      color: #7ec8e3;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.85em;
+    }
+
+    .point-box {
+      background: #16213e;
+      border-left: 4px solid #e94560;
+      padding: 18px 22px;
+      border-radius: 4px;
+      margin: 20px 0;
+    }
+
+    .point-box p { margin-bottom: 0; }
+
+    .note-box {
+      background: #131c2e;
+      border: 1px solid #2a2a4a;
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin: 16px 0;
+    }
+
+    .note-box .note-label {
+      font-size: 0.75rem;
+      color: #6070a0;
+      font-weight: bold;
+      letter-spacing: 0.1em;
+      margin-bottom: 6px;
+    }
+
+    .note-box p { margin-bottom: 0; font-size: 0.9rem; color: #8090a8; }
+
+    .check-list { list-style: none; margin: 16px 0; }
+
+    .check-list li {
+      padding: 8px 0 8px 32px;
+      position: relative;
+      color: #c8d0e0;
+      border-bottom: 1px solid #1a2030;
+    }
+
+    .check-list li:last-child { border-bottom: none; }
+
+    .check-list li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #a0e8a0;
+      font-weight: bold;
+    }
+
+    /* ブループリントノード図 */
+    .bp-flow {
+      background: #0d1a2e;
+      border: 1px solid #2a3a5a;
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin: 16px 0;
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 0.82rem;
+      overflow-x: auto;
+    }
+
+    .bp-node {
+      display: inline-block;
+      background: #1a2a4a;
+      border: 1px solid #3a4a6a;
+      border-radius: 4px;
+      padding: 4px 12px;
+      color: #a0c8e8;
+      white-space: nowrap;
+    }
+
+    .bp-node.event { background: #2a1a2a; border-color: #6a3a6a; color: #c8a0e8; }
+    .bp-node.red   { background: #2a1a1a; border-color: #7a2a3a; color: #e89090; }
+    .bp-node.green { background: #1a2a1a; border-color: #3a6a3a; color: #90e890; }
+
+    .bp-arrow {
+      color: #4a6a8a;
+      margin: 0 6px;
+      font-size: 1rem;
+    }
+
+    .bp-comment {
+      color: #4a6060;
+      font-size: 0.78rem;
+      margin-top: 8px;
+      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+    }
+
+    .bp-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0;
+      margin-bottom: 12px;
+    }
+
+    .bp-row:last-child { margin-bottom: 0; }
+
+    .page-nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 64px;
+      padding-top: 24px;
+      border-top: 1px solid #2a2a4a;
+    }
+
+    .page-nav a {
+      color: #7ec8e3;
+      text-decoration: none;
+      font-size: 0.9rem;
+      padding: 10px 20px;
+      border: 1px solid #2a2a4a;
+      border-radius: 4px;
+      transition: border-color 0.2s;
+    }
+
+    .page-nav a:hover { border-color: #7ec8e3; }
+    .page-nav .next { margin-left: auto; }
+
+    footer {
+      text-align: center;
+      padding: 28px;
+      color: #4a5068;
+      font-size: 0.82rem;
+      border-top: 1px solid #2a2a4a;
+    }
+  </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay"></div>
+
+<div class="layout">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-heading">
+      <a href="./">GameplayAbilities 入門</a>
+    </div>
+
+    <a class="nav-item done" href="step01.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">STEP 01</span>
+        <span class="nav-title">GAS とは何か</span>
+      </span>
+    </a>
+
+    <a class="nav-item done" href="step02.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">STEP 02</span>
+        <span class="nav-title">最小構成のセットアップ</span>
+      </span>
+    </a>
+
+    <div class="nav-item current">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">STEP 03</span>
+        <span class="nav-title">最初の Ability を作る</span>
+      </span>
+    </div>
+
+    <div class="nav-item coming">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">STEP 04</span>
+        <span class="nav-title">AttributeSet の基本</span>
+      </span>
+    </div>
+
+    <div class="nav-item coming">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">STEP 05</span>
+        <span class="nav-title">GameplayEffect でダメージを与える</span>
+      </span>
+    </div>
+
+    <div class="nav-item coming">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">STEP 06</span>
+        <span class="nav-title">GameplayTag を使う</span>
+      </span>
+    </div>
+  </aside>
+
+  <div class="content-col">
+
+  <header>
+    <div class="header-inner">
+      <div class="breadcrumb">
+        <a href="../">UchidenoIndustry</a> &rsaquo;
+        <a href="./">GameplayAbilities 入門</a> &rsaquo;
+        STEP 03
+      </div>
+      <div class="step-label">STEP 03</div>
+      <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px;">
+        <h1>最初の Ability を作る</h1>
+        <span style="background:#1a3a1a;border:1px solid #2a6a2a;color:#a0e8a0;font-size:0.75rem;padding:2px 8px;border-radius:4px;font-family:'Consolas','Courier New',monospace;white-space:nowrap;">UE 5.5 対応</span>
+      </div>
+      <p>ブループリントで GameplayAbility を作り、キャラクターに持たせて発動させる。</p>
+    </div>
+  </header>
+
+  <main>
+
+    <button class="menu-toggle" id="menuToggle">&#9776; 目次</button>
+
+    <h2>このステップのゴール</h2>
+
+    <p>
+      前のステップで GAS を使える状態になりました。
+      このステップではいよいよ「アビリティ」を作って動かします。
+      難しいことは後回しにして、まず「発動する」ところまで進めましょう。
+    </p>
+
+    <ul class="check-list">
+      <li>GameplayAbility ブループリントを作る</li>
+      <li>発動時にメッセージを表示する（動作確認のため）</li>
+      <li>キャラクターにアビリティを持たせる</li>
+      <li>キーを押したらアビリティが発動する</li>
+    </ul>
+
+    <div class="point-box">
+      <p>
+        <strong style="color:#fff">このステップはブループリントのみで完結します。</strong><br>
+        前のステップで書いた C++ コードには手を加えません。
+      </p>
+    </div>
+
+    <h2>GameplayAbility の基本構造</h2>
+
+    <p>
+      GameplayAbility ブループリントには、必ず意識しておくべき3つの処理があります。
+    </p>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num" style="background:#c792ea;">①</div>
+        <div class="step-title">ActivateAbility — アビリティ発動時に呼ばれる</div>
+      </div>
+      <div class="step-body">
+        <p>
+          アビリティが発動したときに最初に呼ばれる処理です。
+          「ジャンプする」「炎を出す」「回復する」など、アビリティの本体はここに書きます。
+        </p>
+      </div>
+    </div>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num" style="background:#c792ea;">②</div>
+        <div class="step-title">CommitAbility — コストとクールダウンを消費する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          「MPを消費する」「クールダウンを開始する」といった処理を確定させます。
+          コストやクールダウンを設定していない場合でも、呼ぶ必要があります。
+          <strong style="color:#fff">CommitAbility が false を返した場合</strong>（コスト不足など）は
+          アビリティをキャンセルしてください。
+        </p>
+      </div>
+    </div>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num" style="background:#c792ea;">③</div>
+        <div class="step-title">EndAbility — アビリティを終了する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          アビリティの処理が終わったら必ず呼びます。
+          これを呼ばないと GAS がアビリティを「まだ実行中」と認識し続けるため、
+          同じアビリティを再度発動できなくなったり、クールダウンが始まらなかったりします。
+        </p>
+      </div>
+    </div>
+
+    <div class="note-box">
+      <div class="note-label">まとめると</div>
+      <p>ActivateAbility → やりたい処理 → CommitAbility → EndAbility、という流れが基本です。</p>
+    </div>
+
+    <h2>Ability ブループリントを作る</h2>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">1</div>
+        <div class="step-title">ブループリントクラスを作成する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          コンテンツブラウザの空白部分を右クリックして
+          <strong style="color:#fff">「ブループリントクラス」</strong> を選択します。
+        </p>
+        <p>
+          親クラスの選択画面が開くので、検索欄に <code>GameplayAbility</code> と入力して選択し、
+          ブループリントの名前を <strong style="color:#fff"><code>GA_MyFirstAbility</code></strong> にしてください。
+        </p>
+        <div class="note-box">
+          <div class="note-label">命名のルール（慣例）</div>
+          <p>GAS 関連のアセットは接頭辞で種類がわかるように命名するのが一般的です。GameplayAbility は <code>GA_</code>、GameplayEffect は <code>GE_</code> のように付けます。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">2</div>
+        <div class="step-title">ActivateAbility をオーバーライドする</div>
+      </div>
+      <div class="step-body">
+        <p>
+          <code>GA_MyFirstAbility</code> をダブルクリックして開きます。
+          ブループリントエディタ上部のメニューから
+          <strong style="color:#fff">「オーバーライド → ActivateAbility」</strong>
+          を選択してください。
+        </p>
+        <p>
+          <code>Event ActivateAbility</code> ノードがグラフに追加されます。
+          このノードから処理をつないでいきます。
+        </p>
+      </div>
+    </div>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">3</div>
+        <div class="step-title">発動時の処理を組む</div>
+      </div>
+      <div class="step-body">
+        <p>
+          以下のようにノードをつないでください。
+          右クリックでノードを検索・追加できます。
+        </p>
+
+        <div class="bp-flow">
+          <div class="bp-row">
+            <span class="bp-node event">Event ActivateAbility</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Print String<br><span style="color:#6a8a6a;font-size:0.75rem;">In String: "Ability Activated!"</span></span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node green">Commit Ability<br><span style="color:#6a8a6a;font-size:0.75rem;">Ability Handle: (自動接続)</span></span>
+          </div>
+          <div class="bp-comment">Commit Ability の Return Value（bool）を分岐させる ↓</div>
+          <div class="bp-row" style="margin-top:10px;">
+            <span style="color:#4a6a8a;margin-right:8px;">└ true</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node green">End Ability<br><span style="color:#6a8a6a;font-size:0.75rem;">Was Cancelled: false</span></span>
+          </div>
+          <div class="bp-row">
+            <span style="color:#8a4a4a;margin-right:8px;">└ false</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node red">End Ability<br><span style="color:#6a8a6a;font-size:0.75rem;">Was Cancelled: true</span></span>
+          </div>
+        </div>
+
+        <p>
+          <code>Commit Ability</code> ノードには
+          <code>Ability Handle</code> と <code>Activation Info</code> という入力があります。
+          <code>Event ActivateAbility</code> の出力ピンから引っ張ると自動的に接続できます。
+        </p>
+        <p>
+          <code>Commit Ability</code> の戻り値（Return Value）を <strong style="color:#fff">Branch</strong> ノード（if 文）につなぎ、
+          <strong style="color:#a0e8a0">True のとき</strong>は通常終了、<strong style="color:#e89090">False のとき</strong>はキャンセル終了としてください。
+        </p>
+        <div class="note-box">
+          <div class="note-label">今の段階では Commit が false になることはない</div>
+          <p>コストもクールダウンも設定していないので、Commit Ability は必ず true を返します。ただし「失敗したらキャンセル」のパターンを最初から習慣にしておくと、後で困りません。</p>
+        </div>
+        <p>
+          ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。
+        </p>
+      </div>
+    </div>
+
+    <h2>キャラクターに Ability を持たせる</h2>
+
+    <p>
+      GAS では「キャラクターが持っているアビリティの一覧」を
+      AbilitySystemComponent が管理しています。
+      アビリティを発動するには、まず <strong style="color:#fff">GiveAbility</strong> で
+      キャラクターにアビリティを登録する必要があります。
+    </p>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">4</div>
+        <div class="step-title">キャラクターの Blueprint を開く</div>
+      </div>
+      <div class="step-body">
+        <p>
+          コンテンツブラウザからキャラクターのブループリント（STEP 02 で C++ を書いた
+          <code>[プロジェクト名]Character</code> から派生したもの）を開いてください。
+        </p>
+        <p>
+          サードパーソンテンプレートの場合は
+          <code>Content/ThirdPerson/Blueprints/BP_ThirdPersonCharacter</code> を使えます。
+        </p>
+      </div>
+    </div>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">5</div>
+        <div class="step-title">BeginPlay で GiveAbility を呼ぶ</div>
+      </div>
+      <div class="step-body">
+        <p>
+          イベントグラフの <code>Event BeginPlay</code> を探し（なければ右クリックで追加）、
+          以下のようにノードをつないでください。
+        </p>
+
+        <div class="bp-flow">
+          <div class="bp-row">
+            <span class="bp-node event">Event BeginPlay</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Get Ability System Component</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node green">Give Ability<br><span style="color:#6a8a6a;font-size:0.75rem;">Ability Class: GA_MyFirstAbility</span></span>
+          </div>
+        </div>
+
+        <p>
+          <code>Get Ability System Component</code> は、STEP 02 で実装した
+          <code>IAbilitySystemInterface</code> 経由で ASC を取得するノードです。
+          <code>Target</code> には <code>Self</code>（このキャラクター自身）を接続してください。
+        </p>
+        <p>
+          <code>Give Ability</code> の <code>Ability Class</code> に
+          <strong style="color:#fff"><code>GA_MyFirstAbility</code></strong> を設定します。
+        </p>
+
+        <div class="note-box">
+          <div class="note-label">Give Ability の戻り値について</div>
+          <p><code>Give Ability</code> は <code>FGameplayAbilitySpecHandle</code> という値を返します。これは「このアビリティを識別するID」で、後で特定のアビリティを取り消したいときに使います。今は無視してかまいません。</p>
+        </div>
+      </div>
+    </div>
+
+    <h2>キーを押して Ability を発動する</h2>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">6</div>
+        <div class="step-title">キー入力でアビリティを発動する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          同じキャラクターのブループリントで、キーボードイベントを追加します。
+          グラフの空白部分を右クリックして <code>Q</code> キーのイベントを追加してください
+          （<strong style="color:#fff">Keyboard Events → Q</strong>）。
+        </p>
+
+        <div class="bp-flow">
+          <div class="bp-row">
+            <span class="bp-node event">Q（Pressed）</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Get Ability System Component</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node green">Try Activate Ability By Class<br><span style="color:#6a8a6a;font-size:0.75rem;">Ability Class: GA_MyFirstAbility</span></span>
+          </div>
+        </div>
+
+        <p>
+          <code>Try Activate Ability By Class</code> は、指定したクラスのアビリティを
+          発動しようとするノードです。
+          発動の条件（コスト・クールダウンなど）を満たしていれば発動し、
+          満たしていなければ何もしません。
+        </p>
+        <p>
+          ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。
+        </p>
+      </div>
+    </div>
+
+    <h2>動作確認</h2>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">7</div>
+        <div class="step-title">プレイして確認する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          エディタ上部の <strong style="color:#fff">「プレイ」ボタン</strong> を押してゲームを開始します。
+          <strong style="color:#fff">Q キーを押す</strong>と、画面左上に
+          <code style="color:#c3e88d;">"Ability Activated!"</code>
+          というメッセージが表示されれば成功です。
+        </p>
+        <p>
+          Q を押すたびにメッセージが出ることを確認してください。
+        </p>
+      </div>
+    </div>
+
+    <h2>うまくいかないときの確認ポイント</h2>
+
+    <ul class="check-list">
+      <li>キャラクターのブループリントが C++ の <code>[プロジェクト名]Character</code> を継承しているか（サードパーソンテンプレートなら <code>BP_ThirdPersonCharacter</code> が対象）</li>
+      <li>BeginPlay の <code>Give Ability</code> で <code>GA_MyFirstAbility</code> が正しく設定されているか</li>
+      <li><code>GA_MyFirstAbility</code> 内で <code>End Ability</code> を呼んでいるか（呼ばないと2回目以降発動しない）</li>
+      <li><code>Get Ability System Component</code> の Target に Self が接続されているか</li>
+    </ul>
+
+    <h2>このステップのまとめ</h2>
+
+    <div class="point-box">
+      <p>
+        GameplayAbility の基本的な流れが完成しました。<br>
+        <strong style="color:#fff">「GiveAbility で登録 → TryActivateAbilityByClass で発動」</strong>
+        という2ステップが GAS の基本パターンです。
+      </p>
+    </div>
+
+    <p>
+      現在のアビリティは Print String するだけですが、
+      この枠組みの中にどんな処理でも入れられます。
+      次のステップでは「ステータス（HP・MP など）」を扱う AttributeSet を学びます。
+      AttributeSet があって初めて「ダメージを与える」「回復する」といった処理が書けるようになります。
+    </p>
+
+    <div class="page-nav">
+      <a href="step02.html">&#8592; STEP 02 最小構成のセットアップ</a>
+      <a class="next" href="step04.html">STEP 04 AttributeSet の基本 &#8594;</a>
+    </div>
+
+  </main>
+
+  </div><!-- /.content-col -->
+
+</div><!-- /.layout -->
+
+<footer>
+  <p>GameplayAbilities 入門 &mdash; UchidenoIndustry</p>
+</footer>
+
+<script>
+  const toggle  = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+
+  toggle.addEventListener('click', function () {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+  });
+
+  overlay.addEventListener('click', function () {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+  });
+</script>
+
+</body>
+</html>
