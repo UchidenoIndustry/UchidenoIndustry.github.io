@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STEP 04 AttributeSet の基本 | GameplayAbilities 入門</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      background: #0f0f1a;
+      color: #e0e0e0;
+      line-height: 1.9;
+    }
+
+    /* ===== HEADER ===== */
+    header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      padding: 18px 20px;
+      border-bottom: 2px solid #e94560;
+    }
+
+    .header-inner {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+
+    .breadcrumb { font-size: 0.8rem; color: #6070a0; margin-bottom: 6px; }
+    .breadcrumb a { color: #7ec8e3; text-decoration: none; }
+    .breadcrumb a:hover { color: #e94560; }
+
+    .step-label {
+      font-size: 0.8rem;
+      color: #e94560;
+      font-weight: bold;
+      letter-spacing: 0.15em;
+      margin-bottom: 4px;
+    }
+
+    header h1 { font-size: 1.4rem; color: #fff; margin-bottom: 4px; }
+    header p { color: #a0a8c0; font-size: 0.88rem; }
+
+    /* ===== LAYOUT ===== */
+    .layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      align-items: start;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      background: #111120;
+      border-right: 1px solid #2a2a4a;
+      padding: 24px 0;
+      scrollbar-width: thin;
+      scrollbar-color: #2a2a4a transparent;
+    }
+
+    .sidebar-heading {
+      font-size: 0.72rem;
+      color: #4a5068;
+      letter-spacing: 0.12em;
+      padding: 0 20px 14px;
+      border-bottom: 1px solid #1a1a2e;
+      margin-bottom: 8px;
+    }
+
+    .sidebar-heading a { color: #4a5068; text-decoration: none; }
+    .sidebar-heading a:hover { color: #7ec8e3; }
+
+    .nav-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 20px;
+      text-decoration: none;
+      transition: background 0.15s;
+      cursor: pointer;
+    }
+
+    .nav-item.current { background: #1a2040; }
+    .nav-item.done:hover { background: #161830; }
+
+    .nav-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+
+    .nav-item.done    .nav-dot { background: #a0e8a0; }
+    .nav-item.current .nav-dot { background: #e94560; box-shadow: 0 0 7px #e94560aa; }
+    .nav-item.coming  .nav-dot { background: transparent; border: 1px solid #2a2a4a; }
+
+    .nav-text { display: flex; flex-direction: column; }
+
+    .nav-step { font-size: 0.7rem; letter-spacing: 0.08em; display: block; color: #3a4a5a; }
+    .nav-item.done    .nav-step { color: #4a7860; }
+    .nav-item.current .nav-step { color: #e94560; }
+
+    .nav-title { font-size: 0.83rem; display: block; line-height: 1.45; margin-top: 2px; }
+    .nav-item.done    .nav-title { color: #90a8a0; }
+    .nav-item.current .nav-title { color: #e0e8f8; }
+    .nav-item.coming  .nav-title { color: #2e3548; }
+    .nav-item.coming  .nav-step  { color: #2a3040; }
+    .nav-item.coming { cursor: default; }
+
+    /* ===== MAIN ===== */
+    main { padding: 48px 40px 80px; max-width: 760px; margin: 0 auto; }
+
+    /* ===== MOBILE ===== */
+    .menu-toggle {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      background: #16213e;
+      border: 1px solid #2a2a4a;
+      color: #7ec8e3;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      margin-bottom: 24px;
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 99;
+    }
+
+    .overlay.open { display: block; }
+
+    @media (max-width: 860px) {
+      .header-inner { padding-left: 20px; }
+      .layout { grid-template-columns: 1fr; }
+
+      .sidebar {
+        position: fixed;
+        left: -260px;
+        top: 0;
+        height: 100%;
+        width: 240px;
+        z-index: 100;
+        transition: left 0.25s ease;
+      }
+
+      .sidebar.open {
+        left: 0;
+        box-shadow: 4px 0 24px rgba(0,0,0,0.6);
+      }
+
+      .header-inner { padding: 0 20px; }
+      main { padding: 32px 20px 60px; max-width: 100%; }
+      .menu-toggle { display: flex; }
+    }
+
+    /* ===== CONTENT STYLES ===== */
+    h2 {
+      font-size: 1.3rem;
+      color: #7ec8e3;
+      margin: 52px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #2a2a4a;
+    }
+
+    h2:first-of-type { margin-top: 0; }
+    p { margin-bottom: 16px; color: #c8d0e0; }
+
+    .step-block {
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      margin: 24px 0;
+      overflow: hidden;
+    }
+
+    .step-block .step-head {
+      background: #1a2a4a;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .step-block .step-num {
+      background: #e94560;
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: bold;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .step-block .step-title { color: #fff; font-size: 0.95rem; font-weight: bold; }
+    .step-block .step-body { padding: 20px 24px; }
+    .step-block .step-body p { margin-bottom: 12px; }
+    .step-block .step-body p:last-child { margin-bottom: 0; }
+
+    .code-wrap { margin: 16px 0; }
+
+    .code-label {
+      background: #2a2a4a;
+      color: #8090a8;
+      font-size: 0.75rem;
+      padding: 5px 14px;
+      border-radius: 4px 4px 0 0;
+      font-family: "Consolas", "Courier New", monospace;
+      display: inline-block;
+    }
+
+    pre {
+      background: #0a0a14;
+      border: 1px solid #2a2a4a;
+      border-radius: 0 4px 4px 4px;
+      padding: 20px;
+      overflow-x: auto;
+      margin: 0;
+    }
+
+    code {
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 0.85rem;
+      line-height: 1.8;
+    }
+
+    .c-comment { color: #4a7060; }
+    .c-keyword  { color: #c792ea; }
+    .c-string   { color: #c3e88d; }
+    .c-type     { color: #ffcb6b; }
+    .c-macro    { color: #82aaff; }
+    .c-add      { color: #a0e8a0; }
+
+    p code, li code {
+      background: #1a2a3a;
+      color: #7ec8e3;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.85em;
+    }
+
+    .point-box {
+      background: #16213e;
+      border-left: 4px solid #e94560;
+      padding: 18px 22px;
+      border-radius: 4px;
+      margin: 20px 0;
+    }
+
+    .point-box p { margin-bottom: 0; }
+
+    .note-box {
+      background: #131c2e;
+      border: 1px solid #2a2a4a;
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin: 16px 0;
+    }
+
+    .note-box .note-label {
+      font-size: 0.75rem;
+      color: #6070a0;
+      font-weight: bold;
+      letter-spacing: 0.1em;
+      margin-bottom: 6px;
+    }
+
+    .note-box p { margin-bottom: 0; font-size: 0.9rem; color: #8090a8; }
+
+    .check-list { list-style: none; margin: 16px 0; }
+
+    .check-list li {
+      padding: 8px 0 8px 32px;
+      position: relative;
+      color: #c8d0e0;
+      border-bottom: 1px solid #1a2030;
+    }
+
+    .check-list li:last-child { border-bottom: none; }
+
+    .check-list li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #a0e8a0;
+      font-weight: bold;
+    }
+
+    /* ブループリントノード図 */
+    .bp-flow {
+      background: #0d1a2e;
+      border: 1px solid #2a3a5a;
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin: 16px 0;
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 0.82rem;
+      overflow-x: auto;
+    }
+
+    .bp-node {
+      display: inline-block;
+      background: #1a2a4a;
+      border: 1px solid #3a4a6a;
+      border-radius: 4px;
+      padding: 4px 12px;
+      color: #a0c8e8;
+      white-space: nowrap;
+    }
+
+    .bp-node.event { background: #2a1a2a; border-color: #6a3a6a; color: #c8a0e8; }
+    .bp-node.green { background: #1a2a1a; border-color: #3a6a3a; color: #90e890; }
+
+    .bp-arrow {
+      color: #4a6a8a;
+      margin: 0 6px;
+      font-size: 1rem;
+    }
+
+    .bp-comment {
+      color: #4a6060;
+      font-size: 0.78rem;
+      margin-top: 8px;
+      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+    }
+
+    .bp-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0;
+      margin-bottom: 12px;
+    }
+
+    .bp-row:last-child { margin-bottom: 0; }
+
+    /* 概念図テーブル */
+    .concept-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.88rem;
+    }
+
+    .concept-table th {
+      background: #1a2a4a;
+      color: #7ec8e3;
+      padding: 10px 16px;
+      text-align: left;
+      font-weight: bold;
+      border: 1px solid #2a2a4a;
+    }
+
+    .concept-table td {
+      padding: 10px 16px;
+      border: 1px solid #2a2a4a;
+      color: #c8d0e0;
+      vertical-align: top;
+    }
+
+    .concept-table tr:nth-child(even) td { background: #111828; }
+
+    .page-nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 64px;
+      padding-top: 24px;
+      border-top: 1px solid #2a2a4a;
+    }
+
+    .page-nav a {
+      color: #7ec8e3;
+      text-decoration: none;
+      font-size: 0.9rem;
+      padding: 10px 20px;
+      border: 1px solid #2a2a4a;
+      border-radius: 4px;
+      transition: border-color 0.2s;
+    }
+
+    .page-nav a:hover { border-color: #7ec8e3; }
+    .page-nav .next { margin-left: auto; }
+
+    footer {
+      text-align: center;
+      padding: 28px;
+      color: #4a5068;
+      font-size: 0.82rem;
+      border-top: 1px solid #2a2a4a;
+    }
+  </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay"></div>
+
+<div class="layout">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-heading">
+      <a href="./">GameplayAbilities 入門</a>
+    </div>
+
+    <a class="nav-item done" href="step01.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">STEP 01</span>
+        <span class="nav-title">GAS とは何か</span>
+      </span>
+    </a>
+
+    <a class="nav-item done" href="step02.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">STEP 02</span>
+        <span class="nav-title">最小構成のセットアップ</span>
+      </span>
+    </a>
+
+    <a class="nav-item done" href="step03.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">STEP 03</span>
+        <span class="nav-title">最初の Ability を作る</span>
+      </span>
+    </a>
+
+    <div class="nav-item current">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">STEP 04</span>
+        <span class="nav-title">AttributeSet の基本</span>
+      </span>
+    </div>
+
+    <div class="nav-item coming">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">STEP 05</span>
+        <span class="nav-title">GameplayEffect でダメージを与える</span>
+      </span>
+    </div>
+
+    <div class="nav-item coming">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">STEP 06</span>
+        <span class="nav-title">GameplayTag を使う</span>
+      </span>
+    </div>
+  </aside>
+
+  <div class="content-col">
+
+  <header>
+    <div class="header-inner">
+      <div class="breadcrumb">
+        <a href="../">UchidenoIndustry</a> &rsaquo;
+        <a href="./">GameplayAbilities 入門</a> &rsaquo;
+        STEP 04
+      </div>
+      <div class="step-label">STEP 04</div>
+      <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px;">
+        <h1>AttributeSet の基本</h1>
+        <span style="background:#1a3a1a;border:1px solid #2a6a2a;color:#a0e8a0;font-size:0.75rem;padding:2px 8px;border-radius:4px;font-family:'Consolas','Courier New',monospace;white-space:nowrap;">UE 5.5 対応</span>
+      </div>
+      <p>C++ で HP などのステータスを定義し、GAS から読み書きできる状態にする。</p>
+    </div>
+  </header>
+
+  <main>
+
+    <button class="menu-toggle" id="menuToggle">&#9776; 目次</button>
+
+    <h2>このステップのゴール</h2>
+
+    <p>
+      アビリティで「ダメージを与える」「回復する」といった処理を作るには、
+      まず「HP」や「MP」といったステータスを GAS に認識させる仕組みが必要です。
+      それが <strong style="color:#fff">AttributeSet</strong> です。
+    </p>
+
+    <ul class="check-list">
+      <li>AttributeSet とは何かを理解する</li>
+      <li>C++ で <code>UMyAttributeSet</code> クラスを作る（MaxHealth、Health を定義）</li>
+      <li>キャラクターに AttributeSet を追加する</li>
+      <li>ブループリントから HP の値を読めることを確認する</li>
+    </ul>
+
+    <div class="point-box">
+      <p>
+        <strong style="color:#fff">AttributeSet の定義は C++ が必須です。</strong><br>
+        ブループリントだけでは作れません。ただしコードは決まったパターンのコピペなので、
+        C++ に慣れていなくても大丈夫です。一度書いてしまえば、後はブループリントで操作できます。
+      </p>
+    </div>
+
+    <h2>AttributeSet とは</h2>
+
+    <p>
+      GAS における AttributeSet は「ステータスの入れ物」です。
+      キャラクターの HP、MP、攻撃力、防御力など、変化する数値をここにまとめて定義します。
+    </p>
+
+    <p>
+      普通の変数（<code>float HP</code>など）との違いは何でしょうか？
+    </p>
+
+    <table class="concept-table">
+      <tr>
+        <th></th>
+        <th>普通の変数</th>
+        <th>AttributeSet の Attribute</th>
+      </tr>
+      <tr>
+        <td>値の変更</td>
+        <td>直接代入</td>
+        <td>GameplayEffect 経由（後のステップで説明）</td>
+      </tr>
+      <tr>
+        <td>変化の検知</td>
+        <td>自前で監視が必要</td>
+        <td>GAS が自動的に通知（OnAttributeChanged）</td>
+      </tr>
+      <tr>
+        <td>ネットワーク同期</td>
+        <td>自前でレプリケーション設定が必要</td>
+        <td>GAS が管理（後のステップで対応）</td>
+      </tr>
+      <tr>
+        <td>バフ・デバフ</td>
+        <td>ロジックを自前で組む必要がある</td>
+        <td>GameplayEffect で宣言的に適用できる</td>
+      </tr>
+    </table>
+
+    <p>
+      Attribute を GAS に管理させることで、後のステップで学ぶ
+      「GameplayEffect でダメージを与える」「クールダウン中は使えない」
+      といった仕組みが自然に使えるようになります。
+    </p>
+
+    <h2>AttributeSet の C++ クラスを作る</h2>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">1</div>
+        <div class="step-title">新規 C++ クラスを作成する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          UE エディタのメニューから
+          <strong style="color:#fff">「ツール → 新規 C++ クラス」</strong> を開きます。
+        </p>
+        <p>
+          親クラスの選択画面で <strong style="color:#fff">「すべてのクラス」</strong> にチェックを入れ、
+          検索欄に <code>AttributeSet</code> と入力します。
+          <code>AttributeSet</code>（<code>GameplayAbilities</code> モジュール）が見つかったら選択してください。
+        </p>
+        <p>
+          クラス名を <strong style="color:#fff"><code>MyAttributeSet</code></strong> にして作成します。
+          Visual Studio または Rider が自動的に開きます。
+        </p>
+      </div>
+    </div>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">2</div>
+        <div class="step-title">ヘッダーファイルを編集する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          生成された <code>MyAttributeSet.h</code> を以下のように書き換えてください。
+          <strong style="color:#fff">ファイルの内容をすべて置き換えます</strong>（既存コードは削除）。
+        </p>
+        <div class="code-wrap">
+          <div class="code-label">MyAttributeSet.h</div>
+          <pre><code><span class="c-macro">#pragma once</span>
+
+<span class="c-macro">#include</span> <span class="c-string">"CoreMinimal.h"</span>
+<span class="c-macro">#include</span> <span class="c-string">"AttributeSet.h"</span>
+<span class="c-macro">#include</span> <span class="c-string">"AbilitySystemComponent.h"</span>
+<span class="c-macro">#include</span> <span class="c-string">"MyAttributeSet.generated.h"</span>
+
+<span class="c-comment">// Attribute のゲッター・セッターを自動生成する便利マクロ</span>
+<span class="c-macro">#define</span> ATTRIBUTE_ACCESSORS(ClassName, PropertyName) \
+    GAMEPLAYATTRIBUTE_PROPERTY_GETTER(ClassName, PropertyName) \
+    GAMEPLAYATTRIBUTE_VALUE_GETTER(PropertyName) \
+    GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \
+    GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
+
+UCLASS()
+<span class="c-keyword">class</span> <span class="c-type">UMyAttributeSet</span> : <span class="c-keyword">public</span> <span class="c-type">UAttributeSet</span>
+{
+    GENERATED_BODY()
+
+<span class="c-keyword">public</span>:
+    <span class="c-type">UMyAttributeSet</span>();
+
+    <span class="c-comment">// HP の最大値</span>
+    UPROPERTY(BlueprintReadOnly, Category = <span class="c-string">"Attributes"</span>)
+    <span class="c-type">FGameplayAttributeData</span> MaxHealth;
+    ATTRIBUTE_ACCESSORS(<span class="c-type">UMyAttributeSet</span>, MaxHealth)
+
+    <span class="c-comment">// HP の現在値</span>
+    UPROPERTY(BlueprintReadOnly, Category = <span class="c-string">"Attributes"</span>)
+    <span class="c-type">FGameplayAttributeData</span> Health;
+    ATTRIBUTE_ACCESSORS(<span class="c-type">UMyAttributeSet</span>, Health)
+};</code></pre>
+        </div>
+
+        <div class="note-box">
+          <div class="note-label">FGameplayAttributeData とは</div>
+          <p>
+            ただの <code>float</code> ではなく、GAS 専用の数値型です。
+            「基本値（BaseValue）」と「現在値（CurrentValue）」の2つを内部で持っており、
+            バフ・デバフによる一時的な変化を管理できます。
+          </p>
+        </div>
+
+        <div class="note-box">
+          <div class="note-label">ATTRIBUTE_ACCESSORS マクロについて</div>
+          <p>
+            このマクロは GAS の標準ヘッダーにある4つのマクロを1行にまとめたものです。
+            <code>GetHealth()</code>・<code>SetHealth()</code>・<code>InitHealth()</code> などの関数を自動生成します。
+            中身を理解しなくてもコピペで動くので、今は「おまじない」として扱ってください。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">3</div>
+        <div class="step-title">cpp ファイルを編集する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          <code>MyAttributeSet.cpp</code> を以下のように書き換えてください。
+          コンストラクタで HP の初期値（100）を設定しています。
+        </p>
+        <div class="code-wrap">
+          <div class="code-label">MyAttributeSet.cpp</div>
+          <pre><code><span class="c-macro">#include</span> <span class="c-string">"MyAttributeSet.h"</span>
+
+<span class="c-type">UMyAttributeSet</span>::<span class="c-type">UMyAttributeSet</span>()
+{
+    InitMaxHealth(<span class="c-string">100.f</span>);
+    InitHealth(<span class="c-string">100.f</span>);
+}</code></pre>
+        </div>
+        <div class="note-box">
+          <div class="note-label">InitHealth() と SetHealth() の違い</div>
+          <p>
+            <code>InitXxx()</code> はゲーム開始時の初期化専用で、BaseValue と CurrentValue の両方を同時に設定します。
+            <code>SetXxx()</code> は CurrentValue だけを変更します。
+            コンストラクタでの初期値設定には <code>InitXxx()</code> を使うのが正しいパターンです。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <h2>キャラクターに AttributeSet を追加する</h2>
+
+    <p>
+      AttributeSet はキャラクターのコンポーネントとして追加します。
+      AbilitySystemComponent が同じ Actor 上の AttributeSet を自動的に認識します。
+    </p>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">4</div>
+        <div class="step-title">Character.h を編集する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          <code>[プロジェクト名]Character.h</code> に
+          <strong style="color:#a0e8a0">緑色の行</strong>を追加してください。
+        </p>
+        <div class="code-wrap">
+          <div class="code-label">[プロジェクト名]Character.h</div>
+          <pre><code><span class="c-macro">#pragma once</span>
+
+<span class="c-macro">#include</span> <span class="c-string">"CoreMinimal.h"</span>
+<span class="c-macro">#include</span> <span class="c-string">"GameFramework/Character.h"</span>
+<span class="c-macro">#include</span> <span class="c-string">"AbilitySystemInterface.h"</span>
+<span class="c-add"><span class="c-macro">#include</span> <span class="c-string">"MyAttributeSet.h"</span>  <span class="c-comment">// 追加</span></span>
+<span class="c-macro">#include</span> <span class="c-string">"[プロジェクト名]Character.generated.h"</span>
+
+<span class="c-keyword">class</span> <span class="c-type">UAbilitySystemComponent</span>;
+
+UCLASS()
+<span class="c-keyword">class</span> <span class="c-type">A[プロジェクト名]Character</span> : <span class="c-keyword">public</span> <span class="c-type">ACharacter</span>, <span class="c-keyword">public</span> <span class="c-type">IAbilitySystemInterface</span>
+{
+    GENERATED_BODY()
+
+<span class="c-keyword">public</span>:
+    <span class="c-type">A[プロジェクト名]Character</span>();
+    <span class="c-keyword">virtual</span> <span class="c-type">UAbilitySystemComponent</span>* GetAbilitySystemComponent() <span class="c-keyword">const override</span>;
+
+<span class="c-keyword">protected</span>:
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = <span class="c-string">"GAS"</span>)
+    TObjectPtr&lt;<span class="c-type">UAbilitySystemComponent</span>&gt; AbilitySystemComponent;
+
+    <span class="c-add">UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = <span class="c-string">"GAS"</span>)
+    TObjectPtr&lt;<span class="c-type">UMyAttributeSet</span>&gt; AttributeSet;  <span class="c-comment">// 追加</span></span>
+
+    <span class="c-comment">// 既存のコードはそのまま...</span>
+};</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">5</div>
+        <div class="step-title">Character.cpp を編集する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          <code>[プロジェクト名]Character.cpp</code> のコンストラクタに
+          <strong style="color:#a0e8a0">緑色の行</strong>を追加してください。
+        </p>
+        <div class="code-wrap">
+          <div class="code-label">[プロジェクト名]Character.cpp（コンストラクタ部分）</div>
+          <pre><code><span class="c-type">A[プロジェクト名]Character</span>::<span class="c-type">A[プロジェクト名]Character</span>()
+{
+    <span class="c-comment">// 既存のコードはそのまま...</span>
+
+    AbilitySystemComponent = CreateDefaultSubobject&lt;<span class="c-type">UAbilitySystemComponent</span>&gt;(TEXT(<span class="c-string">"AbilitySystemComponent"</span>));
+    <span class="c-add">AttributeSet = CreateDefaultSubobject&lt;<span class="c-type">UMyAttributeSet</span>&gt;(TEXT(<span class="c-string">"AttributeSet"</span>));  <span class="c-comment">// 追加</span></span>
+}</code></pre>
+        </div>
+        <div class="note-box">
+          <div class="note-label">なぜ ASC に直接登録しないのか</div>
+          <p>
+            <code>CreateDefaultSubobject</code> で Actor のコンポーネントとして作成すると、
+            AbilitySystemComponent が同じ Actor 上の AttributeSet を自動的に検出して管理下に置きます。
+            明示的に「この ASC にこの AttributeSet を渡す」という操作は不要です。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">6</div>
+        <div class="step-title">コンパイルする</div>
+      </div>
+      <div class="step-body">
+        <p>
+          Visual Studio または UE エディタの「コンパイル」ボタンでビルドします。
+          エラーがなければ次へ進んでください。
+        </p>
+        <p>
+          コンパイルが通ったら、キャラクターを選択して詳細パネルを確認すると、
+          <strong style="color:#fff">「GAS」カテゴリに <code>AttributeSet</code> が追加されている</strong>はずです。
+        </p>
+      </div>
+    </div>
+
+    <h2>ブループリントから Health の値を読む</h2>
+
+    <p>
+      AttributeSet が正しく追加されているか、ブループリントから値を読んで確認します。
+    </p>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">7</div>
+        <div class="step-title">BeginPlay で Health を表示する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          キャラクターのブループリント（<code>BP_ThirdPersonCharacter</code> など）を開き、
+          <code>Event BeginPlay</code> に以下のノードをつないでください。
+        </p>
+
+        <div class="bp-flow">
+          <div class="bp-row">
+            <span class="bp-node event">Event BeginPlay</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Get Ability System Component</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Get Numeric Attribute Value<br><span style="color:#6a8a6a;font-size:0.75rem;">Attribute: MyAttributeSet.Health</span></span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node green">Print String<br><span style="color:#6a8a6a;font-size:0.75rem;">In String: (float を接続)</span></span>
+          </div>
+        </div>
+
+        <p>
+          <code>Get Numeric Attribute Value</code> ノードの
+          <strong style="color:#fff">Attribute</strong> ドロップダウンから
+          <strong style="color:#fff"><code>MyAttributeSet.Health</code></strong> を選択してください。
+        </p>
+        <p>
+          戻り値の <code>Return Value</code>（float）を <code>Print String</code> の
+          <code>In String</code> に接続します。
+          型が異なるため、間に <strong style="color:#fff"><code>ToString (float)</code></strong>
+          ノードが自動挿入されます。
+        </p>
+
+        <div class="note-box">
+          <div class="note-label">Attribute がドロップダウンに出てこない場合</div>
+          <p>
+            一度コンパイルして保存し、エディタを再起動してみてください。
+            コンパイル直後は反映されないことがあります。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">8</div>
+        <div class="step-title">プレイして確認する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          プレイボタンを押すと、画面左上に <code>100.0</code> と表示されれば成功です。
+          <code>MyAttributeSet.cpp</code> のコンストラクタで設定した初期値が
+          正しく読み取れていることが確認できます。
+        </p>
+      </div>
+    </div>
+
+    <h2>うまくいかないときの確認ポイント</h2>
+
+    <ul class="check-list">
+      <li><code>MyAttributeSet.h</code> に <code>#include "AbilitySystemComponent.h"</code> があるか（ATTRIBUTE_ACCESSORS マクロに必要）</li>
+      <li><code>Character.h</code> で <code>#include "MyAttributeSet.h"</code> を追加したか</li>
+      <li>コンストラクタの <code>CreateDefaultSubobject&lt;UMyAttributeSet&gt;</code> を追加したか</li>
+      <li>ブループリントの <code>Get Numeric Attribute Value</code> で Attribute に <code>MyAttributeSet.Health</code> を選んでいるか</li>
+      <li>Attribute がドロップダウンに表示されない → エディタを再起動してみる</li>
+    </ul>
+
+    <h2>このステップのまとめ</h2>
+
+    <div class="point-box">
+      <p>
+        AttributeSet により、HP などのステータスが GAS の管理下に入りました。<br>
+        <strong style="color:#fff">定義は C++、読み書きはブループリント</strong>というハイブリッドな使い方が
+        GAS のスタンダードです。
+      </p>
+    </div>
+
+    <p>
+      次のステップでは <strong style="color:#fff">GameplayEffect</strong> を使って
+      この <code>Health</code> を実際に減らす（ダメージを与える）処理を作ります。
+      ここからはほぼブループリントだけで進められます。
+    </p>
+
+    <div class="page-nav">
+      <a href="step03.html">&#8592; STEP 03 最初の Ability を作る</a>
+      <a class="next" href="step05.html">STEP 05 GameplayEffect でダメージを与える &#8594;</a>
+    </div>
+
+  </main>
+
+  </div><!-- /.content-col -->
+
+</div><!-- /.layout -->
+
+<footer>
+  <p>GameplayAbilities 入門 &mdash; UchidenoIndustry</p>
+</footer>
+
+<script>
+  const toggle  = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+
+  toggle.addEventListener('click', function () {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+  });
+
+  overlay.addEventListener('click', function () {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+  });
+</script>
+
+</body>
+</html>
