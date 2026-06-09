@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BP 01 GAS とは何か | GameplayAbilities 入門</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      background: #0f0f1a;
+      color: #e0e0e0;
+      line-height: 1.9;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      padding: 18px 20px;
+      border-bottom: 2px solid #e94560;
+    }
+
+    .header-inner { max-width: 760px; margin: 0 auto; padding: 0 40px; }
+    .breadcrumb { font-size: 0.8rem; color: #6070a0; margin-bottom: 6px; }
+    .breadcrumb a { color: #7ec8e3; text-decoration: none; }
+    .breadcrumb a:hover { color: #e94560; }
+    .step-label { font-size: 0.8rem; color: #e94560; font-weight: bold; letter-spacing: 0.15em; margin-bottom: 4px; }
+    header h1 { font-size: 1.4rem; color: #fff; margin-bottom: 4px; }
+    header p { color: #a0a8c0; font-size: 0.88rem; }
+
+    .layout { display: grid; grid-template-columns: 240px 1fr; align-items: start; }
+
+    .sidebar {
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
+      background: #111120; border-right: 1px solid #2a2a4a;
+      padding: 24px 0; scrollbar-width: thin; scrollbar-color: #2a2a4a transparent;
+    }
+
+    .sidebar-heading { font-size: 0.72rem; color: #4a5068; letter-spacing: 0.12em; padding: 0 20px 14px; border-bottom: 1px solid #1a1a2e; margin-bottom: 8px; }
+    .sidebar-heading a { color: #4a5068; text-decoration: none; }
+    .sidebar-heading a:hover { color: #7ec8e3; }
+    .sidebar-track { font-size: 0.65rem; color: #50a870; letter-spacing: 0.1em; margin-top: 3px; }
+
+    .nav-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 20px; text-decoration: none; transition: background 0.15s; cursor: pointer; }
+    .nav-item.current { background: #1a2040; }
+    .nav-item.done:hover { background: #161830; }
+
+    .nav-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+    .nav-item.done    .nav-dot { background: #a0e8a0; }
+    .nav-item.current .nav-dot { background: #e94560; box-shadow: 0 0 7px #e94560aa; }
+
+    .nav-text { display: flex; flex-direction: column; }
+    .nav-step { font-size: 0.7rem; letter-spacing: 0.08em; display: block; }
+    .nav-item.done    .nav-step { color: #4a7860; }
+    .nav-item.current .nav-step { color: #e94560; }
+    .nav-title { font-size: 0.83rem; display: block; line-height: 1.45; margin-top: 2px; }
+    .nav-item.done    .nav-title { color: #90a8a0; }
+    .nav-item.current .nav-title { color: #e0e8f8; }
+
+    .nav-divider { border-top: 1px solid #1a1a2e; margin: 12px 0 6px; }
+    .nav-next-track .nav-dot { background: #3a6a8a; }
+    .nav-next-track .nav-step { color: #4a8090; }
+    .nav-next-track .nav-title { color: #506878; }
+    .nav-next-track:hover { background: #141828; }
+
+    main { padding: 48px 40px 80px; max-width: 760px; margin: 0 auto; }
+
+    .menu-toggle {
+      display: none; align-items: center; gap: 8px;
+      background: #16213e; border: 1px solid #2a2a4a; color: #7ec8e3;
+      padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; margin-bottom: 24px;
+    }
+
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 99; }
+    .overlay.open { display: block; }
+
+    @media (max-width: 860px) {
+      .header-inner { padding: 0 20px; }
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: fixed; left: -260px; top: 0; height: 100%; width: 240px; z-index: 100; transition: left 0.25s ease; }
+      .sidebar.open { left: 0; box-shadow: 4px 0 24px rgba(0,0,0,0.6); }
+      main { padding: 32px 20px 60px; max-width: 100%; }
+      .menu-toggle { display: flex; }
+    }
+
+    h2 { font-size: 1.3rem; color: #7ec8e3; margin: 52px 0 16px; padding-bottom: 8px; border-bottom: 1px solid #2a2a4a; }
+    h2:first-of-type { margin-top: 0; }
+    p { margin-bottom: 16px; color: #c8d0e0; }
+
+    .point-box { background: #16213e; border-left: 4px solid #e94560; padding: 18px 22px; border-radius: 4px; margin: 20px 0; }
+    .point-box p { margin-bottom: 0; }
+
+    .info-box { background: #131c2e; border: 1px solid #2a2a4a; border-radius: 6px; padding: 16px 20px; margin: 20px 0; }
+    .info-box p { margin-bottom: 0; font-size: 0.9rem; color: #8090a8; }
+
+    .component-list { display: grid; gap: 12px; margin: 24px 0; }
+
+    .component-item {
+      background: #16213e;
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      padding: 18px 22px;
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .component-item.dim { opacity: 0.5; }
+
+    .component-item .name {
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 0.9rem;
+      color: #7ec8e3;
+      font-weight: bold;
+    }
+
+    .component-item .name .jp {
+      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      display: block;
+      font-size: 0.78rem;
+      color: #6070a0;
+      font-weight: normal;
+      margin-top: 2px;
+    }
+
+    .component-item .desc { font-size: 0.9rem; color: #a0b0c0; line-height: 1.7; }
+
+    .cpp-tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      background: #181830;
+      border: 1px solid #2a3060;
+      color: #5060a0;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-top: 6px;
+      font-family: "Consolas", "Courier New", monospace;
+    }
+
+    .diagram {
+      background: #16213e;
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      padding: 28px;
+      margin: 24px 0;
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 0.85rem;
+      color: #7ec8e3;
+      line-height: 2.2;
+      overflow-x: auto;
+    }
+
+    .page-nav { display: flex; justify-content: space-between; margin-top: 64px; padding-top: 24px; border-top: 1px solid #2a2a4a; }
+    .page-nav a { color: #7ec8e3; text-decoration: none; font-size: 0.9rem; padding: 10px 20px; border: 1px solid #2a2a4a; border-radius: 4px; transition: border-color 0.2s; }
+    .page-nav a:hover { border-color: #7ec8e3; }
+    .page-nav .next { margin-left: auto; }
+
+    footer { text-align: center; padding: 28px; color: #4a5068; font-size: 0.82rem; border-top: 1px solid #2a2a4a; }
+  </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay"></div>
+
+<div class="layout">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-heading">
+      <a href="./">GameplayAbilities 入門</a>
+      <div class="sidebar-track">Blueprint 編</div>
+    </div>
+
+    <div class="nav-item current">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 01</span>
+        <span class="nav-title">GAS とは何か</span>
+      </span>
+    </div>
+
+    <a class="nav-item done" href="bp02.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 02</span>
+        <span class="nav-title">Blueprint で始める</span>
+      </span>
+    </a>
+
+    <a class="nav-item done" href="bp03.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 03</span>
+        <span class="nav-title">最初の Ability を作る</span>
+      </span>
+    </a>
+
+    <a class="nav-item done" href="bp04.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 04</span>
+        <span class="nav-title">GameplayTag で状態管理</span>
+      </span>
+    </a>
+
+    <div class="nav-divider"></div>
+    <a class="nav-item nav-next-track" href="step01.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">→ C++ 編へ</span>
+        <span class="nav-title">AttributeSet まで学ぶ</span>
+      </span>
+    </a>
+  </aside>
+
+  <div class="content-col">
+
+  <header>
+    <div class="header-inner">
+      <div class="breadcrumb">
+        <a href="../">UchidenoIndustry</a> &rsaquo;
+        <a href="./">GameplayAbilities 入門</a> &rsaquo;
+        BP STEP 01
+      </div>
+      <div class="step-label">BP STEP 01</div>
+      <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px;">
+        <h1>GAS とは何か</h1>
+        <span style="background:#1a3a1a;border:1px solid #2a6a2a;color:#a0e8a0;font-size:0.75rem;padding:2px 8px;border-radius:4px;font-family:'Consolas','Courier New',monospace;white-space:nowrap;">UE 5.5 対応</span>
+      </div>
+      <p>Gameplay Ability System の概要と、Blueprint 編で学ぶ内容の全体像を把握する。</p>
+    </div>
+  </header>
+
+  <main>
+
+    <button class="menu-toggle" id="menuToggle">&#9776; 目次</button>
+
+    <h2>GAS が解決する問題</h2>
+
+    <p>
+      アクションゲームやRPGを作るとき、キャラクターは多くの「能力」を持ちます。
+      通常攻撃、スキル、バフ、デバフ……これらをすべて自分でコーディングすると、
+      どんな問題が起きるでしょうか？
+    </p>
+
+    <div class="point-box">
+      <p>
+        「スキルAを使用中はスキルBが使えない」<br>
+        「スタン状態のときは攻撃できない」<br>
+        「HP が 0 になったとき、実行中のスキルはどう止める？」
+      </p>
+    </div>
+
+    <p>
+      アビリティが増えるほど、こうした「アビリティ同士の関係」を管理するコードが膨れ上がります。
+      バグも増え、新しいアビリティを追加するたびに既存のコードを壊してしまうことも起きます。
+    </p>
+
+    <p>
+      <strong style="color:#fff">GAS（Gameplay Ability System）</strong> は、
+      このような問題をまとめて解決するために Unreal Engine が用意したフレームワークです。
+      アビリティの定義・発動・中断・状態管理といった仕組みがあらかじめ設計されて提供されています。
+    </p>
+
+    <h2>GAS を構成する5つの要素</h2>
+
+    <p>
+      GAS は5つの主要な要素から成り立っています。
+      <strong style="color:#fff">Blueprint 編では、このうち3つ</strong>（通常表示のもの）を使います。
+      残りの2つは C++ が必要なため、薄く表示されているものは C++ 編で扱います。
+    </p>
+
+    <div class="component-list">
+
+      <div class="component-item">
+        <div class="name">
+          AbilitySystemComponent
+          <span class="jp">アビリティシステムコンポーネント（ASC）</span>
+        </div>
+        <div class="desc">
+          GAS の司令塔。このコンポーネントをキャラクターに追加することで、
+          そのキャラクターが GAS を利用できるようになります。
+          Blueprint 編では、<strong style="color:#fff">コンポーネントとして追加するだけ</strong>でセットアップ完了です。
+        </div>
+      </div>
+
+      <div class="component-item">
+        <div class="name">
+          GameplayAbility
+          <span class="jp">ゲームプレイアビリティ</span>
+        </div>
+        <div class="desc">
+          「アビリティ（能力）」そのものを定義するクラスです。
+          「発動したときに何をするか」「どんな条件なら使えるか」をここに記述します。
+          <strong style="color:#fff">Blueprint だけで作成できます。</strong>
+        </div>
+      </div>
+
+      <div class="component-item dim">
+        <div class="name" style="color:#3a5870;">
+          AttributeSet
+          <span class="jp" style="color:#2e3e50;">アトリビュートセット</span>
+          <div class="cpp-tag">C++ 編 STEP 04</div>
+        </div>
+        <div class="desc" style="color:#3a5060;">
+          HP・MP・攻撃力などのステータス（数値）を管理するクラスです。
+          定義には C++ が必要なため、Blueprint 編では扱いません。
+          C++ 編の STEP 04 で学べます。
+        </div>
+      </div>
+
+      <div class="component-item dim">
+        <div class="name" style="color:#3a5870;">
+          GameplayEffect
+          <span class="jp" style="color:#2e3e50;">ゲームプレイエフェクト</span>
+          <div class="cpp-tag">C++ 編 STEP 05</div>
+        </div>
+        <div class="desc" style="color:#3a5060;">
+          Attribute を変化させる「効果」を定義するクラスです。
+          ダメージ・回復・バフはここで定義します。
+          AttributeSet との組み合わせで使うため、Blueprint 編では扱いません。
+          C++ 編の STEP 05 で学べます。
+        </div>
+      </div>
+
+      <div class="component-item">
+        <div class="name">
+          GameplayTag
+          <span class="jp">ゲームプレイタグ</span>
+        </div>
+        <div class="desc">
+          状態を表すラベルです。「Status.Stunned」「Ability.Attack」のように
+          階層構造で定義します。「このタグがついているときはアビリティを使えない」
+          といった制御に使います。<strong style="color:#fff">Blueprint だけで扱えます。</strong>
+        </div>
+      </div>
+
+    </div>
+
+    <h2>全体のイメージ</h2>
+
+    <p>5つの要素がどう関係しているか、大まかなイメージを示します。Blueprint 編で扱う要素には <span style="color:#a0e8a0">← BP 編</span> と示しています。</p>
+
+    <div class="diagram">
+      キャラクター<br>
+      └── <span style="color:#e94560">AbilitySystemComponent</span>（司令塔）　<span style="color:#a0e8a0;font-size:0.8em;">← BP 編で追加</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;├── <span style="color:#7ec8e3">GameplayAbility</span>（アビリティ定義）× 複数　<span style="color:#a0e8a0;font-size:0.8em;">← BP 編で作成</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;├── <span style="color:#404858">GameplayEffect</span>（効果定義）　<span style="color:#303848;font-size:0.8em;">← C++ 編</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;├── <span style="color:#404858">AttributeSet</span>（HP・MP などの数値）　<span style="color:#303848;font-size:0.8em;">← C++ 編</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;└── <span style="color:#c090e0">GameplayTag</span>（現在の状態ラベル）　<span style="color:#a0e8a0;font-size:0.8em;">← BP 編で使用</span>
+    </div>
+
+    <div class="info-box">
+      <p>
+        Blueprint 編を終えた後に C++ 編へ進むと、AttributeSet と GameplayEffect が加わり、
+        「ダメージを与える・HP を回復する」といった処理が実装できるようになります。
+      </p>
+    </div>
+
+    <h2>GAS を使わない選択肢はあるか？</h2>
+
+    <p>
+      小規模なゲームや、アビリティの種類が少ないゲームであれば、
+      GAS を使わず自前で実装する方が早い場合もあります。
+    </p>
+
+    <p>
+      ただし、アビリティが増えてくると GAS の恩恵が大きくなります。
+      また、エピックゲームズが公開している大規模サンプル（Lyra など）も
+      GAS を前提に設計されているため、それらを参照する場合は GAS の理解が必要です。
+    </p>
+
+    <div class="point-box">
+      <p>
+        <strong style="color:#fff">Blueprint 編の方針：</strong><br>
+        C++ なしで「GAS の基本的な仕組みを動かす」ことを目標にします。
+        まず体験してから、必要に応じて C++ 編へステップアップしましょう。
+      </p>
+    </div>
+
+    <div class="page-nav">
+      <a href="./">&#8592; 一覧に戻る</a>
+      <a class="next" href="bp02.html">BP STEP 02 Blueprint で始める &#8594;</a>
+    </div>
+
+  </main>
+
+  </div><!-- /.content-col -->
+
+</div><!-- /.layout -->
+
+<footer>
+  <p>GameplayAbilities 入門 &mdash; UchidenoIndustry</p>
+</footer>
+
+<script>
+  const toggle  = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  toggle.addEventListener('click', function () { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+  overlay.addEventListener('click', function () { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+</script>
+
+</body>
+</html>
