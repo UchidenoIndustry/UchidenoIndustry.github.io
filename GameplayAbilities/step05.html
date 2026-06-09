@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STEP 05 GameplayEffect でダメージを与える | GameplayAbilities 入門</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      background: #0f0f1a;
+      color: #e0e0e0;
+      line-height: 1.9;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      padding: 18px 20px;
+      border-bottom: 2px solid #e94560;
+    }
+
+    .header-inner { max-width: 760px; margin: 0 auto; padding: 0 40px; }
+
+    .breadcrumb { font-size: 0.8rem; color: #6070a0; margin-bottom: 6px; }
+    .breadcrumb a { color: #7ec8e3; text-decoration: none; }
+    .breadcrumb a:hover { color: #e94560; }
+
+    .step-label { font-size: 0.8rem; color: #e94560; font-weight: bold; letter-spacing: 0.15em; margin-bottom: 4px; }
+
+    header h1 { font-size: 1.4rem; color: #fff; margin-bottom: 4px; }
+    header p { color: #a0a8c0; font-size: 0.88rem; }
+
+    .layout { display: grid; grid-template-columns: 240px 1fr; align-items: start; }
+
+    .sidebar {
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
+      background: #111120; border-right: 1px solid #2a2a4a;
+      padding: 24px 0; scrollbar-width: thin; scrollbar-color: #2a2a4a transparent;
+    }
+
+    .sidebar-heading { font-size: 0.72rem; color: #4a5068; letter-spacing: 0.12em; padding: 0 20px 14px; border-bottom: 1px solid #1a1a2e; margin-bottom: 8px; }
+    .sidebar-heading a { color: #4a5068; text-decoration: none; }
+    .sidebar-heading a:hover { color: #7ec8e3; }
+
+    .nav-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 20px; text-decoration: none; transition: background 0.15s; cursor: pointer; }
+    .nav-item.current { background: #1a2040; }
+    .nav-item.done:hover { background: #161830; }
+
+    .nav-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+    .nav-item.done    .nav-dot { background: #a0e8a0; }
+    .nav-item.current .nav-dot { background: #e94560; box-shadow: 0 0 7px #e94560aa; }
+    .nav-item.coming  .nav-dot { background: transparent; border: 1px solid #2a2a4a; }
+
+    .nav-text { display: flex; flex-direction: column; }
+    .nav-step { font-size: 0.7rem; letter-spacing: 0.08em; display: block; color: #3a4a5a; }
+    .nav-item.done    .nav-step { color: #4a7860; }
+    .nav-item.current .nav-step { color: #e94560; }
+    .nav-title { font-size: 0.83rem; display: block; line-height: 1.45; margin-top: 2px; }
+    .nav-item.done    .nav-title { color: #90a8a0; }
+    .nav-item.current .nav-title { color: #e0e8f8; }
+    .nav-item.coming  .nav-title { color: #2e3548; }
+    .nav-item.coming  .nav-step  { color: #2a3040; }
+    .nav-item.coming { cursor: default; }
+
+    main { padding: 48px 40px 80px; max-width: 760px; margin: 0 auto; }
+
+    .menu-toggle {
+      display: none; align-items: center; gap: 8px;
+      background: #16213e; border: 1px solid #2a2a4a; color: #7ec8e3;
+      padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; margin-bottom: 24px;
+    }
+
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 99; }
+    .overlay.open { display: block; }
+
+    @media (max-width: 860px) {
+      .header-inner { padding: 0 20px; }
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: fixed; left: -260px; top: 0; height: 100%; width: 240px; z-index: 100; transition: left 0.25s ease; }
+      .sidebar.open { left: 0; box-shadow: 4px 0 24px rgba(0,0,0,0.6); }
+      main { padding: 32px 20px 60px; max-width: 100%; }
+      .menu-toggle { display: flex; }
+    }
+
+    h2 { font-size: 1.3rem; color: #7ec8e3; margin: 52px 0 16px; padding-bottom: 8px; border-bottom: 1px solid #2a2a4a; }
+    h2:first-of-type { margin-top: 0; }
+    p { margin-bottom: 16px; color: #c8d0e0; }
+
+    .step-block { border: 1px solid #2a2a4a; border-radius: 8px; margin: 24px 0; overflow: hidden; }
+    .step-block .step-head { background: #1a2a4a; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+    .step-block .step-num { background: #e94560; color: #fff; font-size: 0.75rem; font-weight: bold; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .step-block .step-title { color: #fff; font-size: 0.95rem; font-weight: bold; }
+    .step-block .step-body { padding: 20px 24px; }
+    .step-block .step-body p { margin-bottom: 12px; }
+    .step-block .step-body p:last-child { margin-bottom: 0; }
+
+    .code-wrap { margin: 16px 0; }
+    .code-label { background: #2a2a4a; color: #8090a8; font-size: 0.75rem; padding: 5px 14px; border-radius: 4px 4px 0 0; font-family: "Consolas","Courier New",monospace; display: inline-block; }
+    pre { background: #0a0a14; border: 1px solid #2a2a4a; border-radius: 0 4px 4px 4px; padding: 20px; overflow-x: auto; margin: 0; }
+    code { font-family: "Consolas","Courier New",monospace; font-size: 0.85rem; line-height: 1.8; }
+
+    p code, li code { background: #1a2a3a; color: #7ec8e3; padding: 2px 6px; border-radius: 3px; font-size: 0.85em; }
+
+    .point-box { background: #16213e; border-left: 4px solid #e94560; padding: 18px 22px; border-radius: 4px; margin: 20px 0; }
+    .point-box p { margin-bottom: 0; }
+
+    .note-box { background: #131c2e; border: 1px solid #2a2a4a; border-radius: 6px; padding: 16px 20px; margin: 16px 0; }
+    .note-box .note-label { font-size: 0.75rem; color: #6070a0; font-weight: bold; letter-spacing: 0.1em; margin-bottom: 6px; }
+    .note-box p { margin-bottom: 0; font-size: 0.9rem; color: #8090a8; }
+
+    .check-list { list-style: none; margin: 16px 0; }
+    .check-list li { padding: 8px 0 8px 32px; position: relative; color: #c8d0e0; border-bottom: 1px solid #1a2030; }
+    .check-list li:last-child { border-bottom: none; }
+    .check-list li::before { content: "✓"; position: absolute; left: 0; color: #a0e8a0; font-weight: bold; }
+
+    .bp-flow { background: #0d1a2e; border: 1px solid #2a3a5a; border-radius: 8px; padding: 20px 24px; margin: 16px 0; font-family: "Consolas","Courier New",monospace; font-size: 0.82rem; overflow-x: auto; }
+    .bp-node { display: inline-block; background: #1a2a4a; border: 1px solid #3a4a6a; border-radius: 4px; padding: 4px 12px; color: #a0c8e8; white-space: nowrap; }
+    .bp-node.event { background: #2a1a2a; border-color: #6a3a6a; color: #c8a0e8; }
+    .bp-node.red   { background: #2a1a1a; border-color: #7a2a3a; color: #e89090; }
+    .bp-node.green { background: #1a2a1a; border-color: #3a6a3a; color: #90e890; }
+    .bp-arrow { color: #4a6a8a; margin: 0 6px; font-size: 1rem; }
+    .bp-comment { color: #4a6060; font-size: 0.78rem; margin-top: 8px; font-family: "Hiragino Kaku Gothic ProN","Meiryo",sans-serif; }
+    .bp-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0; margin-bottom: 12px; }
+    .bp-row:last-child { margin-bottom: 0; }
+
+    .concept-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.88rem; }
+    .concept-table th { background: #1a2a4a; color: #7ec8e3; padding: 10px 16px; text-align: left; border: 1px solid #2a2a4a; }
+    .concept-table td { padding: 10px 16px; border: 1px solid #2a2a4a; color: #c8d0e0; vertical-align: top; }
+    .concept-table tr:nth-child(even) td { background: #111828; }
+
+    .page-nav { display: flex; justify-content: space-between; margin-top: 64px; padding-top: 24px; border-top: 1px solid #2a2a4a; }
+    .page-nav a { color: #7ec8e3; text-decoration: none; font-size: 0.9rem; padding: 10px 20px; border: 1px solid #2a2a4a; border-radius: 4px; transition: border-color 0.2s; }
+    .page-nav a:hover { border-color: #7ec8e3; }
+    .page-nav .next { margin-left: auto; }
+
+    footer { text-align: center; padding: 28px; color: #4a5068; font-size: 0.82rem; border-top: 1px solid #2a2a4a; }
+  </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay"></div>
+
+<div class="layout">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-heading"><a href="./">GameplayAbilities 入門</a></div>
+
+    <a class="nav-item done" href="step01.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text"><span class="nav-step">STEP 01</span><span class="nav-title">GAS とは何か</span></span>
+    </a>
+    <a class="nav-item done" href="step02.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text"><span class="nav-step">STEP 02</span><span class="nav-title">最小構成のセットアップ</span></span>
+    </a>
+    <a class="nav-item done" href="step03.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text"><span class="nav-step">STEP 03</span><span class="nav-title">最初の Ability を作る</span></span>
+    </a>
+    <a class="nav-item done" href="step04.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text"><span class="nav-step">STEP 04</span><span class="nav-title">AttributeSet の基本</span></span>
+    </a>
+
+    <div class="nav-item current">
+      <span class="nav-dot"></span>
+      <span class="nav-text"><span class="nav-step">STEP 05</span><span class="nav-title">GameplayEffect でダメージを与える</span></span>
+    </div>
+
+    <div class="nav-item coming">
+      <span class="nav-dot"></span>
+      <span class="nav-text"><span class="nav-step">STEP 06</span><span class="nav-title">GameplayTag を使う</span></span>
+    </div>
+  </aside>
+
+  <div class="content-col">
+
+  <header>
+    <div class="header-inner">
+      <div class="breadcrumb">
+        <a href="../">UchidenoIndustry</a> &rsaquo;
+        <a href="./">GameplayAbilities 入門</a> &rsaquo;
+        STEP 05
+      </div>
+      <div class="step-label">STEP 05</div>
+      <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px;">
+        <h1>GameplayEffect でダメージを与える</h1>
+        <span style="background:#1a3a1a;border:1px solid #2a6a2a;color:#a0e8a0;font-size:0.75rem;padding:2px 8px;border-radius:4px;font-family:'Consolas','Courier New',monospace;white-space:nowrap;">UE 5.5 対応</span>
+      </div>
+      <p>GE_Damage を Blueprint で作り、アビリティから適用して Health を減らす。</p>
+    </div>
+  </header>
+
+  <main>
+
+    <button class="menu-toggle" id="menuToggle">&#9776; 目次</button>
+
+    <h2>このステップのゴール</h2>
+
+    <p>
+      STEP 04 で用意した <code>Health</code> を、実際に変化させます。
+      GAS では Attribute の値を直接書き換えるのではなく、
+      <strong style="color:#fff">GameplayEffect（以下 GE）</strong> という「命令書」を経由して変化させます。
+    </p>
+
+    <ul class="check-list">
+      <li>GameplayEffect の仕組みを理解する</li>
+      <li>ブループリントで <code>GE_Damage</code> を作る（Health を 20 減らす）</li>
+      <li><code>GA_MyFirstAbility</code> を更新してダメージを適用する</li>
+      <li>Q を押すたびに Health が 20 減ることを確認する</li>
+    </ul>
+
+    <div class="point-box">
+      <p>
+        <strong style="color:#fff">このステップはブループリントのみで完結します。</strong><br>
+        C++ を一切書かずに「ダメージを与える」という処理が作れます。
+      </p>
+    </div>
+
+    <h2>GameplayEffect とは</h2>
+
+    <p>
+      GameplayEffect は「Attribute をどう変化させるか」を定義したデータアセットです。
+      アビリティや他のゲームコードから GE を適用することで、
+      HP を減らしたり、バフをかけたり、クールダウンを管理したりできます。
+    </p>
+
+    <p>
+      GE には3種類の <strong style="color:#fff">Duration Policy（持続時間の種類）</strong>があります。
+    </p>
+
+    <table class="concept-table">
+      <tr>
+        <th>Duration Policy</th>
+        <th>動作</th>
+        <th>主な用途</th>
+      </tr>
+      <tr>
+        <td><strong style="color:#ffcb6b;">Instant</strong></td>
+        <td>適用した瞬間に値が変わる</td>
+        <td>ダメージ、即時回復、即時消費</td>
+      </tr>
+      <tr>
+        <td><strong style="color:#ffcb6b;">Duration</strong></td>
+        <td>指定した秒数だけ効果が続く</td>
+        <td>毒ダメージ（DoT）、一時的なバフ</td>
+      </tr>
+      <tr>
+        <td><strong style="color:#ffcb6b;">Infinite</strong></td>
+        <td>明示的に除去するまで効果が続く</td>
+        <td>装備ボーナス、パッシブバフ</td>
+      </tr>
+    </table>
+
+    <p>
+      今回は最もシンプルな <strong style="color:#fff">Instant</strong> を使います。
+    </p>
+
+    <h2>GE_Damage を作る</h2>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">1</div>
+        <div class="step-title">GameplayEffect ブループリントを作成する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          コンテンツブラウザを右クリックして <strong style="color:#fff">「ブループリントクラス」</strong> を選択します。
+          親クラスの検索欄に <code>GameplayEffect</code> と入力して選択し、
+          名前を <strong style="color:#fff"><code>GE_Damage</code></strong> にしてください。
+        </p>
+      </div>
+    </div>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">2</div>
+        <div class="step-title">Duration Policy を Instant に設定する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          <code>GE_Damage</code> を開き、<strong style="color:#fff">「クラスのデフォルト」</strong>
+          （ブループリントエディタ上部のボタン）を選択します。
+          詳細パネルに GE の設定が表示されます。
+        </p>
+        <p>
+          <strong style="color:#fff">「Gameplay Effect → Duration Policy」</strong> を探して、
+          <code>Instant</code> に設定してください。
+        </p>
+      </div>
+    </div>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">3</div>
+        <div class="step-title">Modifier を追加する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          詳細パネルの <strong style="color:#fff">「Gameplay Effect → Modifiers」</strong> セクションの
+          <strong style="color:#fff">「+」ボタン</strong>を押して Modifier を1つ追加します。
+          以下のように設定してください。
+        </p>
+
+        <div class="code-wrap">
+          <div class="code-label">Modifier の設定値</div>
+          <pre><code>Attribute              : MyAttributeSet.Health
+Modifier Op            : Add
+Modifier Magnitude
+  Magnitude Calculation Type : Scalable Float
+  Scalable Float Magnitude   : -20</code></pre>
+        </div>
+
+        <div class="note-box">
+          <div class="note-label">「Add」で -20 を指定する理由</div>
+          <p>
+            GAS の Modifier Operation に「Subtract」はありません。
+            減算したい場合は <code>Add</code> に負の値（<code>-20</code>）を指定します。
+          </p>
+        </div>
+        <div class="note-box">
+          <div class="note-label">Scalable Float とは</div>
+          <p>
+            アビリティのレベルに応じて値をスケーリングできる仕組みです。
+            今は固定値なのでシンプルに <code>-20</code> と入れるだけで動きます。
+            レベルシステムと連携させる場合は DataTable でカーブを定義できます。
+          </p>
+        </div>
+        <p>
+          設定が終わったらブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。
+        </p>
+      </div>
+    </div>
+
+    <h2>GA_MyFirstAbility を更新する</h2>
+
+    <p>
+      STEP 03 で作った <code>GA_MyFirstAbility</code> を開き、
+      <code>ActivateAbility</code> のグラフを以下のように更新します。
+    </p>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">4</div>
+        <div class="step-title">ActivateAbility に GE_Damage の適用を追加する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          既存の <code>Print String</code> の代わりに、以下の流れに組み替えてください。
+        </p>
+
+        <div class="bp-flow">
+          <div class="bp-row">
+            <span class="bp-node event">Event ActivateAbility</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node green">Commit Ability</span>
+          </div>
+          <div class="bp-comment">Commit Ability の Return Value を Branch につなぐ ↓</div>
+          <br>
+          <div class="bp-row" style="margin-top:10px;">
+            <span style="color:#4a8a4a;margin-right:8px;">└ true</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Apply Gameplay Effect to Owner<br><span style="color:#6a8a6a;font-size:0.75rem;">Gameplay Effect Class: GE_Damage</span></span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Get Ability System Component<br><span style="color:#6a8a6a;font-size:0.75rem;">Target: Get Owner Actor</span></span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node green">Get Numeric Attribute Value<br><span style="color:#6a8a6a;font-size:0.75rem;">Attribute: MyAttributeSet.Health</span></span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Print String</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node green">End Ability</span>
+          </div>
+          <div class="bp-row">
+            <span style="color:#8a4a4a;margin-right:8px;">└ false</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node red">End Ability (Was Cancelled: true)</span>
+          </div>
+        </div>
+
+        <p>
+          <code>Apply Gameplay Effect to Owner</code> は GameplayAbility ブループリントの中から
+          右クリックで検索すると見つかります。
+          <code>Gameplay Effect Class</code> に <strong style="color:#fff"><code>GE_Damage</code></strong> を設定してください。
+        </p>
+        <p>
+          GE を適用した後、現在の Health 値を確認するために
+          <code>Get Numeric Attribute Value</code> → <code>Print String</code> をつなぎます。
+          float を文字列に変換する <code>ToString (float)</code> ノードが自動で挿入されます。
+        </p>
+
+        <div class="note-box">
+          <div class="note-label">Apply Gameplay Effect to Owner が見つからない場合</div>
+          <p>
+            GameplayAbility の外（Character Blueprint など）からは <code>Apply Gameplay Effect to Owner</code>
+            は使えません。キャラクターの Blueprint から操作したい場合は
+            <code>Get Ability System Component</code> → <code>Apply Gameplay Effect to Target</code>
+            を使います（Target に自分自身を渡す）。
+          </p>
+        </div>
+
+        <p>
+          ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。
+        </p>
+      </div>
+    </div>
+
+    <h2>動作確認</h2>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">5</div>
+        <div class="step-title">プレイして Health が減ることを確認する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          プレイを開始し、<strong style="color:#fff">Q キーを押す</strong>たびに
+          画面左上に表示される数値が減っていけば成功です。
+        </p>
+        <p>
+          初期値 <code>100</code> から始まり、
+          1回押すごとに <code>80</code> → <code>60</code> → <code>40</code> → <code>20</code> → <code>0</code>
+          と変化するはずです。
+        </p>
+        <div class="note-box">
+          <div class="note-label">0 以下になったときの挙動</div>
+          <p>
+            GAS はデフォルトでは Health が 0 以下になることを許可しています（マイナスにもなります）。
+            「0 未満にならない」制御は AttributeSet の <code>PostGameplayEffectExecute</code>
+            関数でクランプ処理を追加するのが一般的ですが、これは応用的な内容なため今回は省略します。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <h2>うまくいかないときの確認ポイント</h2>
+
+    <ul class="check-list">
+      <li><code>GE_Damage</code> の Duration Policy が <code>Instant</code> になっているか</li>
+      <li>Modifier の Attribute が <code>MyAttributeSet.Health</code> になっているか（<code>MaxHealth</code> ではなく）</li>
+      <li>Modifier の Scalable Float Magnitude が <code>-20</code>（マイナス）になっているか</li>
+      <li><code>Apply Gameplay Effect to Owner</code> に <code>GE_Damage</code> が設定されているか</li>
+      <li>Health の表示が変化しない → <code>End Ability</code> が呼ばれているか、再発動できているか確認</li>
+    </ul>
+
+    <h2>このステップのまとめ</h2>
+
+    <div class="point-box">
+      <p>
+        「アビリティ → GameplayEffect → Attribute の変化」という GAS の基本的な流れが完成しました。<br>
+        直接値を書き換えるのではなく GE を経由することで、
+        後で学ぶ <strong style="color:#fff">GameplayTag による制御</strong>や
+        <strong style="color:#fff">バフの重ね掛け管理</strong>が自然に機能するようになります。
+      </p>
+    </div>
+
+    <p>
+      次のステップでは <strong style="color:#fff">GameplayTag</strong> を学びます。
+      「スタン中はアビリティが使えない」といった状態管理を、
+      コードを書かずにタグの設定だけで実現できます。
+    </p>
+
+    <div class="page-nav">
+      <a href="step04.html">&#8592; STEP 04 AttributeSet の基本</a>
+      <a class="next" href="step06.html">STEP 06 GameplayTag を使う &#8594;</a>
+    </div>
+
+  </main>
+
+  </div><!-- /.content-col -->
+
+</div><!-- /.layout -->
+
+<footer>
+  <p>GameplayAbilities 入門 &mdash; UchidenoIndustry</p>
+</footer>
+
+<script>
+  const toggle  = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  toggle.addEventListener('click', function () { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+  overlay.addEventListener('click', function () { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STEP 06 GameplayTag を使う | GameplayAbilities 入門</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      background: #0f0f1a;
+      color: #e0e0e0;
+      line-height: 1.9;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      padding: 18px 20px;
+      border-bottom: 2px solid #e94560;
+    }
+
+    .header-inner { max-width: 760px; margin: 0 auto; padding: 0 40px; }
+
+    .breadcrumb { font-size: 0.8rem; color: #6070a0; margin-bottom: 6px; }
+    .breadcrumb a { color: #7ec8e3; text-decoration: none; }
+    .breadcrumb a:hover { color: #e94560; }
+
+    .step-label { font-size: 0.8rem; color: #e94560; font-weight: bold; letter-spacing: 0.15em; margin-bottom: 4px; }
+
+    header h1 { font-size: 1.4rem; color: #fff; margin-bottom: 4px; }
+    header p { color: #a0a8c0; font-size: 0.88rem; }
+
+    .layout { display: grid; grid-template-columns: 240px 1fr; align-items: start; }
+
+    .sidebar {
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
+      background: #111120; border-right: 1px solid #2a2a4a;
+      padding: 24px 0; scrollbar-width: thin; scrollbar-color: #2a2a4a transparent;
+    }
+
+    .sidebar-heading { font-size: 0.72rem; color: #4a5068; letter-spacing: 0.12em; padding: 0 20px 14px; border-bottom: 1px solid #1a1a2e; margin-bottom: 8px; }
+    .sidebar-heading a { color: #4a5068; text-decoration: none; }
+    .sidebar-heading a:hover { color: #7ec8e3; }
+
+    .nav-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 20px; text-decoration: none; transition: background 0.15s; cursor: pointer; }
+    .nav-item.current { background: #1a2040; }
+    .nav-item.done:hover { background: #161830; }
+
+    .nav-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+    .nav-item.done    .nav-dot { background: #a0e8a0; }
+    .nav-item.current .nav-dot { background: #e94560; box-shadow: 0 0 7px #e94560aa; }
+
+    .nav-text { display: flex; flex-direction: column; }
+    .nav-step { font-size: 0.7rem; letter-spacing: 0.08em; display: block; color: #3a4a5a; }
+    .nav-item.done    .nav-step { color: #4a7860; }
+    .nav-item.current .nav-step { color: #e94560; }
+    .nav-title { font-size: 0.83rem; display: block; line-height: 1.45; margin-top: 2px; }
+    .nav-item.done    .nav-title { color: #90a8a0; }
+    .nav-item.current .nav-title { color: #e0e8f8; }
+
+    main { padding: 48px 40px 80px; max-width: 760px; margin: 0 auto; }
+
+    .menu-toggle {
+      display: none; align-items: center; gap: 8px;
+      background: #16213e; border: 1px solid #2a2a4a; color: #7ec8e3;
+      padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; margin-bottom: 24px;
+    }
+
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 99; }
+    .overlay.open { display: block; }
+
+    @media (max-width: 860px) {
+      .header-inner { padding: 0 20px; }
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: fixed; left: -260px; top: 0; height: 100%; width: 240px; z-index: 100; transition: left 0.25s ease; }
+      .sidebar.open { left: 0; box-shadow: 4px 0 24px rgba(0,0,0,0.6); }
+      main { padding: 32px 20px 60px; max-width: 100%; }
+      .menu-toggle { display: flex; }
+    }
+
+    h2 { font-size: 1.3rem; color: #7ec8e3; margin: 52px 0 16px; padding-bottom: 8px; border-bottom: 1px solid #2a2a4a; }
+    h2:first-of-type { margin-top: 0; }
+    p { margin-bottom: 16px; color: #c8d0e0; }
+
+    .step-block { border: 1px solid #2a2a4a; border-radius: 8px; margin: 24px 0; overflow: hidden; }
+    .step-block .step-head { background: #1a2a4a; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+    .step-block .step-num { background: #e94560; color: #fff; font-size: 0.75rem; font-weight: bold; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .step-block .step-title { color: #fff; font-size: 0.95rem; font-weight: bold; }
+    .step-block .step-body { padding: 20px 24px; }
+    .step-block .step-body p { margin-bottom: 12px; }
+    .step-block .step-body p:last-child { margin-bottom: 0; }
+
+    .code-wrap { margin: 16px 0; }
+    .code-label { background: #2a2a4a; color: #8090a8; font-size: 0.75rem; padding: 5px 14px; border-radius: 4px 4px 0 0; font-family: "Consolas","Courier New",monospace; display: inline-block; }
+    pre { background: #0a0a14; border: 1px solid #2a2a4a; border-radius: 0 4px 4px 4px; padding: 20px; overflow-x: auto; margin: 0; }
+    code { font-family: "Consolas","Courier New",monospace; font-size: 0.85rem; line-height: 1.8; }
+
+    p code, li code { background: #1a2a3a; color: #7ec8e3; padding: 2px 6px; border-radius: 3px; font-size: 0.85em; }
+
+    .point-box { background: #16213e; border-left: 4px solid #e94560; padding: 18px 22px; border-radius: 4px; margin: 20px 0; }
+    .point-box p { margin-bottom: 0; }
+
+    .note-box { background: #131c2e; border: 1px solid #2a2a4a; border-radius: 6px; padding: 16px 20px; margin: 16px 0; }
+    .note-box .note-label { font-size: 0.75rem; color: #6070a0; font-weight: bold; letter-spacing: 0.1em; margin-bottom: 6px; }
+    .note-box p { margin-bottom: 0; font-size: 0.9rem; color: #8090a8; }
+
+    .check-list { list-style: none; margin: 16px 0; }
+    .check-list li { padding: 8px 0 8px 32px; position: relative; color: #c8d0e0; border-bottom: 1px solid #1a2030; }
+    .check-list li:last-child { border-bottom: none; }
+    .check-list li::before { content: "✓"; position: absolute; left: 0; color: #a0e8a0; font-weight: bold; }
+
+    .bp-flow { background: #0d1a2e; border: 1px solid #2a3a5a; border-radius: 8px; padding: 20px 24px; margin: 16px 0; font-family: "Consolas","Courier New",monospace; font-size: 0.82rem; overflow-x: auto; }
+    .bp-node { display: inline-block; background: #1a2a4a; border: 1px solid #3a4a6a; border-radius: 4px; padding: 4px 12px; color: #a0c8e8; white-space: nowrap; }
+    .bp-node.event { background: #2a1a2a; border-color: #6a3a6a; color: #c8a0e8; }
+    .bp-node.green { background: #1a2a1a; border-color: #3a6a3a; color: #90e890; }
+    .bp-node.red   { background: #2a1a1a; border-color: #7a2a3a; color: #e89090; }
+    .bp-arrow { color: #4a6a8a; margin: 0 6px; font-size: 1rem; }
+    .bp-comment { color: #4a6060; font-size: 0.78rem; margin-top: 8px; font-family: "Hiragino Kaku Gothic ProN","Meiryo",sans-serif; }
+    .bp-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0; margin-bottom: 12px; }
+    .bp-row:last-child { margin-bottom: 0; }
+
+    /* タグツリー図 */
+    .tag-tree {
+      background: #0d1a2e;
+      border: 1px solid #2a3a5a;
+      border-radius: 8px;
+      padding: 16px 24px;
+      margin: 16px 0;
+      font-family: "Consolas","Courier New",monospace;
+      font-size: 0.85rem;
+      line-height: 2;
+    }
+
+    .tag-tree .tag-root { color: #7ec8e3; }
+    .tag-tree .tag-child { color: #a0c8e8; padding-left: 20px; }
+    .tag-tree .tag-leaf  { color: #c8d0e0; padding-left: 40px; }
+    .tag-tree .tag-comment { color: #4a6060; }
+
+    .concept-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.88rem; }
+    .concept-table th { background: #1a2a4a; color: #7ec8e3; padding: 10px 16px; text-align: left; border: 1px solid #2a2a4a; }
+    .concept-table td { padding: 10px 16px; border: 1px solid #2a2a4a; color: #c8d0e0; vertical-align: top; }
+    .concept-table tr:nth-child(even) td { background: #111828; }
+
+    .page-nav { display: flex; justify-content: space-between; margin-top: 64px; padding-top: 24px; border-top: 1px solid #2a2a4a; }
+    .page-nav a { color: #7ec8e3; text-decoration: none; font-size: 0.9rem; padding: 10px 20px; border: 1px solid #2a2a4a; border-radius: 4px; transition: border-color 0.2s; }
+    .page-nav a:hover { border-color: #7ec8e3; }
+    .page-nav .next { margin-left: auto; }
+
+    footer { text-align: center; padding: 28px; color: #4a5068; font-size: 0.82rem; border-top: 1px solid #2a2a4a; }
+  </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay"></div>
+
+<div class="layout">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-heading"><a href="./">GameplayAbilities 入門</a></div>
+
+    <a class="nav-item done" href="step01.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text"><span class="nav-step">STEP 01</span><span class="nav-title">GAS とは何か</span></span>
+    </a>
+    <a class="nav-item done" href="step02.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text"><span class="nav-step">STEP 02</span><span class="nav-title">最小構成のセットアップ</span></span>
+    </a>
+    <a class="nav-item done" href="step03.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text"><span class="nav-step">STEP 03</span><span class="nav-title">最初の Ability を作る</span></span>
+    </a>
+    <a class="nav-item done" href="step04.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text"><span class="nav-step">STEP 04</span><span class="nav-title">AttributeSet の基本</span></span>
+    </a>
+    <a class="nav-item done" href="step05.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text"><span class="nav-step">STEP 05</span><span class="nav-title">GameplayEffect でダメージを与える</span></span>
+    </a>
+
+    <div class="nav-item current">
+      <span class="nav-dot"></span>
+      <span class="nav-text"><span class="nav-step">STEP 06</span><span class="nav-title">GameplayTag を使う</span></span>
+    </div>
+  </aside>
+
+  <div class="content-col">
+
+  <header>
+    <div class="header-inner">
+      <div class="breadcrumb">
+        <a href="../">UchidenoIndustry</a> &rsaquo;
+        <a href="./">GameplayAbilities 入門</a> &rsaquo;
+        STEP 06
+      </div>
+      <div class="step-label">STEP 06</div>
+      <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px;">
+        <h1>GameplayTag を使う</h1>
+        <span style="background:#1a3a1a;border:1px solid #2a6a2a;color:#a0e8a0;font-size:0.75rem;padding:2px 8px;border-radius:4px;font-family:'Consolas','Courier New',monospace;white-space:nowrap;">UE 5.5 対応</span>
+      </div>
+      <p>タグで状態を管理し「スタン中はアビリティを発動できない」を実装する。</p>
+    </div>
+  </header>
+
+  <main>
+
+    <button class="menu-toggle" id="menuToggle">&#9776; 目次</button>
+
+    <h2>このステップのゴール</h2>
+
+    <p>
+      GAS を使う上で GameplayTag は至る所に登場します。
+      アビリティの制御、状態管理、エフェクトの条件指定など、
+      GAS の柔軟さを支える根幹の仕組みです。
+    </p>
+
+    <ul class="check-list">
+      <li>GameplayTag の仕組みを理解する</li>
+      <li>プロジェクト設定でタグを登録する</li>
+      <li>アビリティに Ability Tags と Activation Blocked Tags を設定する</li>
+      <li>「スタン中はアビリティが発動できない」を Blueprint で実装・確認する</li>
+    </ul>
+
+    <h2>GameplayTag とは</h2>
+
+    <p>
+      GameplayTag は <strong style="color:#fff">ドット区切りの階層ラベル</strong>です。
+      「このキャラクターは今こういう状態だ」「このアビリティはこの種類だ」という情報を
+      シンプルな文字列で表現します。
+    </p>
+
+    <div class="tag-tree">
+      <div class="tag-root">Ability</div>
+      <div class="tag-child">├ Ability.Attack　　　<span class="tag-comment">← 攻撃アビリティ</span></div>
+      <div class="tag-child">└ Ability.Heal　　　　<span class="tag-comment">← 回復アビリティ</span></div>
+      <div class="tag-root" style="margin-top:8px;">Status</div>
+      <div class="tag-child">├ Status.Stunned　　　<span class="tag-comment">← スタン状態</span></div>
+      <div class="tag-child">└ Status.Invincible　　<span class="tag-comment">← 無敵状態</span></div>
+      <div class="tag-root" style="margin-top:8px;">Effect</div>
+      <div class="tag-child">└ Effect.Damage　　　<span class="tag-comment">← ダメージエフェクト</span></div>
+    </div>
+
+    <p>
+      タグの強みは <strong style="color:#fff">階層的なマッチング</strong>です。
+      <code>Ability</code> で検索すると <code>Ability.Attack</code> も <code>Ability.Heal</code> も
+      まとめてヒットします。これにより「攻撃系のアビリティをすべてキャンセルする」
+      といった処理をタグ1つで表現できます。
+    </p>
+
+    <h2>アビリティとタグの関係</h2>
+
+    <p>
+      GameplayAbility の「クラスのデフォルト」には、タグに関する重要な設定が並んでいます。
+    </p>
+
+    <table class="concept-table">
+      <tr>
+        <th>設定項目</th>
+        <th>役割</th>
+      </tr>
+      <tr>
+        <td><strong style="color:#ffcb6b;">Ability Tags</strong></td>
+        <td>このアビリティ自身に付くタグ。実行中は ASC のタグリストに追加される。他のシステムがこのアビリティを識別するのにも使う。</td>
+      </tr>
+      <tr>
+        <td><strong style="color:#ffcb6b;">Activation Blocked Tags</strong></td>
+        <td>ASC にこのタグが1つでもある間は、このアビリティを発動できない。スタンや詠唱中の制御に使う。</td>
+      </tr>
+      <tr>
+        <td><strong style="color:#ffcb6b;">Activation Required Tags</strong></td>
+        <td>ASC にこのタグが揃っている場合のみ、発動できる。特定状態でしか使えないアビリティに使う。</td>
+      </tr>
+      <tr>
+        <td><strong style="color:#ffcb6b;">Cancel Abilities with Tag</strong></td>
+        <td>このアビリティが発動したとき、指定タグを持つ他のアビリティを強制キャンセルする。</td>
+      </tr>
+    </table>
+
+    <p>
+      今回は <code>Ability Tags</code> と <code>Activation Blocked Tags</code> の2つを使い、
+      「スタン中はアビリティが発動できない」を実現します。
+    </p>
+
+    <h2>タグを登録する</h2>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">1</div>
+        <div class="step-title">プロジェクト設定でタグを追加する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          UE エディタのメニューから
+          <strong style="color:#fff">「編集 → プロジェクト設定」</strong> を開きます。
+          左の一覧から <strong style="color:#fff">「GameplayTags」</strong> を選んでください。
+        </p>
+        <p>
+          <strong style="color:#fff">「Manage Gameplay Tags」ボタン</strong>を押すと
+          タグ管理ウィンドウが開きます。
+          <strong style="color:#fff">「+」ボタン（Add New Gameplay Tag）</strong> で
+          以下の2つのタグを追加してください。
+        </p>
+        <div class="code-wrap">
+          <div class="code-label">登録するタグ</div>
+          <pre><code>Ability.Attack
+Status.Stunned</code></pre>
+        </div>
+        <div class="note-box">
+          <div class="note-label">タグの保存先について</div>
+          <p>
+            タグは <code>Config/DefaultGameplayTags.ini</code> に保存されます。
+            ウィンドウを閉じると自動的に保存されます。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <h2>GA_MyFirstAbility にタグを設定する</h2>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">2</div>
+        <div class="step-title">Ability Tags と Activation Blocked Tags を設定する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          <code>GA_MyFirstAbility</code> を開き、
+          <strong style="color:#fff">「クラスのデフォルト」</strong> を選択します。
+          詳細パネルの <strong style="color:#fff">「Tags」セクション</strong>を探してください。
+        </p>
+        <div class="code-wrap">
+          <div class="code-label">GA_MyFirstAbility のタグ設定</div>
+          <pre><code>Ability Tags             : Ability.Attack
+Activation Blocked Tags  : Status.Stunned</code></pre>
+        </div>
+        <p>
+          各項目の <strong style="color:#fff">「+」</strong> を押してタグを追加します。
+          ドロップダウンで先ほど登録したタグが選べます。
+        </p>
+        <p>
+          ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。
+        </p>
+
+        <div class="note-box">
+          <div class="note-label">この設定でどう動くか</div>
+          <p>
+            <code>Ability Tags: Ability.Attack</code> を設定すると、
+            このアビリティが実行中の間、キャラクターの ASC に <code>Ability.Attack</code> タグが付きます。<br>
+            <code>Activation Blocked Tags: Status.Stunned</code> を設定すると、
+            ASC に <code>Status.Stunned</code> タグが存在する間は Q を押しても発動しなくなります。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <h2>スタン付与・解除を Blueprint で実装する</h2>
+
+    <p>
+      「スタン状態」を手動で ON/OFF して動作を確認するために、
+      キャラクターのブループリントにテスト用の入力を追加します。
+    </p>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">3</div>
+        <div class="step-title">E キーでスタン付与・解除を切り替える</div>
+      </div>
+      <div class="step-body">
+        <p>
+          キャラクターのブループリント（<code>BP_ThirdPersonCharacter</code> など）の
+          イベントグラフに以下の2つのイベントを追加します。
+        </p>
+
+        <div class="bp-flow">
+          <div class="bp-comment" style="color:#7ec8e3;margin-bottom:10px;">E キーを押したとき → スタン付与</div>
+          <div class="bp-row">
+            <span class="bp-node event">E（Pressed）</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Get Ability System Component</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node red">Add Loose Gameplay Tag<br><span style="color:#6a8a6a;font-size:0.75rem;">Tag: Status.Stunned</span></span>
+          </div>
+          <div class="bp-row" style="margin-top:10px;">
+            <span class="bp-node event">E（Pressed）</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Print String<br><span style="color:#6a8a6a;font-size:0.75rem;">"Stunned!"</span></span>
+          </div>
+        </div>
+
+        <div class="bp-flow" style="margin-top:12px;">
+          <div class="bp-comment" style="color:#7ec8e3;margin-bottom:10px;">E キーを離したとき → スタン解除</div>
+          <div class="bp-row">
+            <span class="bp-node event">E（Released）</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Get Ability System Component</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node green">Remove Loose Gameplay Tag<br><span style="color:#6a8a6a;font-size:0.75rem;">Tag: Status.Stunned</span></span>
+          </div>
+          <div class="bp-row" style="margin-top:10px;">
+            <span class="bp-node event">E（Released）</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Print String<br><span style="color:#6a8a6a;font-size:0.75rem;">"Stun Removed"</span></span>
+          </div>
+        </div>
+
+        <div class="note-box">
+          <div class="note-label">Loose Gameplay Tag とは</div>
+          <p>
+            GameplayEffect を使わずに ASC へ直接タグを付け外しする方法です。
+            今回のようなテスト用途や、GameplayEffect を使わない単純な状態フラグに向いています。
+            実際のゲームでは、スタンを GameplayEffect で表現してタグを自動付与する
+            パターンがより一般的です。
+          </p>
+        </div>
+
+        <p>
+          ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。
+        </p>
+      </div>
+    </div>
+
+    <h2>動作確認</h2>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">4</div>
+        <div class="step-title">スタン中のアビリティ制御を確認する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          プレイを開始して、以下の順で操作してください。
+        </p>
+        <ul class="check-list">
+          <li><strong style="color:#fff">Q キーを押す</strong> → Health が 20 減り、Print String が表示される（通常動作）</li>
+          <li><strong style="color:#fff">E キーを押したまま</strong> → 「Stunned!」と表示される</li>
+          <li><strong style="color:#fff">E を押したまま Q キーを押す</strong> → Health が変化せず、何も表示されない（スタン中で発動ブロック）</li>
+          <li><strong style="color:#fff">E キーを離す</strong> → 「Stun Removed」と表示される</li>
+          <li><strong style="color:#fff">Q キーを押す</strong> → 再び Health が減る（スタン解除後は通常通り）</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>Blueprint でタグを確認する</h2>
+
+    <p>
+      アビリティの外から「このキャラクターは今スタン中か？」を調べたいときは、
+      <code>Has Matching Gameplay Tag</code> ノードを使います。
+    </p>
+
+    <div class="bp-flow">
+      <div class="bp-row">
+        <span class="bp-node">Get Ability System Component</span>
+        <span class="bp-arrow">→</span>
+        <span class="bp-node">Has Matching Gameplay Tag<br><span style="color:#6a8a6a;font-size:0.75rem;">Tag: Status.Stunned</span></span>
+      </div>
+      <div class="bp-comment">Return Value（bool）が true ならスタン中</div>
+    </div>
+
+    <p>
+      これを使えば「スタン中はアニメーションを変える」「スタン中は移動速度を下げる」
+      といった処理を Blueprint の Branch ノードで簡単に分岐できます。
+    </p>
+
+    <h2>うまくいかないときの確認ポイント</h2>
+
+    <ul class="check-list">
+      <li>タグが Project Settings に登録されているか（スペルミスに注意）</li>
+      <li><code>GA_MyFirstAbility</code> の <code>Ability Tags</code> に <code>Ability.Attack</code> が設定されているか</li>
+      <li><code>Activation Blocked Tags</code> に <code>Status.Stunned</code> が設定されているか</li>
+      <li><code>Add Loose Gameplay Tag</code> の Tag が <code>Status.Stunned</code>（大文字小文字を含め正確に）</li>
+      <li>E を押したまま Q を押しているのに発動してしまう → ブループリントを再コンパイルして試す</li>
+    </ul>
+
+    <h2>このステップのまとめ</h2>
+
+    <div class="point-box">
+      <p>
+        GameplayTag を使うことで、「どんな状態のときに何ができるか」を
+        <strong style="color:#fff">コードを書かずにタグの設定だけで制御</strong>できます。<br>
+        スタン・沈黙・詠唱中・無敵など、複雑な状態管理がシンプルに表現できるのが GAS の強みです。
+      </p>
+    </div>
+
+    <p>
+      STEP 01 〜 06 を通じて、GAS の5大要素である
+      <strong style="color:#fff">AbilitySystemComponent・GameplayAbility・AttributeSet・GameplayEffect・GameplayTag</strong>
+      すべてを実際に動かすことができました。
+      ここで学んだパターンを組み合わせれば、本格的なアビリティシステムを構築できます。
+    </p>
+
+    <div class="page-nav">
+      <a href="step05.html">&#8592; STEP 05 GameplayEffect でダメージを与える</a>
+      <a class="next" href="./">チュートリアル一覧へ &#8594;</a>
+    </div>
+
+  </main>
+
+  </div><!-- /.content-col -->
+
+</div><!-- /.layout -->
+
+<footer>
+  <p>GameplayAbilities 入門 &mdash; UchidenoIndustry</p>
+</footer>
+
+<script>
+  const toggle  = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  toggle.addEventListener('click', function () { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+  overlay.addEventListener('click', function () { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+</script>
+
+</body>
+</html>
