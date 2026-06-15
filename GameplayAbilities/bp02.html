@@ -216,8 +216,7 @@
       <li>サードパーソンテンプレートで新規プロジェクトを作成する</li>
       <li>GAS プラグインを有効化する</li>
       <li>キャラクターの Blueprint に AbilitySystemComponent を追加する</li>
-      <li>AbilitySystemInterface を Blueprint で実装する</li>
-      <li>Get Ability System Component ノードが機能することを確認する</li>
+      <li>ASC が正しく動作することを確認する</li>
     </ul>
 
     <div class="point-box">
@@ -329,116 +328,42 @@
       </div>
     </div>
 
-    <h2>AbilitySystemInterface を実装する</h2>
-
-    <p>
-      コンポーネントを追加しただけでは、GAS のノード（<code>Get Ability System Component</code>）が
-      「このキャラクターの ASC はどれか」を認識できません。
-      <strong style="color:#fff">AbilitySystemInterface</strong> を実装することで、
-      GAS が正しく ASC を見つけられるようになります。
-    </p>
-
-    <div class="step-block">
-      <div class="step-head">
-        <div class="step-num">5</div>
-        <div class="step-title">クラスの設定でインターフェースを追加する</div>
-      </div>
-      <div class="step-body">
-        <p>
-          Blueprint エディタ上部のツールバーにある
-          <strong style="color:#fff">「Class Settings（クラスの設定）」</strong>ボタンをクリックします。
-          詳細パネルの「Interfaces（インターフェース）」セクションで
-          <strong style="color:#fff">「+ Add（追加）」</strong>をクリックし、
-          検索欄に <strong style="color:#fff">「AbilitySystem」</strong> と入力してください。
-        </p>
-        <p>
-          <strong style="color:#fff">「AbilitySystemInterface」</strong>を選択して追加します。
-          「My Blueprint」パネルの「インターフェース」セクションに
-          <code>GetAbilitySystemComponent</code> という関数が表示されます。
-        </p>
-      </div>
-    </div>
-
-    <div class="step-block">
-      <div class="step-head">
-        <div class="step-num">6</div>
-        <div class="step-title">GetAbilitySystemComponent を実装する</div>
-      </div>
-      <div class="step-body">
-        <p>
-          「My Blueprint」パネルの「インターフェース」セクションに表示された
-          <strong style="color:#fff"><code>GetAbilitySystemComponent</code></strong>
-          をダブルクリックして関数グラフを開きます。
-        </p>
-        <p>
-          「My Blueprint」パネルの <strong style="color:#fff">「Components（コンポーネント）」</strong>セクションから
-          <strong style="color:#fff"><code>AbilitySystem</code></strong>
-          を関数グラフにドラッグします。
-          作成された Getter ノードの出力ピンを <strong style="color:#fff">Return ノードの戻り値</strong>に接続してください。
-        </p>
-
-        <div class="bp-flow">
-          <div class="bp-comment" style="color:#7ec8e3;margin-bottom:10px;">GetAbilitySystemComponent 関数の中身</div>
-          <div class="bp-row">
-            <span class="bp-node green">Get AbilitySystemComponent</span>
-            <span class="bp-arrow">→</span>
-            <span class="bp-node">Return Node<br><span style="color:#6a8a6a;font-size:0.75rem;">Return Value（接続する）</span></span>
-          </div>
-        </div>
-
-        <p>
-          ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。
-        </p>
-
-        <div class="note-box">
-          <div class="note-label">なぜこの実装が必要か</div>
-          <p>
-            GAS の多くのノードは内部で <code>IAbilitySystemInterface::GetAbilitySystemComponent()</code>
-            を呼び出して ASC を探します。この関数を実装しておくことで、
-            キャラクターのイベントグラフや他のシステムから
-            <code>Get Ability System Component</code> ノードが正しく機能するようになります。
-          </p>
-        </div>
-      </div>
-    </div>
-
     <h2>動作確認</h2>
 
     <div class="step-block">
       <div class="step-head">
-        <div class="step-num">7</div>
-        <div class="step-title">ASC が取得できることを確認する</div>
+        <div class="step-num">5</div>
+        <div class="step-title">ASC が機能することを確認する</div>
       </div>
       <div class="step-body">
         <p>
-          キャラクターのイベントグラフに戻り、
-          <code>Event BeginPlay</code> から以下のようにノードをつないでください。
+          Blueprint エディタ左側の <strong style="color:#fff">「Components（コンポーネント）」パネル</strong>から
+          <strong style="color:#fff"><code>AbilitySystem</code></strong>
+          をイベントグラフにドラッグします。
+          以下のようにノードをつないでください。
         </p>
 
         <div class="bp-flow">
+          <div class="bp-comment" style="color:#6a8090;margin-bottom:10px;">Components パネルから AbilitySystem をドラッグして Getter ノードを作成する</div>
           <div class="bp-row">
             <span class="bp-node event">Event BeginPlay</span>
             <span class="bp-arrow">→</span>
-            <span class="bp-node">Get Ability System Component<br><span style="color:#6a8a6a;font-size:0.75rem;">Target: Self</span></span>
-            <span class="bp-arrow">→</span>
-            <span class="bp-node">Is Valid</span>
-            <span class="bp-arrow">→</span>
-            <span class="bp-node">Branch</span>
+            <span class="bp-node">Is Valid?<br><span style="color:#6a8a6a;font-size:0.75rem;">Object ← AbilitySystem</span></span>
           </div>
           <div class="bp-row" style="margin-top:10px;">
-            <span style="color:#4a6a8a;margin-right:8px;">└ True</span>
+            <span style="color:#4a6a8a;margin-right:8px;">└ Is Valid</span>
             <span class="bp-arrow">→</span>
             <span class="bp-node green">Print String<br><span style="color:#6a8a6a;font-size:0.75rem;">"GAS 準備完了！"</span></span>
           </div>
           <div class="bp-row">
-            <span style="color:#8a4a4a;margin-right:8px;">└ False</span>
+            <span style="color:#8a4a4a;margin-right:8px;">└ Is Not Valid</span>
             <span class="bp-arrow">→</span>
             <span class="bp-node red">Print String<br><span style="color:#6a8a6a;font-size:0.75rem;">"エラー: ASC が見つかりません"</span></span>
           </div>
         </div>
 
         <p>
-          ブループリントをコンパイルして保存し、プレイを開始してください。
+          Blueprint をコンパイルして保存し、プレイを開始してください。
           画面左上に <strong style="color:#fff">「GAS 準備完了！」</strong>と表示されれば成功です。
         </p>
 
@@ -457,9 +382,8 @@
     <ul class="check-list">
       <li>「Gameplay Abilities」プラグインが有効化され、エディタが再起動されているか</li>
       <li>Components（コンポーネント）パネルに <code>AbilitySystem</code> が表示されているか</li>
-      <li>Class Settings（クラスの設定）→ Interfaces（インターフェース）に <code>AbilitySystemInterface</code> が追加されているか</li>
-      <li><code>GetAbilitySystemComponent</code> 関数内で <code>AbilitySystem</code> を Return しているか</li>
-      <li>ブループリントをコンパイルして保存してからプレイしているか</li>
+      <li>Is Valid? ノードの Object ピンに <code>AbilitySystem</code> の Getter が接続されているか</li>
+      <li>Blueprint をコンパイルして保存してからプレイしているか</li>
     </ul>
 
     <h2>このステップのまとめ</h2>
@@ -467,8 +391,8 @@
     <div class="point-box">
       <p>
         C++ を書かずに GAS を使える状態になりました。<br>
-        <strong style="color:#fff">「コンポーネントを追加 → インターフェースを実装」</strong>
-        の2ステップが Blueprint での GAS セットアップのポイントです。
+        <strong style="color:#fff">AbilitySystemComponent をキャラクターに追加する</strong>
+        だけで、Blueprint から ASC を直接参照して GAS 機能を使えます。
       </p>
     </div>
 
