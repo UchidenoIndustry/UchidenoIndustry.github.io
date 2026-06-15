@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
@@ -218,10 +218,35 @@
       <li>キーを押したらアビリティが発動する</li>
     </ul>
 
+    <h2>Ability ブループリントを作る</h2>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">1</div>
+        <div class="step-title">ブループリントクラスを作成する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          コンテンツブラウザの空白部分を右クリックして
+          <strong style="color:#fff">「ブループリントクラス」</strong> を選択します。
+        </p>
+        <p>
+          親クラスの選択画面が開くので、検索欄に <code>GameplayAbility</code> と入力して選択し、
+          ブループリントの名前は、今回は <strong style="color:#fff"><code>GA_MyFirstAbility</code></strong> にしました。
+        </p>
+        <div class="note-box">
+          <div class="note-label">命名のルール（慣例）</div>
+          <p>GAS 関連のアセットは接頭辞で種類がわかるように命名するのが一般的です。GameplayAbility は <code>GA_</code> のように付けます。</p>
+        </div>
+      </div>
+    </div>
+
     <h2>GameplayAbility の基本構造</h2>
 
     <p>
-      GameplayAbility ブループリントには、必ず意識しておくべき3つの処理があります。
+      <code>GA_MyFirstAbility</code> をダブルクリックして開くと、イベントグラフに
+      <strong style="color:#fff"><code>Event ActivateAbility</code></strong> ノードがあらかじめ配置されています。
+      ノードをつなぎ始める前に、GameplayAbility で必ず意識しておくべき3つの処理を確認しておきましょう。
     </p>
 
     <div class="step-block">
@@ -271,29 +296,6 @@
       <p>ActivateAbility → やりたい処理 → CommitAbility → EndAbility、という流れが基本です。</p>
     </div>
 
-    <h2>Ability ブループリントを作る</h2>
-
-    <div class="step-block">
-      <div class="step-head">
-        <div class="step-num">1</div>
-        <div class="step-title">ブループリントクラスを作成する</div>
-      </div>
-      <div class="step-body">
-        <p>
-          コンテンツブラウザの空白部分を右クリックして
-          <strong style="color:#fff">「ブループリントクラス」</strong> を選択します。
-        </p>
-        <p>
-          親クラスの選択画面が開くので、検索欄に <code>GameplayAbility</code> と入力して選択し、
-          ブループリントの名前は、今回は <strong style="color:#fff"><code>GA_MyFirstAbility</code></strong> にしました。
-        </p>
-        <div class="note-box">
-          <div class="note-label">命名のルール（慣例）</div>
-          <p>GAS 関連のアセットは接頭辞で種類がわかるように命名するのが一般的です。GameplayAbility は <code>GA_</code> のように付けます。</p>
-        </div>
-      </div>
-    </div>
-
     <div class="step-block">
       <div class="step-head">
         <div class="step-num">2</div>
@@ -301,9 +303,7 @@
       </div>
       <div class="step-body">
         <p>
-          <code>GA_MyFirstAbility</code> をダブルクリックして開きます。
-          イベントグラフには <strong style="color:#fff"><code>Event ActivateAbility</code></strong>
-          ノードがあらかじめ配置されています。このノードから以下のようにつないでください。
+          <code>Event ActivateAbility</code> ノードから以下のようにつないでください。
           右クリックでノードを検索・追加できます。
         </p>
 
@@ -352,7 +352,7 @@
     <p>
       GAS では「キャラクターが持っているアビリティの一覧」を
       AbilitySystemComponent が管理しています。
-      アビリティを発動するには、まず <strong style="color:#fff">GiveAbility</strong> で
+      アビリティを発動するには、まず <strong style="color:#fff">Give Ability（ギブアビリティ）</strong> で
       キャラクターにアビリティを登録する必要があります。
     </p>
 
@@ -373,7 +373,7 @@
     <div class="step-block">
       <div class="step-head">
         <div class="step-num">4</div>
-        <div class="step-title">BeginPlay で GiveAbility を呼ぶ</div>
+        <div class="step-title">BeginPlay で Give Ability を呼ぶ</div>
       </div>
       <div class="step-body">
         <p>
@@ -385,16 +385,16 @@
           <div class="bp-row">
             <span class="bp-node event">Event BeginPlay</span>
             <span class="bp-arrow">→</span>
-            <span class="bp-node">Get Ability System Component</span>
-            <span class="bp-arrow">→</span>
             <span class="bp-node green">Give Ability<br><span style="color:#6a8a6a;font-size:0.75rem;">Ability Class: GA_MyFirstAbility</span></span>
           </div>
         </div>
 
         <p>
-          <code>Get Ability System Component</code> は、BP STEP 02 で実装した
-          AbilitySystemInterface 経由で ASC を取得するノードです。
-          <code>Target</code> には <code>Self</code>（このキャラクター自身）を接続してください。
+          <code>Give Ability</code> ノードの <strong style="color:#fff">Target</strong> ピンには、
+          BP STEP 02 で追加した <code>AbilitySystem</code> コンポーネントをつなぎます。
+          My Blueprint（マイブループリント）パネルの Components（コンポーネント）欄に
+          <code>AbilitySystem</code> があるので、イベントグラフにドラッグして参照ノードを作成し、
+          <code>Give Ability</code> の Target につないでください。
         </p>
         <p>
           <code>Give Ability</code> の <code>Ability Class</code> に
@@ -419,19 +419,21 @@
         <p>
           同じキャラクターのブループリントで、キーボードイベントを追加します。
           グラフの空白部分を右クリックして <code>Q</code> キーのイベントを追加してください
-          （<strong style="color:#fff">Keyboard Events → Q</strong>）。
+          （<strong style="color:#fff">Keyboard Events（キーボードイベント） → Q</strong>）。
         </p>
 
         <div class="bp-flow">
           <div class="bp-row">
             <span class="bp-node event">Q（Pressed）</span>
             <span class="bp-arrow">→</span>
-            <span class="bp-node">Get Ability System Component</span>
-            <span class="bp-arrow">→</span>
             <span class="bp-node green">Try Activate Ability By Class<br><span style="color:#6a8a6a;font-size:0.75rem;">Ability Class: GA_MyFirstAbility</span></span>
           </div>
         </div>
 
+        <p>
+          <code>Try Activate Ability By Class</code> の <strong style="color:#fff">Target</strong> にも、
+          Step 4 と同様に <code>AbilitySystem</code> コンポーネントの参照をつないでください。
+        </p>
         <p>
           <code>Try Activate Ability By Class</code> は、指定したクラスのアビリティを
           発動しようとするノードです。
@@ -448,12 +450,12 @@
 
     <div class="step-block">
       <div class="step-head">
-        <div class="step-num">7</div>
+        <div class="step-num">6</div>
         <div class="step-title">プレイして確認する</div>
       </div>
       <div class="step-body">
         <p>
-          エディタ上部の <strong style="color:#fff">「プレイ」ボタン</strong> を押してゲームを開始します。
+          エディタ上部の <strong style="color:#fff">Play（プレイ）ボタン</strong> を押してゲームを開始します。
           <strong style="color:#fff">Q キーを押す</strong>と、画面左上に
           <code style="color:#c3e88d;">"Ability Activated!"</code>
           というメッセージが表示されれば成功です。
@@ -464,21 +466,17 @@
       </div>
     </div>
 
-    <h2>うまくいかないときの確認ポイント</h2>
-
-    <ul class="check-list">
-      <li>キャラクターの Blueprint に <code>AbilitySystemComponent</code> が追加されているか（BP STEP 02 の手順）</li>
-      <li>BeginPlay の <code>Give Ability</code> で <code>GA_MyFirstAbility</code> が正しく設定されているか</li>
-      <li><code>GA_MyFirstAbility</code> 内で <code>End Ability</code> を呼んでいるか（呼ばないと2回目以降発動しない）</li>
-      <li><code>Get Ability System Component</code> の Target に Self が接続されているか</li>
-    </ul>
+    <div class="note-box">
+      <div class="note-label">チュートリアル通りにならない場合</div>
+      <p>このチュートリアルは UE 5.5 で動作確認しています。別バージョンをお使いの場合は UE 5.5 で試してみてください。</p>
+    </div>
 
     <h2>このステップのまとめ</h2>
 
     <div class="point-box">
       <p>
         GameplayAbility の基本的な流れが完成しました。<br>
-        <strong style="color:#fff">「GiveAbility で登録 → TryActivateAbilityByClass で発動」</strong>
+        <strong style="color:#fff">「Give Ability で登録 → Try Activate Ability By Class で発動」</strong>
         という2ステップが GAS の基本パターンです。
       </p>
     </div>
