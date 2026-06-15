@@ -210,6 +210,7 @@
     <h2>このステップのゴール</h2>
 
     <ul class="check-list">
+      <li>サードパーソンテンプレートで新規プロジェクトを作成する</li>
       <li>GAS プラグインを有効化する</li>
       <li>キャラクターの Blueprint に AbilitySystemComponent を追加する</li>
       <li>AbilitySystemInterface を Blueprint で実装する</li>
@@ -223,11 +224,40 @@
       </p>
     </div>
 
-    <h2>GAS プラグインを有効化する</h2>
+    <h2>プロジェクトを準備する</h2>
 
     <div class="step-block">
       <div class="step-head">
         <div class="step-num">1</div>
+        <div class="step-title">サードパーソンテンプレートで新規プロジェクトを作成する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          UE エディタを起動し、<strong style="color:#fff">「新規プロジェクト」</strong>を選択します。
+          カテゴリは<strong style="color:#fff">「ゲーム」</strong>、テンプレートは
+          <strong style="color:#fff">「サードパーソン」</strong>を選択してください。
+        </p>
+        <p>
+          プロジェクト設定では<strong style="color:#fff">「Blueprint」</strong>を選択します
+          （C++ は不要です）。プロジェクト名と保存場所を設定し、
+          <strong style="color:#fff">「プロジェクトを作成」</strong>を押します。
+        </p>
+        <div class="note-box">
+          <div class="note-label">サードパーソンテンプレートを使う理由</div>
+          <p>
+            移動可能なキャラクターがあらかじめ用意されているため、
+            アビリティの動作確認が手軽にできます。
+            別のテンプレートでも手順は同じです。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <h2>GAS プラグインを有効化する</h2>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">2</div>
         <div class="step-title">Gameplay Abilities プラグインを有効にする</div>
       </div>
       <div class="step-body">
@@ -256,7 +286,7 @@
 
     <div class="step-block">
       <div class="step-head">
-        <div class="step-num">2</div>
+        <div class="step-num">3</div>
         <div class="step-title">キャラクターの Blueprint を開く</div>
       </div>
       <div class="step-body">
@@ -270,7 +300,7 @@
 
     <div class="step-block">
       <div class="step-head">
-        <div class="step-num">3</div>
+        <div class="step-num">4</div>
         <div class="step-title">AbilitySystemComponent コンポーネントを追加する</div>
       </div>
       <div class="step-body">
@@ -302,7 +332,7 @@
 
     <div class="step-block">
       <div class="step-head">
-        <div class="step-num">4</div>
+        <div class="step-num">5</div>
         <div class="step-title">クラスの設定でインターフェースを追加する</div>
       </div>
       <div class="step-body">
@@ -323,7 +353,7 @@
 
     <div class="step-block">
       <div class="step-head">
-        <div class="step-num">5</div>
+        <div class="step-num">6</div>
         <div class="step-title">GetAbilitySystemComponent を実装する</div>
       </div>
       <div class="step-body">
@@ -368,7 +398,7 @@
 
     <div class="step-block">
       <div class="step-head">
-        <div class="step-num">6</div>
+        <div class="step-num">7</div>
         <div class="step-title">ASC が取得できることを確認する</div>
       </div>
       <div class="step-body">
