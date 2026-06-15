@@ -259,28 +259,11 @@
             <span class="bp-node">Print String<br><span style="color:#6a8a6a;font-size:0.75rem;">In String: "Ability Activated!"</span></span>
             <span class="bp-arrow">→</span>
             <span class="bp-node green">Commit Ability</span>
-          </div>
-          <div class="bp-comment">Commit Ability の Return Value（bool）を分岐させる ↓</div>
-          <div class="bp-row" style="margin-top:10px;">
-            <span style="color:#4a6a8a;margin-right:8px;">└ true</span>
             <span class="bp-arrow">→</span>
-            <span class="bp-node green">End Ability<br><span style="color:#6a8a6a;font-size:0.75rem;">Was Cancelled: false</span></span>
-          </div>
-          <div class="bp-row">
-            <span style="color:#8a4a4a;margin-right:8px;">└ false</span>
-            <span class="bp-arrow">→</span>
-            <span class="bp-node red">End Ability<br><span style="color:#6a8a6a;font-size:0.75rem;">Was Cancelled: true</span></span>
+            <span class="bp-node green">End Ability</span>
           </div>
         </div>
 
-        <p>
-          <code>Commit Ability</code> の戻り値（Return Value）を <strong style="color:#fff">Branch</strong> ノード（if 文）につなぎ、
-          <strong style="color:#a0e8a0">True のとき</strong>は通常終了、<strong style="color:#e89090">False のとき</strong>はキャンセル終了としてください。
-        </p>
-        <div class="note-box">
-          <div class="note-label">今の段階では Commit が false になることはない</div>
-          <p>コストもクールダウンも設定していないので、Commit Ability は必ず true を返します。ただし「失敗したらキャンセル」のパターンを最初から習慣にしておくと、後で困りません。</p>
-        </div>
         <p>
           ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。
         </p>
@@ -315,8 +298,6 @@
         <p>
           「MPを消費する」「クールダウンを開始する」といった処理を確定させます。
           コストやクールダウンを設定していない場合でも、呼ぶ必要があります。
-          <strong style="color:#fff">CommitAbility が false を返した場合</strong>（コスト不足など）は
-          アビリティをキャンセルしてください。
         </p>
       </div>
     </div>
