@@ -258,7 +258,7 @@
             <span class="bp-arrow">→</span>
             <span class="bp-node">Print String<br><span style="color:#6a8a6a;font-size:0.75rem;">In String: "Ability Activated!"</span></span>
             <span class="bp-arrow">→</span>
-            <span class="bp-node green">Commit Ability<br><span style="color:#6a8a6a;font-size:0.75rem;">Ability Handle: (自動接続)</span></span>
+            <span class="bp-node green">Commit Ability</span>
           </div>
           <div class="bp-comment">Commit Ability の Return Value（bool）を分岐させる ↓</div>
           <div class="bp-row" style="margin-top:10px;">
@@ -273,11 +273,6 @@
           </div>
         </div>
 
-        <p>
-          <code>Commit Ability</code> ノードには
-          <code>Ability Handle</code> と <code>Activation Info</code> という入力があります。
-          <code>Event ActivateAbility</code> の出力ピンから引っ張ると自動的に接続できます。
-        </p>
         <p>
           <code>Commit Ability</code> の戻り値（Return Value）を <strong style="color:#fff">Branch</strong> ノード（if 文）につなぎ、
           <strong style="color:#a0e8a0">True のとき</strong>は通常終了、<strong style="color:#e89090">False のとき</strong>はキャンセル終了としてください。
