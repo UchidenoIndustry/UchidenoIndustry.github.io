@@ -216,7 +216,6 @@
       <li>サードパーソンテンプレートで新規プロジェクトを作成する</li>
       <li>GAS プラグインを有効化する</li>
       <li>キャラクターの Blueprint に AbilitySystemComponent を追加する</li>
-      <li>ASC が正しく動作することを確認する</li>
     </ul>
 
     <div class="point-box">
@@ -328,62 +327,12 @@
       </div>
     </div>
 
-    <h2>動作確認</h2>
-
-    <div class="step-block">
-      <div class="step-head">
-        <div class="step-num">5</div>
-        <div class="step-title">ASC が機能することを確認する</div>
-      </div>
-      <div class="step-body">
-        <p>
-          Blueprint エディタ左側の <strong style="color:#fff">「Components（コンポーネント）」パネル</strong>から
-          <strong style="color:#fff"><code>AbilitySystem</code></strong>
-          をイベントグラフにドラッグします。
-          以下のようにノードをつないでください。
-        </p>
-
-        <div class="bp-flow">
-          <div class="bp-comment" style="color:#6a8090;margin-bottom:10px;">Components パネルから AbilitySystem をドラッグして Getter ノードを作成する</div>
-          <div class="bp-row">
-            <span class="bp-node event">Event BeginPlay</span>
-            <span class="bp-arrow">→</span>
-            <span class="bp-node">Is Valid?<br><span style="color:#6a8a6a;font-size:0.75rem;">Object ← AbilitySystem</span></span>
-          </div>
-          <div class="bp-row" style="margin-top:10px;">
-            <span style="color:#4a6a8a;margin-right:8px;">└ Is Valid</span>
-            <span class="bp-arrow">→</span>
-            <span class="bp-node green">Print String<br><span style="color:#6a8a6a;font-size:0.75rem;">"GAS 準備完了！"</span></span>
-          </div>
-          <div class="bp-row">
-            <span style="color:#8a4a4a;margin-right:8px;">└ Is Not Valid</span>
-            <span class="bp-arrow">→</span>
-            <span class="bp-node red">Print String<br><span style="color:#6a8a6a;font-size:0.75rem;">"エラー: ASC が見つかりません"</span></span>
-          </div>
-        </div>
-
-        <p>
-          Blueprint をコンパイルして保存し、プレイを開始してください。
-          画面左上に <strong style="color:#fff">「GAS 準備完了！」</strong>と表示されれば成功です。
-        </p>
-
-        <div class="note-box">
-          <div class="note-label">確認が終わったら</div>
-          <p>
-            この Print String ノードは動作確認用です。
-            次のステップに進む前に削除するか、そのまま残しておいても構いません。
-          </p>
-        </div>
-      </div>
-    </div>
-
     <h2>うまくいかないときの確認ポイント</h2>
 
     <ul class="check-list">
       <li>「Gameplay Abilities」プラグインが有効化され、エディタが再起動されているか</li>
       <li>Components（コンポーネント）パネルに <code>AbilitySystem</code> が表示されているか</li>
-      <li>Is Valid? ノードの Object ピンに <code>AbilitySystem</code> の Getter が接続されているか</li>
-      <li>Blueprint をコンパイルして保存してからプレイしているか</li>
+      <li>Blueprint をコンパイルして保存しているか</li>
     </ul>
 
     <h2>このステップのまとめ</h2>
