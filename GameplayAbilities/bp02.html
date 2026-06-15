@@ -297,7 +297,7 @@
       </div>
       <div class="step-body">
         <p>
-          コンテンツブラウザからキャラクターのブループリントを開きます。
+          <strong style="color:#fff">Content Browser（コンテンツブラウザ）</strong>からキャラクターの Blueprint を開きます。
           サードパーソンテンプレートを使用している場合は
           <code>Content/ThirdPerson/Blueprints/BP_ThirdPersonCharacter</code> です。
         </p>
@@ -311,18 +311,20 @@
       </div>
       <div class="step-body">
         <p>
-          ブループリントエディタ左側の <strong style="color:#fff">「コンポーネント」パネル</strong>で
-          <strong style="color:#fff">「+ 追加」ボタン</strong>をクリックします。
-          検索欄に <strong style="color:#fff">「Ability System Component」</strong> と入力して
-          候補を選択してください。
+          Blueprint エディタ左側の <strong style="color:#fff">「Components（コンポーネント）」パネル</strong>で
+          <strong style="color:#fff">「+ Add（追加）」ボタン</strong>をクリックします。
+          検索欄に <strong style="color:#fff">「Ability」</strong> と入力すると
+          候補が1件表示されるので選択してください。
+        </p>
+        <img class="ss" src="img/bp02-component-add.png" alt="「+ Add」ボタンをクリックし、「Ability」と検索して AbilitySystemComponent の候補を選択している画面">
+        <span class="ss-caption">▲ UE 5.5 のスクリーンショット</span>
+        <p>
+          コンポーネントが追加されます。デフォルト名は
+          <strong style="color:#fff"><code>AbilitySystem</code></strong>
+          です。この名前をあとで参照するので変更しないでください。
         </p>
         <p>
-          コンポーネントが追加されたら、名前はデフォルトの
-          <strong style="color:#fff"><code>AbilitySystemComponent</code></strong>
-          のままにしてください。この名前をあとで参照します。
-        </p>
-        <p>
-          ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。
+          Blueprint を<strong style="color:#fff">コンパイルして保存</strong>してください。
         </p>
       </div>
     </div>
@@ -343,10 +345,10 @@
       </div>
       <div class="step-body">
         <p>
-          ブループリントエディタ上部のツールバーにある
-          <strong style="color:#fff">「クラスの設定」</strong>ボタンをクリックします。
-          詳細パネルの「インターフェース」セクションで
-          <strong style="color:#fff">「+ 追加」</strong>をクリックし、
+          Blueprint エディタ上部のツールバーにある
+          <strong style="color:#fff">「Class Settings（クラスの設定）」</strong>ボタンをクリックします。
+          詳細パネルの「Interfaces（インターフェース）」セクションで
+          <strong style="color:#fff">「+ Add（追加）」</strong>をクリックし、
           検索欄に <strong style="color:#fff">「AbilitySystem」</strong> と入力してください。
         </p>
         <p>
@@ -369,8 +371,8 @@
           をダブルクリックして関数グラフを開きます。
         </p>
         <p>
-          「My Blueprint」パネルの <strong style="color:#fff">「コンポーネント」</strong>セクションから
-          <strong style="color:#fff"><code>AbilitySystemComponent</code></strong>
+          「My Blueprint」パネルの <strong style="color:#fff">「Components（コンポーネント）」</strong>セクションから
+          <strong style="color:#fff"><code>AbilitySystem</code></strong>
           を関数グラフにドラッグします。
           作成された Getter ノードの出力ピンを <strong style="color:#fff">Return ノードの戻り値</strong>に接続してください。
         </p>
@@ -454,9 +456,9 @@
 
     <ul class="check-list">
       <li>「Gameplay Abilities」プラグインが有効化され、エディタが再起動されているか</li>
-      <li>コンポーネントパネルに <code>AbilitySystemComponent</code> が表示されているか</li>
-      <li>クラスの設定 → インターフェースに <code>AbilitySystemInterface</code> が追加されているか</li>
-      <li><code>GetAbilitySystemComponent</code> 関数内で <code>AbilitySystemComponent</code> を Return しているか</li>
+      <li>Components（コンポーネント）パネルに <code>AbilitySystem</code> が表示されているか</li>
+      <li>Class Settings（クラスの設定）→ Interfaces（インターフェース）に <code>AbilitySystemInterface</code> が追加されているか</li>
+      <li><code>GetAbilitySystemComponent</code> 関数内で <code>AbilitySystem</code> を Return しているか</li>
       <li>ブループリントをコンパイルして保存してからプレイしているか</li>
     </ul>
 
