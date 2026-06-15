@@ -241,61 +241,6 @@
       </div>
     </div>
 
-    <h2>GameplayAbility の基本構造</h2>
-
-    <p>
-      <code>GA_MyFirstAbility</code> をダブルクリックして開くと、イベントグラフに
-      <strong style="color:#fff"><code>Event ActivateAbility</code></strong> ノードがあらかじめ配置されています。
-      ノードをつなぎ始める前に、GameplayAbility で必ず意識しておくべき3つの処理を確認しておきましょう。
-    </p>
-
-    <div class="step-block">
-      <div class="step-head">
-        <div class="step-num" style="background:#c792ea;">①</div>
-        <div class="step-title">ActivateAbility — アビリティ発動時に呼ばれる</div>
-      </div>
-      <div class="step-body">
-        <p>
-          アビリティが発動したときに最初に呼ばれる処理です。
-          「ジャンプする」「炎を出す」「回復する」など、アビリティの本体はここに書きます。
-        </p>
-      </div>
-    </div>
-
-    <div class="step-block">
-      <div class="step-head">
-        <div class="step-num" style="background:#c792ea;">②</div>
-        <div class="step-title">CommitAbility — コストとクールダウンを消費する</div>
-      </div>
-      <div class="step-body">
-        <p>
-          「MPを消費する」「クールダウンを開始する」といった処理を確定させます。
-          コストやクールダウンを設定していない場合でも、呼ぶ必要があります。
-          <strong style="color:#fff">CommitAbility が false を返した場合</strong>（コスト不足など）は
-          アビリティをキャンセルしてください。
-        </p>
-      </div>
-    </div>
-
-    <div class="step-block">
-      <div class="step-head">
-        <div class="step-num" style="background:#c792ea;">③</div>
-        <div class="step-title">EndAbility — アビリティを終了する</div>
-      </div>
-      <div class="step-body">
-        <p>
-          アビリティの処理が終わったら必ず呼びます。
-          これを呼ばないと GAS がアビリティを「まだ実行中」と認識し続けるため、
-          同じアビリティを再度発動できなくなったり、クールダウンが始まらなかったりします。
-        </p>
-      </div>
-    </div>
-
-    <div class="note-box">
-      <div class="note-label">まとめると</div>
-      <p>ActivateAbility → やりたい処理 → CommitAbility → EndAbility、という流れが基本です。</p>
-    </div>
-
     <div class="step-block">
       <div class="step-head">
         <div class="step-num">2</div>
@@ -345,6 +290,59 @@
           ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。
         </p>
       </div>
+    </div>
+
+    <h2>GameplayAbility の基本構造</h2>
+
+    <p>
+      Step 2 で組んだノードのそれぞれが何をしているか確認しておきましょう。
+    </p>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num" style="background:#c792ea;">①</div>
+        <div class="step-title">ActivateAbility — アビリティ発動時に呼ばれる</div>
+      </div>
+      <div class="step-body">
+        <p>
+          アビリティが発動したときに最初に呼ばれる処理です。
+          「ジャンプする」「炎を出す」「回復する」など、アビリティの本体はここに書きます。
+        </p>
+      </div>
+    </div>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num" style="background:#c792ea;">②</div>
+        <div class="step-title">CommitAbility — コストとクールダウンを消費する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          「MPを消費する」「クールダウンを開始する」といった処理を確定させます。
+          コストやクールダウンを設定していない場合でも、呼ぶ必要があります。
+          <strong style="color:#fff">CommitAbility が false を返した場合</strong>（コスト不足など）は
+          アビリティをキャンセルしてください。
+        </p>
+      </div>
+    </div>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num" style="background:#c792ea;">③</div>
+        <div class="step-title">EndAbility — アビリティを終了する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          アビリティの処理が終わったら必ず呼びます。
+          これを呼ばないと GAS がアビリティを「まだ実行中」と認識し続けるため、
+          同じアビリティを再度発動できなくなったり、クールダウンが始まらなかったりします。
+        </p>
+      </div>
+    </div>
+
+    <div class="note-box">
+      <div class="note-label">まとめると</div>
+      <p>ActivateAbility → やりたい処理 → CommitAbility → EndAbility、という流れが基本です。</p>
     </div>
 
     <h2>キャラクターに Ability を持たせる</h2>
