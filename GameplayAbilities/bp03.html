@@ -417,7 +417,7 @@
           <div class="bp-row">
             <span class="bp-node event">Q（Pressed）</span>
             <span class="bp-arrow">→</span>
-            <span class="bp-node green">Try Activate Ability By Class<br><span style="color:#6a8a6a;font-size:0.75rem;">Ability Class: GA_MyFirstAbility</span></span>
+            <span class="bp-node green">Try Activate Ability By Class<br><span style="color:#6a8a6a;font-size:0.75rem;">In Ability to Activate: GA_MyFirstAbility</span></span>
           </div>
         </div>
 
@@ -425,7 +425,14 @@
           <code>Try Activate Ability By Class</code> の <strong style="color:#fff">Target</strong> にも、
           Step 4 と同様に右クリックで検索・配置すれば <code>AbilitySystem</code> が
           自動的につながります。つながっていない場合は手動で接続してください。
+          発動したい Ability は <code>In Ability to Activate</code> に
+          <strong style="color:#fff"><code>GA_MyFirstAbility</code></strong> を設定します。
+          <code>Allow Remote Activation</code> はデフォルトの ON のままで構いません。
         </p>
+
+        <img class="ss" src="img/bp03-q-try-activate-ability-byclass.png" alt="Q (Pressed) から Try Activate Ability By Class をつなぎ、Target に AbilitySystem コンポーネント、In Ability to Activate に GA_MyFirstAbility を設定した状態">
+        <span class="ss-caption">▲ UE 5.5 のスクリーンショット</span>
+
         <p>
           <code>Try Activate Ability By Class</code> は、指定したクラスのアビリティを
           発動しようとするノードです。
