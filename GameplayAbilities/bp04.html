@@ -305,22 +305,33 @@
         <th>役割</th>
       </tr>
       <tr>
-        <td><strong style="color:#ffcb6b;">Ability Tags</strong><br><span style="font-size:0.75rem;color:#6878a0;">UE 5.5 表記: AssetTags (Default Ability Tags)</span></td>
+        <td><strong style="color:#ffcb6b;">Ability Tags</strong><br><span style="font-size:0.75rem;color:#6878a0;">UE 5.5 表記: AssetTags (Default AbilityTags)</span></td>
         <td>このアビリティ自身に付くタグ。実行中は ASC のタグリストに追加される。他のシステムがこのアビリティを識別するのにも使う。</td>
       </tr>
       <tr>
-        <td><strong style="color:#ffcb6b;">Activation Blocked Tags</strong></td>
-        <td>ASC にこのタグが1つでもある間は、このアビリティを発動できない。スタンや詠唱中の制御に使う。</td>
+        <td><strong style="color:#ffcb6b;">Cancel Abilities with Tag</strong></td>
+        <td>このアビリティが発動したとき、指定タグを持つ他のアビリティを強制キャンセルする。</td>
       </tr>
       <tr>
         <td><strong style="color:#ffcb6b;">Activation Required Tags</strong></td>
         <td>ASC にこのタグが揃っている場合のみ、発動できる。特定状態でしか使えないアビリティに使う。</td>
       </tr>
       <tr>
-        <td><strong style="color:#ffcb6b;">Cancel Abilities with Tag</strong></td>
-        <td>このアビリティが発動したとき、指定タグを持つ他のアビリティを強制キャンセルする。</td>
+        <td><strong style="color:#ffcb6b;">Activation Blocked Tags</strong></td>
+        <td>ASC にこのタグが1つでもある間は、このアビリティを発動できない。スタンや詠唱中の制御に使う。</td>
       </tr>
     </table>
+
+    <div class="note-box">
+      <div class="note-label">似た名前のプロパティに注意</div>
+      <p>
+        詳細パネルの Tags セクションには <code>Block Abilities with Tag</code> という
+        似た名前のプロパティもありますが、これは「このアビリティが発動中、指定タグを持つ
+        <strong style="color:#fff">他のアビリティ</strong>をブロックする」もので、
+        上の表の <code>Activation Blocked Tags</code>（このアビリティ自身の発動条件）とは別物です。
+        混同しないように注意してください。
+      </p>
+    </div>
 
     <p>
       今回は <code>Ability Tags</code> と <code>Activation Blocked Tags</code> の2つを使い、
@@ -375,13 +386,13 @@ Status.Stunned</code></pre>
           詳細パネルの <strong style="color:#fff">「Tags」セクション</strong>を探してください。
           このチュートリアルでは <strong style="color:#fff">Ability Tags</strong> と呼んでいますが、
           UE 5.5 の詳細パネルには
-          <strong style="color:#fff"><code>AssetTags (Default Ability Tags)</code></strong>
+          <strong style="color:#fff"><code>AssetTags (Default AbilityTags)</code></strong>
           という名前で表示されます。
         </p>
         <div class="code-wrap">
           <div class="code-label">GA_MyFirstAbility のタグ設定</div>
-          <pre><code>AssetTags (Default Ability Tags) : Ability.Attack
-Activation Blocked Tags          : Status.Stunned</code></pre>
+          <pre><code>AssetTags (Default AbilityTags) : Ability.Attack
+Activation Blocked Tags         : Status.Stunned</code></pre>
         </div>
         <p>
           各項目の <strong style="color:#fff">「+」</strong> を押してタグを追加します。
