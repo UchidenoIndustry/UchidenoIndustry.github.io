@@ -170,6 +170,9 @@
 
     .next-track-box a:hover { border-color: #7ec8e3; }
 
+    .ss { max-width: 100%; height: auto; border-radius: 6px; margin: 16px auto 4px; display: block; }
+    .ss-caption { font-size: 0.75rem; color: #4a5068; margin-bottom: 16px; display: block; text-align: center; }
+
     .page-nav { display: flex; justify-content: space-between; margin-top: 64px; padding-top: 24px; border-top: 1px solid #2a2a4a; }
     .page-nav a { color: #7ec8e3; text-decoration: none; font-size: 0.9rem; padding: 10px 20px; border: 1px solid #2a2a4a; border-radius: 4px; transition: border-color 0.2s; }
     .page-nav a:hover { border-color: #7ec8e3; }
@@ -351,6 +354,10 @@
           <strong style="color:#fff">「編集 → プロジェクト設定」</strong> を開きます。
           左の一覧から <strong style="color:#fff">「GameplayTags」</strong> を選んでください。
         </p>
+
+        <img class="ss" src="img/bp04-projectsettings-manage-gameplay-tags.png" alt="Project Settings の GameplayTags ページで Manage Gameplay Tags ボタンの位置を示した画面">
+        <span class="ss-caption">▲ UE 5.5 のスクリーンショット</span>
+
         <p>
           <strong style="color:#fff">「Manage Gameplay Tags」ボタン</strong>を押すと
           タグ管理ウィンドウが開きます。
@@ -371,6 +378,9 @@ Status.Stunned</code></pre>
           保存先を選ぶよう警告が出るので、
           <strong style="color:#fff"><code>DefaultGameplayTags.ini</code></strong> を選択してください。
         </p>
+
+        <img class="ss" src="img/bp04-add-gameplay-tag-manager.png" alt="Gameplay Tag Manager で Name に Ability.Attack、Source に DefaultGameplayTags.ini を設定した状態">
+        <span class="ss-caption">▲ UE 5.5 のスクリーンショット</span>
         <div class="note-box">
           <div class="note-label">タグの保存先について</div>
           <p>
