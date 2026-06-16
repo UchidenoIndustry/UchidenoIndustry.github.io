@@ -380,11 +380,11 @@
         </div>
 
         <p>
-          <code>Give Ability</code> ノードの <strong style="color:#fff">Target</strong> ピンには、
-          BP STEP 02 で追加した <code>AbilitySystem</code> コンポーネントをつなぎます。
-          My Blueprint（マイブループリント）パネルの Components（コンポーネント）欄に
-          <code>AbilitySystem</code> があるので、イベントグラフにドラッグして参照ノードを作成し、
-          <code>Give Ability</code> の Target につないでください。
+          My Blueprint（マイブループリント）パネルの Components（コンポーネント）欄から
+          <code>AbilitySystem</code> をイベントグラフにドラッグし、
+          その出力ピンから線を引いて <code>Give Ability</code> を検索すると、
+          <strong style="color:#fff">Target</strong> ピンに <code>AbilitySystem</code> が
+          つながった状態で配置されます。つながっていない場合は手動で接続してください。
         </p>
         <p>
           <code>Give Ability</code> の <code>Ability Class</code> に
@@ -425,7 +425,8 @@
 
         <p>
           <code>Try Activate Ability By Class</code> の <strong style="color:#fff">Target</strong> にも、
-          Step 4 と同様に <code>AbilitySystem</code> コンポーネントの参照をつないでください。
+          Step 4 と同様に <code>AbilitySystem</code> の参照ノードからドラッグして検索すれば
+          自動的につながります。つながっていない場合は手動で接続してください。
         </p>
         <p>
           <code>Try Activate Ability By Class</code> は、指定したクラスのアビリティを
