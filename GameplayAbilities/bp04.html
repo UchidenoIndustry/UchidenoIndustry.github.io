@@ -305,7 +305,7 @@
         <th>役割</th>
       </tr>
       <tr>
-        <td><strong style="color:#ffcb6b;">Ability Tags</strong></td>
+        <td><strong style="color:#ffcb6b;">Ability Tags</strong><br><span style="font-size:0.75rem;color:#6878a0;">UE 5.5 表記: AssetTags (Default Ability Tags)</span></td>
         <td>このアビリティ自身に付くタグ。実行中は ASC のタグリストに追加される。他のシステムがこのアビリティを識別するのにも使う。</td>
       </tr>
       <tr>
@@ -373,11 +373,15 @@ Status.Stunned</code></pre>
           <code>GA_MyFirstAbility</code> を開き、
           <strong style="color:#fff">「クラスのデフォルト」</strong> を選択します。
           詳細パネルの <strong style="color:#fff">「Tags」セクション</strong>を探してください。
+          このチュートリアルでは <strong style="color:#fff">Ability Tags</strong> と呼んでいますが、
+          UE 5.5 の詳細パネルには
+          <strong style="color:#fff"><code>AssetTags (Default Ability Tags)</code></strong>
+          という名前で表示されます。
         </p>
         <div class="code-wrap">
           <div class="code-label">GA_MyFirstAbility のタグ設定</div>
-          <pre><code>Ability Tags             : Ability.Attack
-Activation Blocked Tags  : Status.Stunned</code></pre>
+          <pre><code>AssetTags (Default Ability Tags) : Ability.Attack
+Activation Blocked Tags          : Status.Stunned</code></pre>
         </div>
         <p>
           各項目の <strong style="color:#fff">「+」</strong> を押してタグを追加します。
