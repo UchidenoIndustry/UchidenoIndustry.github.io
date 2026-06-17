@@ -457,15 +457,21 @@ Granted Tags     : Cooldown.Attack</code></pre>
         </div>
 
         <p>
-          次に詳細パネルの <strong style="color:#fff">「Tags」セクション</strong>を探し、
-          <strong style="color:#fff">Granted Tags</strong> の <strong style="color:#fff">「+」</strong>をクリックします。
-          タグブラウザが開くので、<code>Cooldown.Attack</code> という新しいタグを作成して追加します。
+          次に詳細パネルの <strong style="color:#fff">「Gameplay Effect」セクション</strong>の
+          <strong style="color:#fff">Components</strong> の <strong style="color:#fff">「+」</strong>をクリックします。
+          ドロップダウンが開くので <strong style="color:#fff">「Grant Tags to Target Actor」</strong>を選択します。
+        </p>
+
+        <p>
+          「Grant Tags to Target Actor」コンポーネントの設定欄が現れるので、
+          <strong style="color:#fff">「+」</strong>をクリックして
+          <code>Cooldown.Attack</code> という新しいタグを作成して追加します。
         </p>
 
         <div class="note-box">
-          <div class="note-label">Granted Tags とは</div>
+          <div class="note-label">Grant Tags to Target Actor とは</div>
           <p>
-            「この GE が ASC に付与されている間、指定したタグを ASC に付与し続ける」設定です。
+            「この GE が ASC に付与されている間、指定したタグを ASC に付与し続ける」設定です（UE 5.3 以降のコンポーネント方式）。
             GE が有効な 3 秒間は <code>Cooldown.Attack</code> タグが ASC に存在し、
             GE が切れると同時に自動で外れます。
           </p>
