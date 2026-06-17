@@ -440,31 +440,31 @@ Activation Blocked Tags         : Status.Stunned</code></pre>
         </p>
 
         <div class="code-wrap">
-          <div class="code-label">GE_AttackCooldown の設定（最終状態）</div>
-          <pre><code>Duration Policy  : Has Duration
-Duration Magnitude (Value) : 3.0
-Granted Tags     : Cooldown.Attack</code></pre>
+          <div class="code-label">Duration セクション</div>
+          <pre><code>Duration Policy          : Has Duration
+Scalable Float Magnitude : 3.0</code></pre>
         </div>
 
         <div class="note-box">
-          <div class="note-label">Duration Magnitude の設定箇所</div>
+          <div class="note-label">Scalable Float Magnitude の場所</div>
           <p>
-            <code>Duration Policy</code> を <strong style="color:#fff">Has Duration</strong> に変更すると、
+            <code>Duration Policy</code> を <strong style="color:#fff">Has Duration</strong> に変更すると
             <code>Duration Magnitude</code> の入力欄が現れます。
-            <code>Scalable Float</code> の <strong style="color:#fff">Value</strong> に
-            <strong style="color:#fff">3.0</strong> を入力します。
+            <code>Magnitude Calculation Type</code> が <strong style="color:#fff">Scalable Float</strong> になっていることを確認し、
+            <code>Scalable Float Magnitude</code> に <strong style="color:#fff">3.0</strong> を入力します。
           </p>
         </div>
 
         <p>
-          次に詳細パネルの <strong style="color:#fff">「Gameplay Effect」セクション</strong>の
+          次に <strong style="color:#fff">「Gameplay Effect」セクション</strong>の
           <strong style="color:#fff">Components</strong> の <strong style="color:#fff">「+」</strong>をクリックします。
-          ドロップダウンが開くので <strong style="color:#fff">「Grant Tags to Target Actor」</strong>を選択します。
+          ドロップダウンから <strong style="color:#fff">「Grant Tags to Target Actor」</strong>を選択します。
         </p>
 
         <p>
-          「Grant Tags to Target Actor」コンポーネントの設定欄が現れるので、
-          <strong style="color:#fff">「+」</strong>をクリックして
+          <strong style="color:#fff">「Target Tags (Granted to Actor)」</strong>コンポーネントが追加されます。
+          <strong style="color:#fff">「Add Tags」</strong>の中の
+          <strong style="color:#fff">「Add to Inherited」</strong>の欄に
           <code>Cooldown.Attack</code> という新しいタグを作成して追加します。
         </p>
 
