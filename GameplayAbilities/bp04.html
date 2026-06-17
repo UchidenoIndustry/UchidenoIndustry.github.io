@@ -268,7 +268,7 @@
     <ul class="check-list">
       <li>GameplayTag の仕組みを理解する</li>
       <li>GameplayAbility の詳細パネルからタグを作成・設定する</li>
-      <li>アビリティに Ability Tags と Activation Blocked Tags を設定する</li>
+      <li>アビリティに AssetTags と Activation Blocked Tags を設定する</li>
       <li>「スタン中はアビリティが発動できない」を Blueprint で実装・確認する</li>
     </ul>
 
@@ -308,7 +308,7 @@
         <th>役割</th>
       </tr>
       <tr>
-        <td><strong style="color:#ffcb6b;">Ability Tags</strong><br><span style="font-size:0.75rem;color:#6878a0;">UE 5.5 表記: AssetTags (Default AbilityTags)</span></td>
+        <td><strong style="color:#ffcb6b;">AssetTags (Default AbilityTags)</strong><br><span style="font-size:0.75rem;color:#6878a0;">一般に Ability Tags とも呼ばれる</span></td>
         <td>このアビリティ自身に付くタグ。実行中は ASC のタグリストに追加される。他のシステムがこのアビリティを識別するのにも使う。</td>
       </tr>
       <tr>
@@ -337,7 +337,7 @@
     </div>
 
     <p>
-      今回は <code>Ability Tags</code> と <code>Activation Blocked Tags</code> の2つを使い、
+      今回は <code>AssetTags</code> と <code>Activation Blocked Tags</code> の2つを使い、
       「スタン中はアビリティが発動できない」を実現します。
     </p>
 
@@ -346,17 +346,13 @@
     <div class="step-block">
       <div class="step-head">
         <div class="step-num">1</div>
-        <div class="step-title">Ability Tags と Activation Blocked Tags を設定する</div>
+        <div class="step-title">AssetTags と Activation Blocked Tags を設定する</div>
       </div>
       <div class="step-body">
         <p>
           <code>GA_MyFirstAbility</code> を開き、
           <strong style="color:#fff">「クラスのデフォルト」</strong> を選択します。
           詳細パネルの <strong style="color:#fff">「Tags」セクション</strong>を探してください。
-          このチュートリアルでは <strong style="color:#fff">Ability Tags</strong> と呼んでいますが、
-          UE 5.5 の詳細パネルには
-          <strong style="color:#fff"><code>AssetTags (Default AbilityTags)</code></strong>
-          という名前で表示されます。
         </p>
         <div class="code-wrap">
           <div class="code-label">GA_MyFirstAbility のタグ設定</div>
@@ -399,7 +395,7 @@ Activation Blocked Tags         : Status.Stunned</code></pre>
         <div class="note-box">
           <div class="note-label">この設定でどう動くか</div>
           <p>
-            <code>Ability Tags: Ability.Attack</code> を設定すると、
+            <code>AssetTags: Ability.Attack</code> を設定すると、
             このアビリティが実行中の間、キャラクターの ASC に <code>Ability.Attack</code> タグが付きます。<br>
             <code>Activation Blocked Tags: Status.Stunned</code> を設定すると、
             ASC に <code>Status.Stunned</code> タグが存在する間は Q を押しても発動しなくなります。
@@ -519,7 +515,7 @@ Activation Blocked Tags         : Status.Stunned</code></pre>
 
     <ul class="check-list">
       <li>タグのスペルが正しいか（大文字小文字を含め正確に）。Project Settings → GameplayTags で登録済みタグの一覧を確認できる</li>
-      <li><code>GA_MyFirstAbility</code> の <code>Ability Tags</code> に <code>Ability.Attack</code> が設定されているか</li>
+      <li><code>GA_MyFirstAbility</code> の <code>AssetTags</code> に <code>Ability.Attack</code> が設定されているか</li>
       <li><code>Activation Blocked Tags</code> に <code>Status.Stunned</code> が設定されているか</li>
       <li><code>Add Loose Gameplay Tag</code> の Tag が <code>Status.Stunned</code>（大文字小文字を含め正確に）</li>
       <li>E を押したまま Q を押しているのに発動してしまう → ブループリントを再コンパイルして試す</li>
