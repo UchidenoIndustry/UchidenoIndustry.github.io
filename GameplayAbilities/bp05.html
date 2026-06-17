@@ -555,6 +555,13 @@ Scalable Float Magnitude : 3.0</code></pre>
     <h2>Duration GameplayEffect とは</h2>
 
     <p>
+      GameplayEffect は本来 C++ 編で本格的に扱うテーマですが、
+      <strong style="color:#fff">クールダウン管理に限っては Blueprint だけで使えます。</strong>
+      Attribute（HP など）の変更には C++ の AttributeSet が必要ですが、
+      今回のように「タグを一定時間付与する」用途であれば C++ 不要です。
+    </p>
+
+    <p>
       GameplayEffect には3種類の <strong style="color:#fff">Duration Policy</strong> があります。
     </p>
 
