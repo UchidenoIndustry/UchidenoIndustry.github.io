@@ -258,7 +258,7 @@
     <h2>このステップのゴール</h2>
 
     <p>
-      bp04 で使った <code>GA_MyFirstAbility</code> をベースに、2つの制御機能を追加します。
+      BP STEP 04 で使った <code>GA_MyFirstAbility</code> をベースに、2つの制御機能を追加します。
     </p>
 
     <ul class="check-list">
@@ -311,7 +311,7 @@
     <h2>Block Abilities with Tag でアビリティを排他にする</h2>
 
     <p>
-      bp04 で <code>AssetTags</code> に <code>Ability.Attack</code> を設定しました。
+      BP STEP 04 で <code>AssetTags</code> に <code>Ability.Attack</code> を設定しました。
       <code>Block Abilities with Tag</code> に同じ <code>Ability.Attack</code> を追加することで、
       「このアビリティが実行中は、同じタグを持つアビリティを発動できない」状態を作ります。
     </p>
@@ -328,7 +328,7 @@
           詳細パネルの <strong style="color:#fff">「Tags」セクション</strong>から
           <strong style="color:#fff">Block Abilities with Tag</strong> の <strong style="color:#fff">「+」</strong>を押します。
           タグブラウザが開くので <code>Ability.Attack</code> を選択します。
-          （bp04 で作成済みのタグなので、新規作成は不要です。）
+          （BP STEP 04 で作成済みのタグなので、新規作成は不要です。）
         </p>
 
         <div class="code-wrap">
@@ -367,7 +367,7 @@ Activation Blocked Tags         : Status.Stunned</code></pre>
     </p>
 
     <p>
-      bp04 で学んだ <code>Activation Blocked Tags</code> と混同しやすいので整理します。
+      BP STEP 04 で学んだ <code>Activation Blocked Tags</code> と混同しやすいので整理します。
     </p>
 
     <table class="concept-table">
@@ -542,7 +542,7 @@ Duration Magnitude (Value) : 3.0</code></pre>
     <div class="note-box">
       <div class="note-label">GameplayEffect でタグの自動付与もできる</div>
       <p>
-        bp04 では <code>Add Loose Gameplay Tags</code> でタグを手動管理しましたが、
+        BP STEP 04 では <code>Add Loose Gameplay Tags</code> でタグを手動管理しましたが、
         GameplayEffect に「付与タグ」を設定すれば、GE が有効な間だけタグが自動付与され、
         GE 解除と同時にタグも消えます。
         Attribute（HP・ダメージなど）を変化させるには C++ 編で学ぶ AttributeSet が必要ですが、
@@ -554,7 +554,7 @@ Duration Magnitude (Value) : 3.0</code></pre>
 
     <ul class="check-list">
       <li>排他が効かない → <code>Block Abilities with Tag</code> に <code>Ability.Attack</code> が設定されているか</li>
-      <li>排他が効かない → <code>AssetTags (Default AbilityTags)</code> に <code>Ability.Attack</code> が設定されているか（bp04 で設定済みのはず）</li>
+      <li>排他が効かない → <code>AssetTags (Default AbilityTags)</code> に <code>Ability.Attack</code> が設定されているか（BP STEP 04 で設定済みのはず）</li>
       <li>排他が効かない → <code>Delay</code> ノードが <code>Commit Ability</code> と <code>End Ability</code> の間に正しく繋がっているか</li>
       <li>クールダウンが効かない → <code>Cooldown Gameplay Effect Class</code> に <code>GE_AttackCooldown</code> が設定されているか</li>
       <li>クールダウンが効かない → <code>GE_AttackCooldown</code> の <code>Duration Policy</code> が <code>Has Duration</code> になっているか</li>
