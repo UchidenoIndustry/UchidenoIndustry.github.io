@@ -267,7 +267,7 @@
 
     <ul class="check-list">
       <li>GameplayTag の仕組みを理解する</li>
-      <li>プロジェクト設定でタグを登録する</li>
+      <li>GameplayAbility の詳細パネルからタグを作成・設定する</li>
       <li>アビリティに Ability Tags と Activation Blocked Tags を設定する</li>
       <li>「スタン中はアビリティが発動できない」を Blueprint で実装・確認する</li>
     </ul>
@@ -341,61 +341,16 @@
       「スタン中はアビリティが発動できない」を実現します。
     </p>
 
-    <h2>タグを登録する</h2>
+    <h2>GA_MyFirstAbility にタグを設定する</h2>
+
+    <p>
+      UE 5.5 では、GameplayAbility の詳細パネルから直接タグを作成・設定できます。
+      Project Settings を開く必要はありません。
+    </p>
 
     <div class="step-block">
       <div class="step-head">
         <div class="step-num">1</div>
-        <div class="step-title">プロジェクト設定でタグを追加する</div>
-      </div>
-      <div class="step-body">
-        <p>
-          UE エディタのメニューから
-          <strong style="color:#fff">「編集 → プロジェクト設定」</strong> を開きます。
-          左の一覧から <strong style="color:#fff">「GameplayTags」</strong> を選んでください。
-        </p>
-
-        <img class="ss" src="img/bp04-projectsettings-manage-gameplay-tags.png" alt="Project Settings の GameplayTags ページで Manage Gameplay Tags ボタンの位置を示した画面">
-        <span class="ss-caption">▲ UE 5.5 のスクリーンショット</span>
-
-        <p>
-          <strong style="color:#fff">「Manage Gameplay Tags」ボタン</strong>を押すと
-          タグ管理ウィンドウが開きます。
-          <strong style="color:#fff">「+」ボタン（Add New Gameplay Tag）</strong> で
-          以下の2つのタグを追加してください。
-        </p>
-        <div class="code-wrap">
-          <div class="code-label">登録するタグ</div>
-          <pre><code>Ability.Attack
-Status.Stunned</code></pre>
-        </div>
-        <p>
-          ダイアログには <strong style="color:#fff">Name</strong>・
-          <strong style="color:#fff">Comment</strong>・
-          <strong style="color:#fff">Source</strong> の入力欄があります。
-          <code>Comment</code> は空欄のままでも追加できるので、今回は空欄にしておきます。
-          <code>Source</code> が <strong style="color:#fff">Not selected</strong> のままだと
-          保存先を選ぶよう警告が出るので、
-          <strong style="color:#fff"><code>DefaultGameplayTags.ini</code></strong> を選択してください。
-        </p>
-
-        <img class="ss" src="img/bp04-add-gameplay-tag-manager.png" alt="Gameplay Tag Manager で Name に Ability.Attack、Source に DefaultGameplayTags.ini を設定した状態">
-        <span class="ss-caption">▲ UE 5.5 のスクリーンショット</span>
-        <div class="note-box">
-          <div class="note-label">タグの保存先について</div>
-          <p>
-            タグは <code>Config/DefaultGameplayTags.ini</code> に保存されます。
-            ウィンドウを閉じると自動的に保存されます。
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <h2>GA_MyFirstAbility にタグを設定する</h2>
-
-    <div class="step-block">
-      <div class="step-head">
-        <div class="step-num">2</div>
         <div class="step-title">Ability Tags と Activation Blocked Tags を設定する</div>
       </div>
       <div class="step-body">
@@ -414,9 +369,17 @@ Status.Stunned</code></pre>
 Activation Blocked Tags         : Status.Stunned</code></pre>
         </div>
         <p>
-          各項目の <strong style="color:#fff">「+」</strong> を押してタグを追加します。
-          ドロップダウンで先ほど登録したタグが選べます。
+          各項目の <strong style="color:#fff">「+」</strong> を押すとタグブラウザが開き、
+          新規タグを作成しながら設定できます。
+          ダイアログの <strong style="color:#fff">Source</strong> が
+          <strong style="color:#fff">Not selected</strong> のままだと警告が出るので、
+          <strong style="color:#fff"><code>DefaultGameplayTags.ini</code></strong> を選択してください。
+          <code>Comment</code> は空欄のままでも追加できるので、今回は空欄にしておきます。
         </p>
+
+        <img class="ss" src="img/bp04-add-gameplay-tag-manager.png" alt="Gameplay Tag Manager で Name に Ability.Attack、Source に DefaultGameplayTags.ini を設定した状態">
+        <span class="ss-caption">▲ UE 5.5 のスクリーンショット</span>
+
         <p>
           ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。
         </p>
@@ -442,7 +405,7 @@ Activation Blocked Tags         : Status.Stunned</code></pre>
 
     <div class="step-block">
       <div class="step-head">
-        <div class="step-num">3</div>
+        <div class="step-num">2</div>
         <div class="step-title">E キーでスタン付与・解除を切り替える</div>
       </div>
       <div class="step-body">
@@ -502,7 +465,7 @@ Activation Blocked Tags         : Status.Stunned</code></pre>
 
     <div class="step-block">
       <div class="step-head">
-        <div class="step-num">4</div>
+        <div class="step-num">3</div>
         <div class="step-title">スタン中のアビリティ制御を確認する</div>
       </div>
       <div class="step-body">
@@ -543,7 +506,7 @@ Activation Blocked Tags         : Status.Stunned</code></pre>
     <h2>うまくいかないときの確認ポイント</h2>
 
     <ul class="check-list">
-      <li>タグが Project Settings に登録されているか（スペルミスに注意）</li>
+      <li>タグのスペルが正しいか（大文字小文字を含め正確に）。Project Settings → GameplayTags で登録済みタグの一覧を確認できる</li>
       <li><code>GA_MyFirstAbility</code> の <code>Ability Tags</code> に <code>Ability.Attack</code> が設定されているか</li>
       <li><code>Activation Blocked Tags</code> に <code>Status.Stunned</code> が設定されているか</li>
       <li><code>Add Loose Gameplay Tag</code> の Tag が <code>Status.Stunned</code>（大文字小文字を含め正確に）</li>
