@@ -272,73 +272,8 @@
       <li>「スタン中はアビリティが発動できない」を Blueprint で実装・確認する</li>
     </ul>
 
-    <h2>GameplayTag とは</h2>
-
     <p>
-      GameplayTag は <strong style="color:#fff">ドット区切りの階層ラベル</strong>です。
-      「このキャラクターは今こういう状態だ」「このアビリティはこの種類だ」という情報を
-      シンプルな文字列で表現します。
-    </p>
-
-    <div class="tag-tree">
-      <div class="tag-root">Ability</div>
-      <div class="tag-child">├ Ability.Attack　　　<span class="tag-comment">← 攻撃アビリティ</span></div>
-      <div class="tag-child">└ Ability.Heal　　　　<span class="tag-comment">← 回復アビリティ</span></div>
-      <div class="tag-root" style="margin-top:8px;">Status</div>
-      <div class="tag-child">├ Status.Stunned　　　<span class="tag-comment">← スタン状態</span></div>
-      <div class="tag-child">└ Status.Invincible　　<span class="tag-comment">← 無敵状態</span></div>
-    </div>
-
-    <p>
-      タグの強みは <strong style="color:#fff">階層的なマッチング</strong>です。
-      <code>Ability</code> で検索すると <code>Ability.Attack</code> も <code>Ability.Heal</code> も
-      まとめてヒットします。これにより「攻撃系のアビリティをすべてキャンセルする」
-      といった処理をタグ1つで表現できます。
-    </p>
-
-    <h2>アビリティとタグの関係</h2>
-
-    <p>
-      GameplayAbility の「クラスのデフォルト」には、タグに関する重要な設定が並んでいます。
-    </p>
-
-    <table class="concept-table">
-      <tr>
-        <th>設定項目</th>
-        <th>役割</th>
-      </tr>
-      <tr>
-        <td><strong style="color:#ffcb6b;">AssetTags (Default AbilityTags)</strong><br><span style="font-size:0.75rem;color:#6878a0;">一般に Ability Tags とも呼ばれる</span></td>
-        <td>このアビリティ自身に付くタグ。実行中は ASC のタグリストに追加される。他のシステムがこのアビリティを識別するのにも使う。</td>
-      </tr>
-      <tr>
-        <td><strong style="color:#ffcb6b;">Cancel Abilities with Tag</strong></td>
-        <td>このアビリティが発動したとき、指定タグを持つ他のアビリティを強制キャンセルする。</td>
-      </tr>
-      <tr>
-        <td><strong style="color:#ffcb6b;">Activation Required Tags</strong></td>
-        <td>ASC にこのタグが揃っている場合のみ、発動できる。特定状態でしか使えないアビリティに使う。</td>
-      </tr>
-      <tr>
-        <td><strong style="color:#ffcb6b;">Activation Blocked Tags</strong></td>
-        <td>ASC にこのタグが1つでもある間は、このアビリティを発動できない。スタンや詠唱中の制御に使う。</td>
-      </tr>
-    </table>
-
-    <div class="note-box">
-      <div class="note-label">似た名前のプロパティに注意</div>
-      <p>
-        詳細パネルの Tags セクションには <code>Block Abilities with Tag</code> という
-        似た名前のプロパティもありますが、これは「このアビリティが発動中、指定タグを持つ
-        <strong style="color:#fff">他のアビリティ</strong>をブロックする」もので、
-        上の表の <code>Activation Blocked Tags</code>（このアビリティ自身の発動条件）とは別物です。
-        混同しないように注意してください。
-      </p>
-    </div>
-
-    <p>
-      今回は <code>AssetTags</code> と <code>Activation Blocked Tags</code> の2つを使い、
-      「スタン中はアビリティが発動できない」を実現します。
+      まず実際にタグを設定してみましょう。タグが何をしているのかは、設定した後で改めて説明します。
     </p>
 
     <h2>GA_MyFirstAbility にタグを設定する</h2>
@@ -403,6 +338,76 @@ Activation Blocked Tags         : Status.Stunned</code></pre>
         </div>
       </div>
     </div>
+
+    <h2>GameplayTag とは</h2>
+
+    <p>
+      GameplayTag は <strong style="color:#fff">ドット区切りの階層ラベル</strong>です。
+      「このキャラクターは今こういう状態だ」「このアビリティはこの種類だ」という情報を
+      シンプルな文字列で表現します。
+    </p>
+
+    <div class="tag-tree">
+      <div class="tag-root">Ability</div>
+      <div class="tag-child">├ Ability.Attack　　　<span class="tag-comment">← 攻撃アビリティ</span></div>
+      <div class="tag-child">└ Ability.Heal　　　　<span class="tag-comment">← 回復アビリティ</span></div>
+      <div class="tag-root" style="margin-top:8px;">Status</div>
+      <div class="tag-child">├ Status.Stunned　　　<span class="tag-comment">← スタン状態</span></div>
+      <div class="tag-child">└ Status.Invincible　　<span class="tag-comment">← 無敵状態</span></div>
+    </div>
+
+    <p>
+      タグの強みは <strong style="color:#fff">階層的なマッチング</strong>です。
+      <code>Ability</code> で検索すると <code>Ability.Attack</code> も <code>Ability.Heal</code> も
+      まとめてヒットします。これにより「攻撃系のアビリティをすべてキャンセルする」
+      といった処理をタグ1つで表現できます。
+    </p>
+
+    <h2>アビリティとタグの関係</h2>
+
+    <p>
+      Step 1 で設定した <code>AssetTags</code> と <code>Activation Blocked Tags</code> は、
+      GameplayAbility の「クラスのデフォルト」にある「Tags」セクションの項目です。
+      ここには他にもタグ関連の設定が並んでいます。
+    </p>
+
+    <table class="concept-table">
+      <tr>
+        <th>設定項目</th>
+        <th>役割</th>
+      </tr>
+      <tr>
+        <td><strong style="color:#ffcb6b;">AssetTags (Default AbilityTags)</strong><br><span style="font-size:0.75rem;color:#6878a0;">一般に Ability Tags とも呼ばれる</span></td>
+        <td>このアビリティ自身に付くタグ。実行中は ASC のタグリストに追加される。他のシステムがこのアビリティを識別するのにも使う。</td>
+      </tr>
+      <tr>
+        <td><strong style="color:#ffcb6b;">Cancel Abilities with Tag</strong></td>
+        <td>このアビリティが発動したとき、指定タグを持つ他のアビリティを強制キャンセルする。</td>
+      </tr>
+      <tr>
+        <td><strong style="color:#ffcb6b;">Activation Required Tags</strong></td>
+        <td>ASC にこのタグが揃っている場合のみ、発動できる。特定状態でしか使えないアビリティに使う。</td>
+      </tr>
+      <tr>
+        <td><strong style="color:#ffcb6b;">Activation Blocked Tags</strong></td>
+        <td>ASC にこのタグが1つでもある間は、このアビリティを発動できない。スタンや詠唱中の制御に使う。</td>
+      </tr>
+    </table>
+
+    <div class="note-box">
+      <div class="note-label">似た名前のプロパティに注意</div>
+      <p>
+        詳細パネルの Tags セクションには <code>Block Abilities with Tag</code> という
+        似た名前のプロパティもありますが、これは「このアビリティが発動中、指定タグを持つ
+        <strong style="color:#fff">他のアビリティ</strong>をブロックする」もので、
+        上の表の <code>Activation Blocked Tags</code>（このアビリティ自身の発動条件）とは別物です。
+        混同しないように注意してください。
+      </p>
+    </div>
+
+    <p>
+      次は、ASC にスタンタグを実際に付与・解除する仕組みをキャラクターの Blueprint に組みます。
+    </p>
 
     <h2>スタン付与・解除を Blueprint で実装する</h2>
 
