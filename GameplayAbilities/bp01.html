@@ -267,7 +267,7 @@
     <p>
       GAS は5つの主要な要素から成り立っています。
       <strong style="color:#fff">Blueprint 編では、このうち3つ</strong>（通常表示のもの）を使います。
-      残りの2つは C++ が必要なため、薄く表示されているものは C++ 編で扱います。
+      残りの2つは C++ が必要なため、C++ 編で扱います。GAS をフル活用する際に参照してください。
     </p>
 
     <div class="component-list">
@@ -296,6 +296,18 @@
         </div>
       </div>
 
+      <div class="component-item">
+        <div class="name">
+          GameplayTag
+          <span class="jp">ゲームプレイタグ</span>
+        </div>
+        <div class="desc">
+          状態を表すラベルです。「Status.Stunned」「Ability.Attack」のように
+          階層構造で定義します。「このタグがついているときはアビリティを使えない」
+          といった制御に使います。<strong style="color:#fff">Blueprint だけで扱えます。</strong>
+        </div>
+      </div>
+
       <div class="component-item dim">
         <div class="name" style="color:#3a5870;">
           AttributeSet
@@ -304,8 +316,6 @@
         </div>
         <div class="desc" style="color:#3a5060;">
           HP・MP・攻撃力などのステータス（数値）を管理するクラスです。
-          定義には C++ が必要なため、Blueprint 編では扱いません。
-          C++ 編の STEP 04 で学べます。
         </div>
       </div>
 
@@ -318,20 +328,6 @@
         <div class="desc" style="color:#3a5060;">
           Attribute を変化させる「効果」を定義するクラスです。
           ダメージ・回復・バフはここで定義します。
-          AttributeSet との組み合わせで使うため、Blueprint 編では扱いません。
-          C++ 編の STEP 05 で学べます。
-        </div>
-      </div>
-
-      <div class="component-item">
-        <div class="name">
-          GameplayTag
-          <span class="jp">ゲームプレイタグ</span>
-        </div>
-        <div class="desc">
-          状態を表すラベルです。「Status.Stunned」「Ability.Attack」のように
-          階層構造で定義します。「このタグがついているときはアビリティを使えない」
-          といった制御に使います。<strong style="color:#fff">Blueprint だけで扱えます。</strong>
         </div>
       </div>
 
@@ -345,9 +341,9 @@
       キャラクター<br>
       └── <span style="color:#e94560">AbilitySystemComponent</span>（司令塔）　<span style="color:#a0e8a0;font-size:0.8em;">← BP 編で追加</span><br>
       &nbsp;&nbsp;&nbsp;&nbsp;├── <span style="color:#7ec8e3">GameplayAbility</span>（アビリティ定義）× 複数　<span style="color:#a0e8a0;font-size:0.8em;">← BP 編で作成</span><br>
-      &nbsp;&nbsp;&nbsp;&nbsp;├── <span style="color:#404858">GameplayEffect</span>（効果定義）　<span style="color:#303848;font-size:0.8em;">← C++ 編</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;├── <span style="color:#c090e0">GameplayTag</span>（現在の状態ラベル）　<span style="color:#a0e8a0;font-size:0.8em;">← BP 編で使用</span><br>
       &nbsp;&nbsp;&nbsp;&nbsp;├── <span style="color:#404858">AttributeSet</span>（HP・MP などの数値）　<span style="color:#303848;font-size:0.8em;">← C++ 編</span><br>
-      &nbsp;&nbsp;&nbsp;&nbsp;└── <span style="color:#c090e0">GameplayTag</span>（現在の状態ラベル）　<span style="color:#a0e8a0;font-size:0.8em;">← BP 編で使用</span>
+      &nbsp;&nbsp;&nbsp;&nbsp;└── <span style="color:#404858">GameplayEffect</span>（効果定義）　<span style="color:#303848;font-size:0.8em;">← C++ 編</span>
     </div>
 
     <div class="info-box">
