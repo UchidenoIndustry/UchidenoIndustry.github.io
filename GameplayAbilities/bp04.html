@@ -419,7 +419,8 @@ Activation Blocked Tags         : Status.Stunned</code></pre>
       <div class="step-body">
         <p>
           キャラクターのブループリント（<code>BP_ThirdPersonCharacter</code> など）の
-          イベントグラフに以下の2つのイベントを追加します。
+          イベントグラフに以下の構成を組みます。
+          <strong style="color:#fff">E</strong> キーノード1つに Pressed と Released の両方を繋ぎます。
         </p>
 
         <div class="bp-flow">
@@ -427,22 +428,33 @@ Activation Blocked Tags         : Status.Stunned</code></pre>
           <div class="bp-row">
             <span class="bp-node event">E（Pressed）</span>
             <span class="bp-arrow">→</span>
-            <span class="bp-node red">Add Loose Gameplay Tag<br><span style="color:#6a8a6a;font-size:0.75rem;">Target: Get Ability System Component<br>Tag: Status.Stunned</span></span>
+            <span class="bp-node red">Add Loose Gameplay Tags<br><span style="color:#6a8a6a;font-size:0.75rem;">Actor: self<br>Gameplay Tags: Status.Stunned</span></span>
             <span class="bp-arrow">→</span>
             <span class="bp-node">Print String<br><span style="color:#6a8a6a;font-size:0.75rem;">"Stunned!"</span></span>
           </div>
-        </div>
-
-        <div class="bp-flow" style="margin-top:12px;">
-          <div class="bp-comment" style="color:#7ec8e3;margin-bottom:10px;">E キーを離したとき → スタン解除</div>
-          <div class="bp-row">
+          <div class="bp-comment" style="margin-top:12px;color:#7ec8e3;">E キーを離したとき → スタン解除</div>
+          <div class="bp-row" style="margin-top:8px;">
             <span class="bp-node event">E（Released）</span>
             <span class="bp-arrow">→</span>
-            <span class="bp-node green">Remove Loose Gameplay Tag<br><span style="color:#6a8a6a;font-size:0.75rem;">Target: Get Ability System Component<br>Tag: Status.Stunned</span></span>
+            <span class="bp-node green">Remove Loose Gameplay Tags<br><span style="color:#6a8a6a;font-size:0.75rem;">Actor: self<br>Gameplay Tags: Status.Stunned</span></span>
             <span class="bp-arrow">→</span>
             <span class="bp-node">Print String<br><span style="color:#6a8a6a;font-size:0.75rem;">"Stun Removed"</span></span>
           </div>
         </div>
+
+        <div class="note-box">
+          <div class="note-label">Gameplay Tags ピンの接続について</div>
+          <p>
+            <code>Add/Remove Loose Gameplay Tags</code> の <code>Gameplay Tags</code> ピンはタグの「コンテナ」型です。
+            単一タグを渡すには、間に <strong style="color:#fff">Make Gameplay Tag Container from Tag</strong> ノードを挟み、
+            <code>Single Tag</code> に <code>Status.Stunned</code> を設定してその <code>Return Value</code> を繋いでください。<br>
+            また、<code>Actor</code> ピンには <strong style="color:#fff">self</strong>（キャラクター自身）を繋いでください。
+            未接続のままでは ASC が見つからずタグの更新が行われません。
+          </p>
+        </div>
+
+        <img class="ss" src="img/bp04-addremoveloose-screenshot.png" alt="E キーの Pressed/Released に Add/Remove Loose Gameplay Tags を接続した Blueprint">
+        <span class="ss-caption">▲ UE 5.5 のスクリーンショット</span>
 
         <div class="note-box">
           <div class="note-label">Loose Gameplay Tag とは</div>
