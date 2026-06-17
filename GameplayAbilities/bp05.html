@@ -495,19 +495,13 @@ Scalable Float Magnitude : 3.0</code></pre>
         <p>
           <code>GA_MyFirstAbility</code> の <strong style="color:#fff">「Class Defaults（クラスのデフォルト）」</strong>を開き、
           詳細パネルで <code>Cooldown</code> と検索します。
-          以下の 2 つを設定します。
+          <strong style="color:#fff">「Cooldowns」セクション</strong>の
+          <strong style="color:#fff"><code>Cooldown Gameplay Effect Class</code></strong> に
+          <strong style="color:#fff"><code>GE_AttackCooldown</code></strong> を設定します。
         </p>
 
-        <div class="code-wrap">
-          <div class="code-label">GA_MyFirstAbility — Cooldown セクション</div>
-          <pre><code>Cooldown Gameplay Effect Class : GE_AttackCooldown
-Cooldown Tags                  : Cooldown.Attack</code></pre>
-        </div>
-
-        <p>
-          <code>Cooldown Tags</code> の <strong style="color:#fff">「+」</strong>をクリックして
-          <code>Cooldown.Attack</code> を追加します（Step 3 で作成済みのタグです）。
-        </p>
+        <img class="ss" src="img/bp05-ga-cooldown-attack.png" alt="GA_MyFirstAbility の詳細パネルで Cooldown と検索した結果。Cooldowns セクションの Cooldown Gameplay Effect Class に GE_AttackCooldown が設定されている">
+        <span class="ss-caption">▲ UE 5.5 のスクリーンショット</span>
 
         <p>
           ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。
@@ -516,10 +510,10 @@ Cooldown Tags                  : Cooldown.Attack</code></pre>
         <div class="note-box">
           <div class="note-label">クールダウンが機能する仕組み</div>
           <p>
-            <code>Commit Ability</code> を呼ぶと <code>GE_AttackCooldown</code>（3 秒）が ASC に付与され、
-            GE は <code>Cooldown.Attack</code> タグを ASC に与えます。
-            <code>TryActivateAbilityByClass</code> は内部で「ASC に <code>Cooldown Tags</code> と同じタグがあるか」を確認するため、
-            タグが外れる（= 3 秒後に GE が切れる）まで再発動できなくなります。
+            <code>Commit Ability</code> を呼ぶと <code>GE_AttackCooldown</code>（3 秒）が ASC に付与されます。
+            GE の「Grant Tags to Target Actor」コンポーネントが <code>Cooldown.Attack</code> タグを ASC に与え、
+            <code>TryActivateAbilityByClass</code> はその GE が付与している間、発動チェックで失敗します。
+            3 秒後に GE が切れるとタグも外れ、再び発動できるようになります。
           </p>
         </div>
       </div>
