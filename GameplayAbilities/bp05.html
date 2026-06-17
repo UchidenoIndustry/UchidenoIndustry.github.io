@@ -341,6 +341,9 @@ Block Abilities with Tag        : Ability.Attack
 Activation Blocked Tags         : Status.Stunned</code></pre>
         </div>
 
+        <img class="ss" src="img/bp05-ga-block-abilities-with-tag.png" alt="GA_MyFirstAbility の Tags セクション。AssetTags に Ability.Attack、Block Abilities with Tag に Ability.Attack、Activation Blocked Tags に Status.Stunned が設定されている">
+        <span class="ss-caption">▲ UE 5.5 のスクリーンショット</span>
+
         <p>
           ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。
         </p>
@@ -437,9 +440,10 @@ Activation Blocked Tags         : Status.Stunned</code></pre>
         </p>
 
         <div class="code-wrap">
-          <div class="code-label">GE_AttackCooldown の設定</div>
+          <div class="code-label">GE_AttackCooldown の設定（最終状態）</div>
           <pre><code>Duration Policy  : Has Duration
-Duration Magnitude (Value) : 3.0</code></pre>
+Duration Magnitude (Value) : 3.0
+Granted Tags     : Cooldown.Attack</code></pre>
         </div>
 
         <div class="note-box">
@@ -449,6 +453,21 @@ Duration Magnitude (Value) : 3.0</code></pre>
             <code>Duration Magnitude</code> の入力欄が現れます。
             <code>Scalable Float</code> の <strong style="color:#fff">Value</strong> に
             <strong style="color:#fff">3.0</strong> を入力します。
+          </p>
+        </div>
+
+        <p>
+          次に詳細パネルの <strong style="color:#fff">「Tags」セクション</strong>を探し、
+          <strong style="color:#fff">Granted Tags</strong> の <strong style="color:#fff">「+」</strong>をクリックします。
+          タグブラウザが開くので、<code>Cooldown.Attack</code> という新しいタグを作成して追加します。
+        </p>
+
+        <div class="note-box">
+          <div class="note-label">Granted Tags とは</div>
+          <p>
+            「この GE が ASC に付与されている間、指定したタグを ASC に付与し続ける」設定です。
+            GE が有効な 3 秒間は <code>Cooldown.Attack</code> タグが ASC に存在し、
+            GE が切れると同時に自動で外れます。
           </p>
         </div>
 
@@ -467,8 +486,18 @@ Duration Magnitude (Value) : 3.0</code></pre>
         <p>
           <code>GA_MyFirstAbility</code> の <strong style="color:#fff">「Class Defaults（クラスのデフォルト）」</strong>を開き、
           詳細パネルで <code>Cooldown</code> と検索します。
-          <strong style="color:#fff"><code>Cooldown Gameplay Effect Class</code></strong> に
-          <strong style="color:#fff"><code>GE_AttackCooldown</code></strong> を設定します。
+          以下の 2 つを設定します。
+        </p>
+
+        <div class="code-wrap">
+          <div class="code-label">GA_MyFirstAbility — Cooldown セクション</div>
+          <pre><code>Cooldown Gameplay Effect Class : GE_AttackCooldown
+Cooldown Tags                  : Cooldown.Attack</code></pre>
+        </div>
+
+        <p>
+          <code>Cooldown Tags</code> の <strong style="color:#fff">「+」</strong>をクリックして
+          <code>Cooldown.Attack</code> を追加します（Step 3 で作成済みのタグです）。
         </p>
 
         <p>
@@ -476,11 +505,12 @@ Duration Magnitude (Value) : 3.0</code></pre>
         </p>
 
         <div class="note-box">
-          <div class="note-label">Commit Ability がクールダウンを開始する</div>
+          <div class="note-label">クールダウンが機能する仕組み</div>
           <p>
-            <code>Commit Ability</code> ノードは、コストとクールダウンを同時に適用します。
-            Step 1 のフローでは <code>Commit Ability</code> を呼んだ瞬間に
-            <code>GE_AttackCooldown</code>（3 秒）が ASC に付与され、3 秒後に自動解除されます。
+            <code>Commit Ability</code> を呼ぶと <code>GE_AttackCooldown</code>（3 秒）が ASC に付与され、
+            GE は <code>Cooldown.Attack</code> タグを ASC に与えます。
+            <code>TryActivateAbilityByClass</code> は内部で「ASC に <code>Cooldown Tags</code> と同じタグがあるか」を確認するため、
+            タグが外れる（= 3 秒後に GE が切れる）まで再発動できなくなります。
           </p>
         </div>
       </div>
