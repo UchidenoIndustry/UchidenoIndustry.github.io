@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BP 05 アビリティの排他とクールダウン | GameplayAbilities 入門</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      background: #0f0f1a;
+      color: #e0e0e0;
+      line-height: 1.9;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      padding: 18px 20px;
+      border-bottom: 2px solid #e94560;
+    }
+
+    .header-inner { max-width: 1000px; margin: 0 auto; padding: 0 40px; }
+    .breadcrumb { font-size: 0.8rem; color: #6070a0; margin-bottom: 6px; }
+    .breadcrumb a { color: #7ec8e3; text-decoration: none; }
+    .breadcrumb a:hover { color: #e94560; }
+    .step-label { font-size: 0.8rem; color: #e94560; font-weight: bold; letter-spacing: 0.15em; margin-bottom: 4px; }
+    header h1 { font-size: 1.4rem; color: #fff; margin-bottom: 4px; }
+    header p { color: #a0a8c0; font-size: 0.88rem; }
+
+    .layout { display: grid; grid-template-columns: 240px 1fr; align-items: start; }
+
+    .sidebar {
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
+      background: #111120; border-right: 1px solid #2a2a4a;
+      padding: 24px 0; scrollbar-width: thin; scrollbar-color: #2a2a4a transparent;
+    }
+
+    .sidebar-heading { font-size: 0.72rem; color: #4a5068; letter-spacing: 0.12em; padding: 0 20px 14px; border-bottom: 1px solid #1a1a2e; margin-bottom: 8px; }
+    .sidebar-heading a { color: #4a5068; text-decoration: none; }
+    .sidebar-heading a:hover { color: #7ec8e3; }
+    .sidebar-track { font-size: 0.65rem; color: #50a870; letter-spacing: 0.1em; margin-top: 3px; }
+
+    .nav-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 20px; text-decoration: none; transition: background 0.15s; cursor: pointer; }
+    .nav-item.current { background: #1a2040; }
+    .nav-item.done:hover { background: #161830; }
+
+    .nav-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+    .nav-item.done    .nav-dot { background: #a0e8a0; }
+    .nav-item.current .nav-dot { background: #e94560; box-shadow: 0 0 7px #e94560aa; }
+
+    .nav-text { display: flex; flex-direction: column; }
+    .nav-step { font-size: 0.7rem; letter-spacing: 0.08em; display: block; }
+    .nav-item.done    .nav-step { color: #4a7860; }
+    .nav-item.current .nav-step { color: #e94560; }
+    .nav-title { font-size: 0.83rem; display: block; line-height: 1.45; margin-top: 2px; }
+    .nav-item.done    .nav-title { color: #90a8a0; }
+    .nav-item.current .nav-title { color: #e0e8f8; }
+
+    .nav-divider { border-top: 1px solid #1a1a2e; margin: 12px 0 6px; }
+    .nav-next-track .nav-dot { background: #3a6a8a; }
+    .nav-next-track .nav-step { color: #4a8090; }
+    .nav-next-track .nav-title { color: #506878; }
+    .nav-next-track:hover { background: #141828; }
+
+    main { padding: 48px 40px 80px; max-width: 1000px; margin: 0 auto; }
+
+    .menu-toggle {
+      display: none; align-items: center; gap: 8px;
+      background: #16213e; border: 1px solid #2a2a4a; color: #7ec8e3;
+      padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; margin-bottom: 24px;
+    }
+
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 99; }
+    .overlay.open { display: block; }
+
+    @media (max-width: 860px) {
+      .header-inner { padding: 0 20px; }
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: fixed; left: -260px; top: 0; height: 100%; width: 240px; z-index: 100; transition: left 0.25s ease; }
+      .sidebar.open { left: 0; box-shadow: 4px 0 24px rgba(0,0,0,0.6); }
+      main { padding: 32px 20px 60px; max-width: 100%; }
+      .menu-toggle { display: flex; }
+    }
+
+    h2 { font-size: 1.3rem; color: #7ec8e3; margin: 52px 0 16px; padding-bottom: 8px; border-bottom: 1px solid #2a2a4a; }
+    h2:first-of-type { margin-top: 0; }
+    p { margin-bottom: 16px; color: #c8d0e0; }
+
+    .step-block { border: 1px solid #2a2a4a; border-radius: 8px; margin: 24px 0; overflow: hidden; }
+    .step-block .step-head { background: #1a2a4a; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+    .step-block .step-num { background: #e94560; color: #fff; font-size: 0.75rem; font-weight: bold; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .step-block .step-title { color: #fff; font-size: 0.95rem; font-weight: bold; }
+    .step-block .step-body { padding: 20px 24px; }
+    .step-block .step-body p { margin-bottom: 12px; }
+    .step-block .step-body p:last-child { margin-bottom: 0; }
+
+    .code-wrap { margin: 16px 0; }
+    .code-label { background: #2a2a4a; color: #8090a8; font-size: 0.75rem; padding: 5px 14px; border-radius: 4px 4px 0 0; font-family: "Consolas","Courier New",monospace; display: inline-block; }
+    pre { background: #0a0a14; border: 1px solid #2a2a4a; border-radius: 0 4px 4px 4px; padding: 20px; overflow-x: auto; margin: 0; }
+    code { font-family: "Consolas","Courier New",monospace; font-size: 0.85rem; line-height: 1.8; }
+    p code, li code { background: #1a2a3a; color: #7ec8e3; padding: 2px 6px; border-radius: 3px; font-size: 0.85em; }
+
+    .point-box { background: #16213e; border-left: 4px solid #e94560; padding: 18px 22px; border-radius: 4px; margin: 20px 0; }
+    .point-box p { margin-bottom: 0; }
+
+    .note-box { background: #131c2e; border: 1px solid #2a2a4a; border-radius: 6px; padding: 16px 20px; margin: 16px 0; }
+    .note-box .note-label { font-size: 0.75rem; color: #6070a0; font-weight: bold; letter-spacing: 0.1em; margin-bottom: 6px; }
+    .note-box p { margin-bottom: 0; font-size: 0.9rem; color: #8090a8; }
+
+    .check-list { list-style: none; margin: 16px 0; }
+    .check-list li { padding: 8px 0 8px 32px; position: relative; color: #c8d0e0; border-bottom: 1px solid #1a2030; }
+    .check-list li:last-child { border-bottom: none; }
+    .check-list li::before { content: "✓"; position: absolute; left: 0; color: #a0e8a0; font-weight: bold; }
+
+    .bp-flow { background: #0d1a2e; border: 1px solid #2a3a5a; border-radius: 8px; padding: 20px 24px; margin: 16px 0; font-family: "Consolas","Courier New",monospace; font-size: 0.82rem; overflow-x: auto; }
+    .bp-node { display: inline-block; background: #1a2a4a; border: 1px solid #3a4a6a; border-radius: 4px; padding: 4px 12px; color: #a0c8e8; white-space: nowrap; }
+    .bp-node.event { background: #2a1a2a; border-color: #6a3a6a; color: #c8a0e8; }
+    .bp-node.green { background: #1a2a1a; border-color: #3a6a3a; color: #90e890; }
+    .bp-node.red   { background: #2a1a1a; border-color: #7a2a3a; color: #e89090; }
+    .bp-arrow { color: #4a6a8a; margin: 0 6px; font-size: 1rem; }
+    .bp-comment { color: #4a6060; font-size: 0.78rem; margin-top: 8px; font-family: "Hiragino Kaku Gothic ProN","Meiryo",sans-serif; }
+    .bp-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0; margin-bottom: 12px; }
+    .bp-row:last-child { margin-bottom: 0; }
+
+    .concept-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.88rem; }
+    .concept-table th { background: #1a2a4a; color: #7ec8e3; padding: 10px 16px; text-align: left; border: 1px solid #2a2a4a; }
+    .concept-table td { padding: 10px 16px; border: 1px solid #2a2a4a; color: #c8d0e0; vertical-align: top; }
+    .concept-table tr:nth-child(even) td { background: #111828; }
+
+    .next-track-box {
+      background: #0f1e30;
+      border: 1px solid #2a4a6a;
+      border-radius: 8px;
+      padding: 22px 26px;
+      margin: 32px 0;
+    }
+
+    .next-track-box .next-track-label {
+      font-size: 0.75rem;
+      color: #4a8090;
+      font-weight: bold;
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+
+    .next-track-box p { margin-bottom: 10px; color: #8090a8; font-size: 0.9rem; }
+    .next-track-box p:last-child { margin-bottom: 0; }
+
+    .next-track-box a {
+      display: inline-block;
+      color: #7ec8e3;
+      text-decoration: none;
+      border: 1px solid #2a5a7a;
+      border-radius: 4px;
+      padding: 8px 18px;
+      font-size: 0.88rem;
+      transition: border-color 0.2s;
+    }
+
+    .next-track-box a:hover { border-color: #7ec8e3; }
+
+    .ss { max-width: 100%; height: auto; border-radius: 6px; margin: 16px auto 4px; display: block; }
+    .ss-caption { font-size: 0.75rem; color: #4a5068; margin-bottom: 16px; display: block; text-align: center; }
+
+    .page-nav { display: flex; justify-content: space-between; margin-top: 64px; padding-top: 24px; border-top: 1px solid #2a2a4a; }
+    .page-nav a { color: #7ec8e3; text-decoration: none; font-size: 0.9rem; padding: 10px 20px; border: 1px solid #2a2a4a; border-radius: 4px; transition: border-color 0.2s; }
+    .page-nav a:hover { border-color: #7ec8e3; }
+    .page-nav .next { margin-left: auto; }
+
+    footer { text-align: center; padding: 28px; color: #4a5068; font-size: 0.82rem; border-top: 1px solid #2a2a4a; }
+  </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay"></div>
+
+<div class="layout">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-heading">
+      <a href="./">GameplayAbilities 入門</a>
+      <div class="sidebar-track">Blueprint 編</div>
+    </div>
+
+    <a class="nav-item done" href="bp01.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 01</span>
+        <span class="nav-title">GAS とは何か</span>
+      </span>
+    </a>
+
+    <a class="nav-item done" href="bp02.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 02</span>
+        <span class="nav-title">Blueprint で始める</span>
+      </span>
+    </a>
+
+    <a class="nav-item done" href="bp03.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 03</span>
+        <span class="nav-title">最初の Ability を作る</span>
+      </span>
+    </a>
+
+    <a class="nav-item done" href="bp04.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 04</span>
+        <span class="nav-title">GameplayTag で状態管理</span>
+      </span>
+    </a>
+
+    <div class="nav-item current">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 05</span>
+        <span class="nav-title">アビリティの排他とクールダウン</span>
+      </span>
+    </div>
+
+    <div class="nav-divider"></div>
+    <a class="nav-item nav-next-track" href="step01.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">→ C++ 編へ</span>
+        <span class="nav-title">AttributeSet まで学ぶ</span>
+      </span>
+    </a>
+  </aside>
+
+  <div class="content-col">
+
+  <header>
+    <div class="header-inner">
+      <div class="breadcrumb">
+        <a href="../">UchidenoIndustry</a> &rsaquo;
+        <a href="./">GameplayAbilities 入門</a> &rsaquo;
+        BP STEP 05
+      </div>
+      <div class="step-label">BP STEP 05</div>
+      <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px;">
+        <h1>アビリティの排他とクールダウン</h1>
+        <span style="background:#1a3a1a;border:1px solid #2a6a2a;color:#a0e8a0;font-size:0.75rem;padding:2px 8px;border-radius:4px;font-family:'Consolas','Courier New',monospace;white-space:nowrap;">UE 5.5 版</span>
+      </div>
+      <p><code>Block Abilities with Tag</code> でアビリティの重複発動を防ぎ、Duration GameplayEffect でクールダウンを実装する。</p>
+    </div>
+  </header>
+
+  <main>
+
+    <button class="menu-toggle" id="menuToggle">&#9776; 目次</button>
+
+    <h2>このステップのゴール</h2>
+
+    <p>
+      bp04 で使った <code>GA_MyFirstAbility</code> をベースに、2つの制御機能を追加します。
+    </p>
+
+    <ul class="check-list">
+      <li>アビリティの実行中に同じアビリティが重複発動しないよう排他制御を設定する</li>
+      <li>Duration GameplayEffect を作成して、クールダウンとして GA_MyFirstAbility に設定する</li>
+      <li>Q キーを押してから 3 秒間は再発動できないことを確認する</li>
+    </ul>
+
+    <h2>GA_MyFirstAbility に Delay を加える</h2>
+
+    <p>
+      排他とクールダウンの効果を確認しやすくするため、まずアビリティに Delay ノードを追加して
+      「一定時間、アビリティが持続している」状態を作ります。
+    </p>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">1</div>
+        <div class="step-title">Delay ノードを追加してアビリティが 1.5 秒間持続するようにする</div>
+      </div>
+      <div class="step-body">
+        <p>
+          <code>GA_MyFirstAbility</code> のイベントグラフを開き、
+          <strong style="color:#fff">Commit Ability</strong> と <strong style="color:#fff">End Ability</strong> の間に
+          <strong style="color:#fff">Delay</strong> ノードを挿入します。
+          Duration は <strong style="color:#fff">1.5</strong>（秒）に設定。
+        </p>
+
+        <div class="bp-flow">
+          <div class="bp-row">
+            <span class="bp-node event">Event ActivateAbility</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Print String<br><span style="color:#6a8a6a;font-size:0.75rem;">"Ability Activated!"</span></span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Commit Ability</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Delay<br><span style="color:#6a8a6a;font-size:0.75rem;">Duration: 1.5</span></span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node green">End Ability</span>
+          </div>
+          <div class="bp-comment">Commit Ability の直後に Delay を追加する。Delay の Duration は 1.5（秒）。</div>
+        </div>
+
+        <p>
+          ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。
+        </p>
+      </div>
+    </div>
+
+    <h2>Block Abilities with Tag でアビリティを排他にする</h2>
+
+    <p>
+      bp04 で <code>AssetTags</code> に <code>Ability.Attack</code> を設定しました。
+      <code>Block Abilities with Tag</code> に同じ <code>Ability.Attack</code> を追加することで、
+      「このアビリティが実行中は、同じタグを持つアビリティを発動できない」状態を作ります。
+    </p>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">2</div>
+        <div class="step-title">Block Abilities with Tag に Ability.Attack を設定する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          <code>GA_MyFirstAbility</code> の
+          <strong style="color:#fff">「Class Defaults（クラスのデフォルト）」</strong> を開き、
+          詳細パネルの <strong style="color:#fff">「Tags」セクション</strong>から
+          <strong style="color:#fff">Block Abilities with Tag</strong> の <strong style="color:#fff">「+」</strong>を押します。
+          タグブラウザが開くので <code>Ability.Attack</code> を選択します。
+          （bp04 で作成済みのタグなので、新規作成は不要です。）
+        </p>
+
+        <div class="code-wrap">
+          <div class="code-label">GA_MyFirstAbility Tags セクションの最終状態</div>
+          <pre><code>AssetTags (Default AbilityTags) : Ability.Attack
+Block Abilities with Tag        : Ability.Attack
+Activation Blocked Tags         : Status.Stunned</code></pre>
+        </div>
+
+        <p>
+          ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。
+        </p>
+
+        <div class="note-box">
+          <div class="note-label">この設定でどう動くか</div>
+          <p>
+            <code>GA_MyFirstAbility</code> が実行中（Delay の 1.5 秒間）は、
+            <code>Ability.Attack</code> タグを持つアビリティの発動がブロックされます。
+            <code>GA_MyFirstAbility</code> 自身も <code>Ability.Attack</code> タグを持っているため、
+            実行中に Q キーを押しても追加発動しません。
+          </p>
+        </div>
+
+        <p>
+          プレイして Q キーを連打してみてください。
+          1.5 秒間は「Ability Activated!」が 1 回しか表示されないことを確認できます。
+        </p>
+      </div>
+    </div>
+
+    <h2>Block Abilities with Tag とは</h2>
+
+    <p>
+      <code>Block Abilities with Tag</code> は、「このアビリティが実行中に、
+      指定したタグを持つ<strong style="color:#fff">他の</strong>アビリティの発動をブロックする」設定です。
+    </p>
+
+    <p>
+      bp04 で学んだ <code>Activation Blocked Tags</code> と混同しやすいので整理します。
+    </p>
+
+    <table class="concept-table">
+      <tr>
+        <th>設定項目</th>
+        <th>何をブロックするか</th>
+      </tr>
+      <tr>
+        <td><strong style="color:#ffcb6b;">Block Abilities with Tag</strong></td>
+        <td>このアビリティが実行中、指定タグを持つ<strong style="color:#fff">他のアビリティ</strong>をブロックする</td>
+      </tr>
+      <tr>
+        <td><strong style="color:#ffcb6b;">Activation Blocked Tags</strong></td>
+        <td>ASC に指定タグが存在する間、<strong style="color:#fff">このアビリティ自身</strong>の発動をブロックする</td>
+      </tr>
+    </table>
+
+    <p>
+      今回は <code>AssetTags</code> と <code>Block Abilities with Tag</code> の両方に
+      同じ <code>Ability.Attack</code> を設定しました。
+      「実行中は自分自身も再発動できない」という排他制御になります。
+    </p>
+
+    <div class="note-box">
+      <div class="note-label">複数アビリティの排他にも使える</div>
+      <p>
+        例えば <code>GA_Attack</code>（AssetTags: <code>Ability.Attack</code>）と
+        <code>GA_Heal</code>（AssetTags: <code>Ability.Heal</code>）があるとき、
+        <code>GA_Attack</code> の <code>Block Abilities with Tag: Ability.Heal</code> を設定すれば
+        「攻撃中は回復できない」という制御もタグ1つで実現できます。
+      </p>
+    </div>
+
+    <h2>クールダウン用 GameplayEffect を作る</h2>
+
+    <p>
+      排他制御に加えて、アビリティが終了してからも一定時間は発動できない
+      クールダウンを実装します。
+    </p>
+
+    <p>
+      クールダウンには <strong style="color:#fff">GameplayEffect</strong> を使います。
+      GameplayEffect は GAS の効果を表現するアセットです。
+      今回は「クールダウン中」という状態を 3 秒間維持するためだけに使います。
+    </p>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">3</div>
+        <div class="step-title">GE_AttackCooldown を作成する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          Content Browser（コンテンツブラウザ）で右クリック →
+          <strong style="color:#fff">「Blueprint Class（ブループリントクラス）」</strong>を選択。
+          親クラスの検索欄に <strong style="color:#fff">「GameplayEffect」</strong> と入力して選択し、
+          名前を <strong style="color:#fff"><code>GE_AttackCooldown</code></strong> にして作成します。
+        </p>
+
+        <p>
+          <code>GE_AttackCooldown</code> を開き、
+          <strong style="color:#fff">「Class Defaults（クラスのデフォルト）」</strong>を選択。
+          詳細パネルの <strong style="color:#fff">「Duration」セクション</strong>で以下を設定します。
+        </p>
+
+        <div class="code-wrap">
+          <div class="code-label">GE_AttackCooldown の設定</div>
+          <pre><code>Duration Policy  : Has Duration
+Duration Magnitude (Value) : 3.0</code></pre>
+        </div>
+
+        <div class="note-box">
+          <div class="note-label">Duration Magnitude の設定箇所</div>
+          <p>
+            <code>Duration Policy</code> を <strong style="color:#fff">Has Duration</strong> に変更すると、
+            <code>Duration Magnitude</code> の入力欄が現れます。
+            <code>Scalable Float</code> の <strong style="color:#fff">Value</strong> に
+            <strong style="color:#fff">3.0</strong> を入力します。
+          </p>
+        </div>
+
+        <p>
+          ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。
+        </p>
+      </div>
+    </div>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">4</div>
+        <div class="step-title">GA_MyFirstAbility にクールダウンを設定する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          <code>GA_MyFirstAbility</code> の <strong style="color:#fff">「Class Defaults（クラスのデフォルト）」</strong>を開き、
+          詳細パネルで <code>Cooldown</code> と検索します。
+          <strong style="color:#fff"><code>Cooldown Gameplay Effect Class</code></strong> に
+          <strong style="color:#fff"><code>GE_AttackCooldown</code></strong> を設定します。
+        </p>
+
+        <p>
+          ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。
+        </p>
+
+        <div class="note-box">
+          <div class="note-label">Commit Ability がクールダウンを開始する</div>
+          <p>
+            <code>Commit Ability</code> ノードは、コストとクールダウンを同時に適用します。
+            Step 1 のフローでは <code>Commit Ability</code> を呼んだ瞬間に
+            <code>GE_AttackCooldown</code>（3 秒）が ASC に付与され、3 秒後に自動解除されます。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <h2>動作確認</h2>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">5</div>
+        <div class="step-title">排他とクールダウンを確認する</div>
+      </div>
+      <div class="step-body">
+        <p>プレイを開始して以下の順で操作します。</p>
+        <ul class="check-list">
+          <li><strong style="color:#fff">Q キーを押す</strong> → 「Ability Activated!」が表示される</li>
+          <li><strong style="color:#fff">1.5 秒以内に Q キーを押す</strong> → 何も表示されない（実行中・排他によるブロック）</li>
+          <li><strong style="color:#fff">1.5 秒後（Delay 終了）に Q キーを押す</strong> → 何も表示されない（クールダウン中・残り 1.5 秒）</li>
+          <li><strong style="color:#fff">最初の Q から 3 秒以上経ってから Q を押す</strong> → 再び「Ability Activated!」が表示される</li>
+        </ul>
+
+        <div class="note-box">
+          <div class="note-label">Q を押した後の 3 秒間の内訳</div>
+          <p>
+            0〜1.5 秒：<code>Block Abilities with Tag</code> によるブロック（アビリティ実行中）<br>
+            1.5〜3 秒：<code>GE_AttackCooldown</code> によるブロック（アビリティ終了後もクールダウン GE が継続）<br>
+            3 秒以降：クールダウン GE が自動解除され、再び発動可能
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <h2>Duration GameplayEffect とは</h2>
+
+    <p>
+      GameplayEffect には3種類の <strong style="color:#fff">Duration Policy</strong> があります。
+    </p>
+
+    <table class="concept-table">
+      <tr>
+        <th>Duration Policy</th>
+        <th>効果の持続</th>
+        <th>主な用途</th>
+      </tr>
+      <tr>
+        <td><strong style="color:#ffcb6b;">Instant</strong></td>
+        <td>一瞬で適用・即終了</td>
+        <td>ダメージ・即時回復（C++ 編で学ぶ AttributeSet が必要）</td>
+      </tr>
+      <tr>
+        <td><strong style="color:#ffcb6b;">Has Duration</strong></td>
+        <td>指定時間後に自動解除</td>
+        <td>クールダウン・時間制限のバフ・デバフ</td>
+      </tr>
+      <tr>
+        <td><strong style="color:#ffcb6b;">Infinite</strong></td>
+        <td>明示的に解除するまで持続</td>
+        <td>パッシブバフ・永続的な状態変化</td>
+      </tr>
+    </table>
+
+    <div class="note-box">
+      <div class="note-label">GameplayEffect でタグの自動付与もできる</div>
+      <p>
+        bp04 では <code>Add Loose Gameplay Tags</code> でタグを手動管理しましたが、
+        GameplayEffect に「付与タグ」を設定すれば、GE が有効な間だけタグが自動付与され、
+        GE 解除と同時にタグも消えます。
+        Attribute（HP・ダメージなど）を変化させるには C++ 編で学ぶ AttributeSet が必要ですが、
+        タグの付与・解除と時間管理は Blueprint の GameplayEffect だけで行えます。
+      </p>
+    </div>
+
+    <h2>うまくいかないときの確認ポイント</h2>
+
+    <ul class="check-list">
+      <li>排他が効かない → <code>Block Abilities with Tag</code> に <code>Ability.Attack</code> が設定されているか</li>
+      <li>排他が効かない → <code>AssetTags (Default AbilityTags)</code> に <code>Ability.Attack</code> が設定されているか（bp04 で設定済みのはず）</li>
+      <li>排他が効かない → <code>Delay</code> ノードが <code>Commit Ability</code> と <code>End Ability</code> の間に正しく繋がっているか</li>
+      <li>クールダウンが効かない → <code>Cooldown Gameplay Effect Class</code> に <code>GE_AttackCooldown</code> が設定されているか</li>
+      <li>クールダウンが効かない → <code>GE_AttackCooldown</code> の <code>Duration Policy</code> が <code>Has Duration</code> になっているか</li>
+      <li>すべてのブループリントをコンパイル・保存済みか</li>
+    </ul>
+
+    <div class="note-box">
+      <div class="note-label">チュートリアル通りにならない場合</div>
+      <p>このチュートリアルは UE 5.5 で動作確認しています。別バージョンをお使いの場合は UE 5.5 で試してみてください。</p>
+    </div>
+
+    <h2>まとめ</h2>
+
+    <div class="point-box">
+      <p>
+        <code>Block Abilities with Tag</code> と <strong style="color:#fff">Duration GameplayEffect</strong> を組み合わせることで、
+        「実行中の重複発動防止」と「発動後のクールダウン」の両方を、
+        <strong style="color:#fff">コードなしでタグとアセットだけで制御</strong>できます。
+      </p>
+    </div>
+
+    <p>
+      Blueprint 編の5ステップを通じて、GAS の3要素
+      （<strong style="color:#fff">AbilitySystemComponent・GameplayAbility・GameplayTag</strong>）
+      を活用した実践的なアビリティ制御を学びました。
+    </p>
+
+    <div class="next-track-box">
+      <div class="next-track-label">次のステップへ — C++ 編</div>
+      <p>
+        BP 編では ASC・GameplayAbility・GameplayTag の3要素を使って、
+        アビリティの発動・状態管理・排他・クールダウンを実装しました。<br>
+        C++ 編では、これに <strong style="color:#fff">AttributeSet</strong>（HP・ダメージなどのステータス管理）と
+        <strong style="color:#fff">GameplayEffect</strong>（Attribute を変化させる効果）が加わり、
+        GAS 本来の全機能を活用した構成を学べます。
+      </p>
+      <a href="step01.html">C++ 編 STEP 01 から始める →</a>
+    </div>
+
+    <div class="page-nav">
+      <a href="bp04.html">&#8592; BP STEP 04 GameplayTag で状態管理</a>
+      <a class="next" href="./">チュートリアル一覧へ &#8594;</a>
+    </div>
+
+  </main>
+
+  </div><!-- /.content-col -->
+
+</div><!-- /.layout -->
+
+<footer>
+  <p>GameplayAbilities 入門 &mdash; UchidenoIndustry</p>
+</footer>
+
+<script>
+  const toggle  = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  toggle.addEventListener('click', function () { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+  overlay.addEventListener('click', function () { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+</script>
+
+</body>
+</html>
