@@ -501,12 +501,15 @@ Activation Blocked Tags         : Status.Stunned</code></pre>
 
     <div class="bp-flow">
       <div class="bp-row">
-        <span class="bp-node">Get Ability System Component</span>
+        <span class="bp-node">Ability System<br><span style="color:#6a8a6a;font-size:0.75rem;">コンポーネント参照</span></span>
         <span class="bp-arrow">→</span>
-        <span class="bp-node">Has Matching Gameplay Tag<br><span style="color:#6a8a6a;font-size:0.75rem;">Tag: Status.Stunned</span></span>
+        <span class="bp-node">Has Matching Gameplay Tag<br><span style="color:#6a8a6a;font-size:0.75rem;">Tag to Check: Status.Stunned</span></span>
       </div>
       <div class="bp-comment">Return Value（bool）が true ならスタン中</div>
     </div>
+
+    <img class="ss" src="img/bp04-has-matching-gameplay-tag.png" alt="Ability System コンポーネントを Target に繋いだ Has Matching Gameplay Tag ノード">
+    <span class="ss-caption">▲ UE 5.5 のスクリーンショット</span>
 
     <p>
       これを使えば「スタン中はアニメーションを変える」「スタン中は移動速度を下げる」
@@ -519,7 +522,7 @@ Activation Blocked Tags         : Status.Stunned</code></pre>
       <li>タグのスペルが正しいか（大文字小文字を含め正確に）。Project Settings → GameplayTags で登録済みタグの一覧を確認できる</li>
       <li><code>GA_MyFirstAbility</code> の <code>AssetTags</code> に <code>Ability.Attack</code> が設定されているか</li>
       <li><code>Activation Blocked Tags</code> に <code>Status.Stunned</code> が設定されているか</li>
-      <li><code>Add Loose Gameplay Tag</code> の Tag が <code>Status.Stunned</code>（大文字小文字を含め正確に）</li>
+      <li><code>Add Loose Gameplay Tags</code> の Tag が <code>Status.Stunned</code>（大文字小文字を含め正確に）</li>
       <li>E を押したまま Q を押しているのに発動してしまう → ブループリントを再コンパイルして試す</li>
     </ul>
 
