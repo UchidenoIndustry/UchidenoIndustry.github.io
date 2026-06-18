@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BP 07 タグの変化を待つ | GameplayAbilities 入門</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      background: #0f0f1a;
+      color: #e0e0e0;
+      line-height: 1.9;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      padding: 18px 20px;
+      border-bottom: 2px solid #e94560;
+    }
+
+    .header-inner { max-width: 1000px; margin: 0 auto; padding: 0 40px; }
+    .breadcrumb { font-size: 0.8rem; color: #6070a0; margin-bottom: 6px; }
+    .breadcrumb a { color: #7ec8e3; text-decoration: none; }
+    .breadcrumb a:hover { color: #e94560; }
+    .step-label { font-size: 0.8rem; color: #e94560; font-weight: bold; letter-spacing: 0.15em; margin-bottom: 4px; }
+    header h1 { font-size: 1.4rem; color: #fff; margin-bottom: 4px; }
+    header p { color: #a0a8c0; font-size: 0.88rem; }
+
+    .layout { display: grid; grid-template-columns: 240px 1fr; align-items: start; }
+
+    .sidebar {
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
+      background: #111120; border-right: 1px solid #2a2a4a;
+      padding: 24px 0; scrollbar-width: thin; scrollbar-color: #2a2a4a transparent;
+    }
+
+    .sidebar-heading { font-size: 0.72rem; color: #4a5068; letter-spacing: 0.12em; padding: 0 20px 14px; border-bottom: 1px solid #1a1a2e; margin-bottom: 8px; }
+    .sidebar-heading a { color: #4a5068; text-decoration: none; }
+    .sidebar-heading a:hover { color: #7ec8e3; }
+    .sidebar-track { font-size: 0.65rem; color: #50a870; letter-spacing: 0.1em; margin-top: 3px; }
+
+    .nav-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 20px; text-decoration: none; transition: background 0.15s; cursor: pointer; }
+    .nav-item.current { background: #1a2040; }
+    .nav-item.done:hover { background: #161830; }
+
+    .nav-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+    .nav-item.done    .nav-dot { background: #a0e8a0; }
+    .nav-item.current .nav-dot { background: #e94560; box-shadow: 0 0 7px #e94560aa; }
+    .nav-item.coming  .nav-dot { border: 1.5px solid #3a4058; background: transparent; }
+
+    .nav-text { display: flex; flex-direction: column; }
+    .nav-step { font-size: 0.7rem; letter-spacing: 0.08em; display: block; }
+    .nav-item.done    .nav-step { color: #4a7860; }
+    .nav-item.current .nav-step { color: #e94560; }
+    .nav-item.coming  .nav-step { color: #3a4058; }
+    .nav-title { font-size: 0.83rem; display: block; line-height: 1.45; margin-top: 2px; }
+    .nav-item.done    .nav-title { color: #90a8a0; }
+    .nav-item.current .nav-title { color: #e0e8f8; }
+    .nav-item.coming  .nav-title { color: #3a4058; }
+
+    .nav-divider { border-top: 1px solid #1a1a2e; margin: 12px 0 6px; }
+    .nav-next-track .nav-dot { background: #3a6a8a; }
+    .nav-next-track .nav-step { color: #4a8090; }
+    .nav-next-track .nav-title { color: #506878; }
+    .nav-next-track:hover { background: #141828; }
+
+    main { padding: 48px 40px 80px; max-width: 1000px; margin: 0 auto; }
+
+    .menu-toggle {
+      display: none; align-items: center; gap: 8px;
+      background: #16213e; border: 1px solid #2a2a4a; color: #7ec8e3;
+      padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; margin-bottom: 24px;
+    }
+
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 99; }
+    .overlay.open { display: block; }
+
+    @media (max-width: 860px) {
+      .header-inner { padding: 0 20px; }
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: fixed; left: -260px; top: 0; height: 100%; width: 240px; z-index: 100; transition: left 0.25s ease; }
+      .sidebar.open { left: 0; box-shadow: 4px 0 24px rgba(0,0,0,0.6); }
+      main { padding: 32px 20px 60px; max-width: 100%; }
+      .menu-toggle { display: flex; }
+    }
+
+    h2 { font-size: 1.3rem; color: #7ec8e3; margin: 52px 0 16px; padding-bottom: 8px; border-bottom: 1px solid #2a2a4a; }
+    h2:first-of-type { margin-top: 0; }
+    p { margin-bottom: 16px; color: #c8d0e0; }
+
+    .step-block { border: 1px solid #2a2a4a; border-radius: 8px; margin: 24px 0; overflow: hidden; }
+    .step-block .step-head { background: #1a2a4a; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+    .step-block .step-num { background: #e94560; color: #fff; font-size: 0.75rem; font-weight: bold; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .step-block .step-title { color: #fff; font-size: 0.95rem; font-weight: bold; }
+    .step-block .step-body { padding: 20px 24px; }
+    .step-block .step-body p { margin-bottom: 12px; }
+    .step-block .step-body p:last-child { margin-bottom: 0; }
+
+    .code-wrap { margin: 16px 0; }
+    .code-label { background: #2a2a4a; color: #8090a8; font-size: 0.75rem; padding: 5px 14px; border-radius: 4px 4px 0 0; font-family: "Consolas","Courier New",monospace; display: inline-block; }
+    pre { background: #0a0a14; border: 1px solid #2a2a4a; border-radius: 0 4px 4px 4px; padding: 20px; overflow-x: auto; margin: 0; }
+    code { font-family: "Consolas","Courier New",monospace; font-size: 0.85rem; line-height: 1.8; }
+    p code, li code { background: #1a2a3a; color: #7ec8e3; padding: 2px 6px; border-radius: 3px; font-size: 0.85em; }
+
+    .point-box { background: #16213e; border-left: 4px solid #e94560; padding: 18px 22px; border-radius: 4px; margin: 20px 0; }
+    .point-box p { margin-bottom: 0; }
+
+    .note-box { background: #131c2e; border: 1px solid #2a2a4a; border-radius: 6px; padding: 16px 20px; margin: 16px 0; }
+    .note-box .note-label { font-size: 0.75rem; color: #6070a0; font-weight: bold; letter-spacing: 0.1em; margin-bottom: 6px; }
+    .note-box p { margin-bottom: 0; font-size: 0.9rem; color: #8090a8; }
+
+    .check-list { list-style: none; margin: 16px 0; }
+    .check-list li { padding: 8px 0 8px 32px; position: relative; color: #c8d0e0; border-bottom: 1px solid #1a2030; }
+    .check-list li:last-child { border-bottom: none; }
+    .check-list li::before { content: "✓"; position: absolute; left: 0; color: #a0e8a0; font-weight: bold; }
+
+    .bp-flow { background: #0d1a2e; border: 1px solid #2a3a5a; border-radius: 8px; padding: 20px 24px; margin: 16px 0; font-family: "Consolas","Courier New",monospace; font-size: 0.82rem; overflow-x: auto; }
+    .bp-node { display: inline-block; background: #1a2a4a; border: 1px solid #3a4a6a; border-radius: 4px; padding: 4px 12px; color: #a0c8e8; white-space: nowrap; }
+    .bp-node.event { background: #2a1a2a; border-color: #6a3a6a; color: #c8a0e8; }
+    .bp-node.green { background: #1a2a1a; border-color: #3a6a3a; color: #90e890; }
+    .bp-arrow { color: #4a6a8a; margin: 0 6px; font-size: 1rem; }
+    .bp-comment { color: #4a6060; font-size: 0.78rem; margin-top: 8px; font-family: "Hiragino Kaku Gothic ProN","Meiryo",sans-serif; }
+    .bp-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0; margin-bottom: 12px; }
+    .bp-row:last-child { margin-bottom: 0; }
+
+    .concept-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.88rem; }
+    .concept-table th { background: #1a2a4a; color: #7ec8e3; padding: 10px 16px; text-align: left; border: 1px solid #2a2a4a; }
+    .concept-table td { padding: 10px 16px; border: 1px solid #2a2a4a; color: #c8d0e0; vertical-align: top; }
+    .concept-table tr:nth-child(even) td { background: #111828; }
+
+    .next-track-box {
+      background: #0f1e30;
+      border: 1px solid #2a4a6a;
+      border-radius: 8px;
+      padding: 22px 26px;
+      margin: 32px 0;
+    }
+    .next-track-box .next-track-label {
+      font-size: 0.75rem;
+      color: #4a8090;
+      font-weight: bold;
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+    .next-track-box p { margin-bottom: 10px; color: #8090a8; font-size: 0.9rem; }
+    .next-track-box p:last-child { margin-bottom: 0; }
+    .next-track-box a {
+      display: inline-block;
+      color: #7ec8e3;
+      text-decoration: none;
+      border: 1px solid #2a5a7a;
+      border-radius: 4px;
+      padding: 8px 18px;
+      font-size: 0.88rem;
+      transition: border-color 0.2s;
+    }
+    .next-track-box a:hover { border-color: #7ec8e3; }
+
+    .ss { max-width: 100%; height: auto; border-radius: 6px; margin: 16px auto 4px; display: block; }
+    .ss-caption { font-size: 0.75rem; color: #4a5068; margin-bottom: 16px; display: block; text-align: center; }
+
+    .page-nav { display: flex; justify-content: space-between; margin-top: 64px; padding-top: 24px; border-top: 1px solid #2a2a4a; }
+    .page-nav a { color: #7ec8e3; text-decoration: none; font-size: 0.9rem; padding: 10px 20px; border: 1px solid #2a2a4a; border-radius: 4px; transition: border-color 0.2s; }
+    .page-nav a:hover { border-color: #7ec8e3; }
+    .page-nav .next { margin-left: auto; }
+
+    footer { text-align: center; padding: 28px; color: #4a5068; font-size: 0.82rem; border-top: 1px solid #2a2a4a; }
+  </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay"></div>
+
+<div class="layout">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-heading">
+      <a href="./">GameplayAbilities 入門</a>
+      <div class="sidebar-track">Blueprint 編</div>
+    </div>
+
+    <a class="nav-item done" href="bp01.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 01</span>
+        <span class="nav-title">GAS とは何か</span>
+      </span>
+    </a>
+
+    <a class="nav-item done" href="bp02.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 02</span>
+        <span class="nav-title">Blueprint で始める</span>
+      </span>
+    </a>
+
+    <a class="nav-item done" href="bp03.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 03</span>
+        <span class="nav-title">最初の Ability を作る</span>
+      </span>
+    </a>
+
+    <a class="nav-item done" href="bp04.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 04</span>
+        <span class="nav-title">GameplayTag で状態管理</span>
+      </span>
+    </a>
+
+    <a class="nav-item done" href="bp05.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 05</span>
+        <span class="nav-title">アビリティの排他とクールダウン</span>
+      </span>
+    </a>
+
+    <a class="nav-item done" href="bp06.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 06</span>
+        <span class="nav-title">Duration GE でスタン自動解除</span>
+      </span>
+    </a>
+
+    <div class="nav-item current">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 07</span>
+        <span class="nav-title">タグの変化を待つ</span>
+      </span>
+    </div>
+
+    <div class="nav-item coming">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 08</span>
+        <span class="nav-title">イベントで連携する</span>
+      </span>
+    </div>
+
+    <div class="nav-divider"></div>
+    <a class="nav-item nav-next-track" href="step01.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">→ C++ 編へ</span>
+        <span class="nav-title">AttributeSet まで学ぶ</span>
+      </span>
+    </a>
+  </aside>
+
+  <div class="content-col">
+
+  <header>
+    <div class="header-inner">
+      <div class="breadcrumb">
+        <a href="../">UchidenoIndustry</a> &rsaquo;
+        <a href="./">GameplayAbilities 入門</a> &rsaquo;
+        BP STEP 07
+      </div>
+      <div class="step-label">BP STEP 07</div>
+      <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px;">
+        <h1>タグの変化を待つ</h1>
+        <span style="background:#1a3a1a;border:1px solid #2a6a2a;color:#a0e8a0;font-size:0.75rem;padding:2px 8px;border-radius:4px;font-family:'Consolas','Courier New',monospace;white-space:nowrap;">UE 5.5 版</span>
+      </div>
+      <p><code>WaitGameplayTagAdded</code> / <code>WaitGameplayTagRemoved</code> で ASC のタグ変化に反応するアビリティを実装する。</p>
+    </div>
+  </header>
+
+  <main>
+
+    <button class="menu-toggle" id="menuToggle">&#9776; 目次</button>
+
+    <h2>このステップのゴール</h2>
+
+    <p>
+      これまで作ったアビリティは「発動 → 処理 → 終了」という一方向の流れでした。
+      このステップでは <strong style="color:#fff">Wait* ノード（Ability Tasks）</strong> を使い、
+      アビリティが途中で「タグが付くまで待つ」「タグが外れるまで待つ」処理を書けるようにします。
+    </p>
+
+    <p>
+      新しく <strong style="color:#fff">GA_StunWatcher</strong> というアビリティを作ります。
+      このアビリティはゲーム開始時から常時動作し、<code>Status.Stunned</code> タグが
+      追加されたとき・削除されたときを自動で検知します。
+    </p>
+
+    <ul class="check-list">
+      <li>GA_StunWatcher Blueprint を作成する</li>
+      <li><code>Wait Gameplay Tag Added</code> でスタン発生を検知し「スタン検知！」を表示する</li>
+      <li><code>Wait Gameplay Tag Removed</code> でスタン解除を検知し「スタン解除！」を表示する</li>
+      <li>E キーを押すたびに 2 つのメッセージが順番に表示されることを確認する</li>
+    </ul>
+
+    <div class="point-box">
+      <p>
+        GA_StunWatcher は「スタンがどうやって付与されたか」を知りません。
+        BP STEP 04 の <code>Add Loose Gameplay Tags</code> でも、
+        BP STEP 06 の <code>GE_Stun</code> でも、タグが変化すれば同じように反応します。
+        これが GameplayTag によるゆるやかな連携（疎結合）の便利さです。
+      </p>
+    </div>
+
+    <h2>GA_StunWatcher を作成する</h2>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">1</div>
+        <div class="step-title">GA_StunWatcher Blueprint を作成する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          Content Browser（コンテンツブラウザ）で右クリック →
+          <strong style="color:#fff">「Blueprint Class（ブループリントクラス）」</strong>を選択。
+          親クラスの検索欄に <strong style="color:#fff">「GameplayAbility」</strong> と入力して選択し、
+          名前を <strong style="color:#fff"><code>GA_StunWatcher</code></strong> にして作成します。
+        </p>
+        <p>
+          <code>GA_StunWatcher</code> を開くと、イベントグラフに
+          <code>Event ActivateAbility</code> がすでに配置されています。
+        </p>
+      </div>
+    </div>
+
+    <h2>アビリティのグラフを組む</h2>
+
+    <p>
+      通常のアビリティは「発動 → Commit → End」と一直線に終わります。
+      GA_StunWatcher は「発動 → Commit → <strong style="color:#fff">ループで待ち続ける</strong>」という構造にします。
+      <strong style="color:#fff">EndAbility は呼ばず</strong>、アビリティを常時起動したままにします。
+    </p>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">2</div>
+        <div class="step-title">Commit とカスタムイベントを接続する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          イベントグラフの空白を右クリックして
+          <strong style="color:#fff">「Commit Ability」</strong> ノードを配置し、
+          <code>Event ActivateAbility</code> の実行ピンに繋ぎます。
+        </p>
+        <p>
+          次に空白を右クリックして
+          <strong style="color:#fff">「Add Custom Event...」</strong>を選択し、
+          イベント名を <strong style="color:#fff"><code>WatchForStun</code></strong> にします。
+          <code>Commit Ability</code> の実行出力ピンを <code>WatchForStun</code> に繋ぎます。
+        </p>
+
+        <div class="bp-flow">
+          <div class="bp-row">
+            <span class="bp-node event">Event ActivateAbility</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Commit Ability</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node event">WatchForStun（カスタムイベント）</span>
+          </div>
+        </div>
+
+        <div class="note-box">
+          <div class="note-label">EndAbility を呼ばない理由</div>
+          <p>
+            GA_StunWatcher はゲーム中ずっとタグの変化を監視します。
+            EndAbility を呼ぶとアビリティが終了して監視が止まります。
+            常時動作させるため、ここでは EndAbility を使いません。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">3</div>
+        <div class="step-title">Wait Gameplay Tag Added でスタンを検知する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          <code>WatchForStun</code> カスタムイベントの実行ピンから続きを作ります。
+          グラフの空白を右クリックして
+          <strong style="color:#fff">「Wait Gameplay Tag Added」</strong> で検索し、ノードを配置します。
+          <code>WatchForStun</code> の実行ピンを繋ぎます。
+        </p>
+        <p>
+          <code>Wait Gameplay Tag Added</code> の <strong style="color:#fff">Tag ピン</strong>に
+          <strong style="color:#fff"><code>Status.Stunned</code></strong> を設定します。
+        </p>
+        <p>
+          <code>Wait Gameplay Tag Added</code> の
+          <strong style="color:#fff">「Added」出力ピン</strong>に
+          <strong style="color:#fff">Print String</strong>（文字列: <code>"スタン検知！"</code>）を繋ぎます。
+        </p>
+
+        <div class="bp-flow">
+          <div class="bp-row">
+            <span class="bp-node event">WatchForStun</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Wait Gameplay Tag Added<br><span style="color:#6a8a6a;font-size:0.75rem;">Tag: Status.Stunned</span></span>
+            <span class="bp-arrow">[Added] →</span>
+            <span class="bp-node">Print String<br><span style="color:#6a8a6a;font-size:0.75rem;">"スタン検知！"</span></span>
+          </div>
+          <div class="bp-comment">タグが付くまでここで待機。付いた瞬間に「Added」ピンから続く。</div>
+        </div>
+
+        <div class="note-box">
+          <div class="note-label">Wait Gameplay Tag Added の動作</div>
+          <p>
+            このノードに実行が届くと、<code>Status.Stunned</code> タグが ASC に追加されるまでアビリティが待機します。
+            タグが追加された瞬間に <strong style="color:#fff">「Added」</strong> ピンから実行が再開されます。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">4</div>
+        <div class="step-title">Wait Gameplay Tag Removed で解除を検知し、ループさせる</div>
+      </div>
+      <div class="step-body">
+        <p>
+          Print String「スタン検知！」の実行出力ピンから続きを作ります。
+          グラフの空白を右クリックして
+          <strong style="color:#fff">「Wait Gameplay Tag Removed」</strong> を検索して配置します。
+          Tag ピンに <strong style="color:#fff"><code>Status.Stunned</code></strong> を設定します。
+        </p>
+        <p>
+          <code>Wait Gameplay Tag Removed</code> の
+          <strong style="color:#fff">「Removed」出力ピン</strong>に
+          <strong style="color:#fff">Print String</strong>（文字列: <code>"スタン解除！"</code>）を繋ぎます。
+        </p>
+        <p>
+          Print String「スタン解除！」の実行出力ピンを
+          <strong style="color:#fff"><code>WatchForStun</code> カスタムイベントに繋いでループを作ります。</strong>
+          これで、スタン解除後も次のスタンを待ち続けます。
+        </p>
+
+        <div class="bp-flow">
+          <div class="bp-comment" style="color:#7ec8e3;margin-bottom:12px;">グラフ全体の流れ</div>
+          <div class="bp-row">
+            <span class="bp-node event">Event ActivateAbility</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Commit Ability</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node event">WatchForStun</span>
+          </div>
+          <div class="bp-row" style="margin-top:8px;">
+            <span class="bp-node event">WatchForStun</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Wait Tag Added<br><span style="color:#6a8a6a;font-size:0.75rem;">Status.Stunned</span></span>
+            <span class="bp-arrow">[Added] →</span>
+            <span class="bp-node">Print "スタン検知！"</span>
+          </div>
+          <div class="bp-row">
+            <span class="bp-arrow" style="padding-left:2em;">↓</span>
+          </div>
+          <div class="bp-row">
+            <span class="bp-node">Wait Tag Removed<br><span style="color:#6a8a6a;font-size:0.75rem;">Status.Stunned</span></span>
+            <span class="bp-arrow">[Removed] →</span>
+            <span class="bp-node">Print "スタン解除！"</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node event">WatchForStun ↺</span>
+          </div>
+          <div class="bp-comment">EndAbility は接続しない。解除後も次のスタンを待ち続ける。</div>
+        </div>
+
+        <p>ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。</p>
+      </div>
+    </div>
+
+    <h2>BeginPlay でアビリティを常時起動する</h2>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">5</div>
+        <div class="step-title">キャラクターの BeginPlay に追加する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          <code>BP_ThirdPersonCharacter</code>（使用中のキャラクター Blueprint）のイベントグラフを開きます。
+          既存の <code>Event BeginPlay</code> に、<code>GA_StunWatcher</code> の登録と起動を<strong style="color:#fff">後ろに追加</strong>します。
+        </p>
+        <p>
+          <code>Give Ability</code>（Ability Class: <code>GA_StunWatcher</code>）を配置し、
+          その後に <code>Try Activate Ability By Class</code>（In Ability to Activate: <code>GA_StunWatcher</code>）を繋ぎます。
+          どちらも右クリック検索で配置でき、Target に AbilitySystem が自動接続されます。
+        </p>
+
+        <div class="note-box">
+          <div class="note-label">既存のノードは残す</div>
+          <p>
+            BP STEP 03 以降で追加した <code>GA_MyFirstAbility</code> の <code>Give Ability</code> は
+            <strong style="color:#fff">削除せずそのまま</strong>残してください。
+            <code>GA_StunWatcher</code> の <code>Give Ability</code> → <code>Try Activate Ability By Class</code> を
+            その後ろに追加します。
+          </p>
+        </div>
+
+        <div class="note-box">
+          <div class="note-label">TryActivateAbilityByClass で即座に起動する</div>
+          <p>
+            GA_StunWatcher はゲーム開始直後から監視を始める必要があります。
+            BeginPlay で <code>Try Activate Ability By Class</code> を呼ぶことで、
+            ゲーム開始後すぐにアビリティが起動してタグの変化を待機し始めます。
+          </p>
+        </div>
+
+        <p>ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。</p>
+      </div>
+    </div>
+
+    <h2>動作確認</h2>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">6</div>
+        <div class="step-title">スタン検知・解除を確認する</div>
+      </div>
+      <div class="step-body">
+        <p>プレイを開始して以下の順で操作します。</p>
+        <ul class="check-list">
+          <li><strong style="color:#fff">E キーを押す</strong> → 「Stunned! (3s)」（bp06 の Print String）と「スタン検知！」が表示される</li>
+          <li><strong style="color:#fff">3 秒待つ</strong> → 「スタン解除！」が表示される</li>
+          <li><strong style="color:#fff">E キーをもう一度押す</strong> → 再び「Stunned! (3s)」と「スタン検知！」が表示される（ループ動作）</li>
+        </ul>
+
+        <div class="note-box">
+          <div class="note-label">メッセージが表示されない場合</div>
+          <p>
+            BeginPlay で <code>Give Ability</code> と <code>Try Activate Ability By Class</code> の両方が
+            <code>GA_StunWatcher</code> に対して接続されているか確認してください。
+            片方だけでは動作しません。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <h2>Wait* ノードとは</h2>
+
+    <p>
+      <code>Wait Gameplay Tag Added</code> / <code>Wait Gameplay Tag Removed</code> は
+      <strong style="color:#fff">Ability Task</strong> という仕組みで実装された非同期ノードです。
+      アビリティ内で「何かが起きるまで待つ」処理を書くことができます。
+    </p>
+
+    <table class="concept-table">
+      <tr>
+        <th>ノード</th>
+        <th>待つ条件</th>
+        <th>発火する出力ピン</th>
+      </tr>
+      <tr>
+        <td><code>Wait Gameplay Tag Added</code></td>
+        <td>指定タグが ASC に追加されるまで</td>
+        <td><strong style="color:#a0c8e8;">Added</strong></td>
+      </tr>
+      <tr>
+        <td><code>Wait Gameplay Tag Removed</code></td>
+        <td>指定タグが ASC から削除されるまで</td>
+        <td><strong style="color:#a0c8e8;">Removed</strong></td>
+      </tr>
+    </table>
+
+    <div class="note-box">
+      <div class="note-label">Ability Task とは</div>
+      <p>
+        Ability Task は GameplayAbility 内で非同期処理を行うための仕組みです。
+        <code>Wait Gameplay Tag Added</code> 以外にも
+        <code>Wait Input Pressed</code>（入力を待つ）・<code>Wait Delay</code>（時間を待つ）・
+        <code>Wait Target Data</code>（ターゲット選択を待つ）など多くの種類があります。
+        グラフで「Wait」と検索すると一覧が表示されます。
+      </p>
+    </div>
+
+    <h2>Wait* パターンとサンプルプロジェクト</h2>
+
+    <p>
+      Lyra などの公式サンプルプロジェクトを見ると、アビリティのグラフに
+      <code>Wait～</code> から始まるノードが多数登場します。
+      これは「アビリティが能動的に何かを待つ」という GAS 特有のパターンです。
+    </p>
+
+    <p>
+      このパターンの特徴は <strong style="color:#fff">疎結合</strong> です。
+      GA_StunWatcher は「スタンを付与する側」を知りません。
+      <code>Add Loose Gameplay Tags</code> で付与しても、<code>GE_Stun</code> で付与しても、
+      将来 C++ で付与しても、<code>Status.Stunned</code> タグが変化する限り同じように動作します。
+      「タグが変化したという事実」だけを介して連携するため、
+      付与側と検知側を独立して変更できます。
+    </p>
+
+    <div class="note-box">
+      <div class="note-label">サンプルプロジェクトを読むために</div>
+      <p>
+        Wait* ノードに慣れると、GAS を使ったプロジェクトのアビリティが読みやすくなります。
+        「このアビリティはここで何を待っているのか」を読み解くのが GAS 理解の鍵です。
+        次のステップでは <code>Wait Gameplay Event</code> を使い、
+        アビリティ間でのイベント連携を学びます。
+      </p>
+    </div>
+
+    <h2>うまくいかないときの確認ポイント</h2>
+
+    <ul class="check-list">
+      <li>「スタン検知！」が表示されない → BeginPlay で <code>Give Ability</code> と <code>Try Activate Ability By Class</code> に <code>GA_StunWatcher</code> が設定されているか</li>
+      <li>「スタン検知！」が表示されない → <code>Wait Gameplay Tag Added</code> の Tag ピンに <code>Status.Stunned</code> が設定されているか</li>
+      <li>「スタン解除！」が表示されない → <code>Wait Gameplay Tag Removed</code> の Tag ピンに <code>Status.Stunned</code> が設定されているか</li>
+      <li>2 回目以降のスタンで検知しない → Print「スタン解除！」の後に <code>WatchForStun</code> カスタムイベントへの接続があるか（ループになっているか）</li>
+      <li>すべてのブループリントをコンパイル・保存済みか</li>
+    </ul>
+
+    <div class="note-box">
+      <div class="note-label">チュートリアル通りにならない場合</div>
+      <p>このチュートリアルは UE 5.5 で動作確認しています。別バージョンをお使いの場合は UE 5.5 で試してみてください。</p>
+    </div>
+
+    <h2>まとめ</h2>
+
+    <div class="point-box">
+      <p>
+        <code>Wait Gameplay Tag Added</code> / <code>Wait Gameplay Tag Removed</code> を使うと、
+        アビリティが「タグの変化を待つ」ことができます。<br>
+        タグを付与する手段を問わず反応できるため、システムを疎結合に保てます。
+        これが GameplayTag の「管理が便利」という実感の核心です。
+      </p>
+    </div>
+
+    <div class="next-track-box">
+      <div class="next-track-label">次のステップへ — C++ 編</div>
+      <p>
+        BP 編では ASC・GameplayAbility・GameplayTag・GameplayEffect・Ability Tasks（Wait* パターン）を
+        Blueprint だけで動かすことができました。<br>
+        C++ 編では、これに <strong style="color:#fff">AttributeSet</strong>（HP・ダメージなどのステータス管理）と
+        <strong style="color:#fff">GameplayEffect の Modifier</strong>（Attribute を変化させる効果）が加わり、
+        GAS 本来の全機能を活用した構成を学べます。
+      </p>
+      <a href="step01.html">C++ 編 STEP 01 から始める →</a>
+    </div>
+
+    <div class="page-nav">
+      <a href="bp06.html">&#8592; BP STEP 06 Duration GE でスタン自動解除</a>
+      <a class="next" href="./">チュートリアル一覧へ &#8594;</a>
+    </div>
+
+  </main>
+
+  </div><!-- /.content-col -->
+
+</div><!-- /.layout -->
+
+<footer>
+  <p>GameplayAbilities 入門 &mdash; UchidenoIndustry</p>
+</footer>
+
+<script>
+  const toggle  = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  toggle.addEventListener('click', function () { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+  overlay.addEventListener('click', function () { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+</script>
+
+</body>
+</html>
