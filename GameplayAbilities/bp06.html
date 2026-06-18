@@ -255,7 +255,7 @@
         <h1>Duration GE でスタン自動解除</h1>
         <span style="background:#1a3a1a;border:1px solid #2a6a2a;color:#a0e8a0;font-size:0.75rem;padding:2px 8px;border-radius:4px;font-family:'Consolas','Courier New',monospace;white-space:nowrap;">UE 5.5 版</span>
       </div>
-      <p><code>Apply Gameplay Effect to Actor</code> で GE_Stun を付与し、<code>Status.Stunned</code> タグを 3 秒間自動管理する。</p>
+      <p><code>ApplyGameplayEffectToSelf</code> で GE_Stun を付与し、<code>Status.Stunned</code> タグを 3 秒間自動管理する。</p>
     </div>
   </header>
 
@@ -273,7 +273,7 @@
 
     <ul class="check-list">
       <li>GE_Stun（Has Duration / Status.Stunned タグ付与）を作成する</li>
-      <li><code>Apply Gameplay Effect to Actor</code> ノードで GE_Stun を付与する</li>
+      <li><code>ApplyGameplayEffectToSelf (AbilitySystem)</code> ノードで GE_Stun を付与する</li>
       <li>E キー 1 回でスタンが 3 秒間継続し、自動で解除されることを確認する</li>
     </ul>
 
@@ -420,9 +420,12 @@ Grant Tags to Target Actor
             <code>Target</code> ピンには My Blueprint パネルの Components から
             <strong style="color:#fff">AbilitySystem</strong> をドラッグした参照ノードを繋いでください。<br>
             <code>Gameplay Effect Class</code> ピンに <strong style="color:#fff">GE_Stun</strong> を選択します。<br>
-            <code>Level</code> は 1.0 のままで問題ありません。
+            <code>Level</code> は 0.0 のまま（デフォルト）で問題ありません。
           </p>
         </div>
+
+        <img class="ss" src="img/bp06-apply-gameplay-effect-to-self.png" alt="E(Pressed) → ApplyGameplayEffectToSelf → Print String ノード接続">
+        <span class="ss-caption">▲ UE 5.5 のスクリーンショット</span>
 
         <p>
           ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。
@@ -481,7 +484,7 @@ Grant Tags to Target Actor
       </tr>
       <tr>
         <td><strong style="color:#ffcb6b;">Level</strong></td>
-        <td>GE の強度。Scalable Curve を使う場合に影響。通常は 1.0 のまま。</td>
+        <td>GE の強度。Scalable Curve を使う場合に影響。通常は 0.0（デフォルト）のまま。</td>
       </tr>
       <tr>
         <td><strong style="color:#ffcb6b;">戻り値（Active GE Handle）</strong></td>
@@ -519,7 +522,7 @@ Grant Tags to Target Actor
       </tr>
       <tr>
         <td><strong style="color:#ffcb6b;">GE + Grant Tags to Target Actor</strong></td>
-        <td>Apply Gameplay Effect to Actor</td>
+        <td>ApplyGameplayEffectToSelf (AbilitySystem)</td>
         <td>Has Duration なら時間切れで自動解除</td>
         <td>時間制限のあるデバフ・バフ</td>
       </tr>
