@@ -396,8 +396,10 @@ Grant Tags to Target Actor
         </p>
 
         <p>
-          <strong style="color:#fff">③ 空白部分を右クリックして <code>Apply Gameplay Effect to Actor</code> ノードを追加します。</strong><br>
-          E（Pressed）→ Apply Gameplay Effect to Actor → Print String「Stunned! (3s)」の順に接続します。
+          <strong style="color:#fff">③ My Blueprint パネルの Components から <code>AbilitySystem</code> をグラフにドラッグします。</strong><br>
+          作成された参照ノードからワイヤーを引き出し、<strong style="color:#fff">「apply gameplay effect」</strong> で検索して
+          <strong style="color:#fff"><code>ApplyGameplayEffectToSelf (AbilitySystem)</code></strong> を選択します。
+          E（Pressed）→ ApplyGameplayEffectToSelf → Print String「Stunned! (3s)」の順に接続します。
         </p>
 
         <div class="bp-flow">
@@ -405,7 +407,7 @@ Grant Tags to Target Actor
           <div class="bp-row">
             <span class="bp-node event">E（Pressed）</span>
             <span class="bp-arrow">→</span>
-            <span class="bp-node">Apply Gameplay Effect to Actor<br><span style="color:#6a8a6a;font-size:0.75rem;">Target Actor: Self<br>GE Class: GE_Stun</span></span>
+            <span class="bp-node">ApplyGameplayEffectToSelf<br><span style="color:#6a8a6a;font-size:0.75rem;">Target: AbilitySystem<br>GE Class: GE_Stun</span></span>
             <span class="bp-arrow">→</span>
             <span class="bp-node">Print String<br><span style="color:#6a8a6a;font-size:0.75rem;">"Stunned! (3s)"</span></span>
           </div>
@@ -413,10 +415,10 @@ Grant Tags to Target Actor
         </div>
 
         <div class="note-box">
-          <div class="note-label">Apply Gameplay Effect to Actor のピン設定</div>
+          <div class="note-label">ApplyGameplayEffectToSelf のピン設定</div>
           <p>
-            <code>Target Actor</code> ピンには <strong style="color:#fff">Self</strong> ノードを繋いでください。
-            未接続のままでは ASC が見つからず GE が付与されません。<br>
+            <code>Target</code> ピンには My Blueprint パネルの Components から
+            <strong style="color:#fff">AbilitySystem</strong> をドラッグした参照ノードを繋いでください。<br>
             <code>Gameplay Effect Class</code> ピンに <strong style="color:#fff">GE_Stun</strong> を選択します。<br>
             <code>Level</code> は 1.0 のままで問題ありません。
           </p>
@@ -455,12 +457,13 @@ Grant Tags to Target Actor
       </div>
     </div>
 
-    <h2>Apply Gameplay Effect to Actor とは</h2>
+    <h2>ApplyGameplayEffectToSelf とは</h2>
 
     <p>
-      <code>Apply Gameplay Effect to Actor</code> は、指定した Actor の ASC に
-      GameplayEffect を付与するノードです。
-      アビリティの外（キャラクター Blueprint など）から直接 GE を付与できます。
+      <code>ApplyGameplayEffectToSelf</code> は AbilitySystem コンポーネントのメソッドで、
+      ASC を持つキャラクター自身に GameplayEffect を付与します。
+      My Blueprint パネルの AbilitySystem コンポーネントから呼び出すため、
+      <code>Has Matching Gameplay Tag</code> と同じ要領で使えます。
     </p>
 
     <table class="concept-table">
@@ -469,8 +472,8 @@ Grant Tags to Target Actor
         <th>説明</th>
       </tr>
       <tr>
-        <td><strong style="color:#ffcb6b;">Target Actor</strong></td>
-        <td>GE を受け取る Actor。今回は Self（キャラクター自身）。</td>
+        <td><strong style="color:#ffcb6b;">Target</strong></td>
+        <td>AbilitySystem コンポーネントの参照。My Blueprint パネルからドラッグして接続。</td>
       </tr>
       <tr>
         <td><strong style="color:#ffcb6b;">Gameplay Effect Class</strong></td>
@@ -487,11 +490,11 @@ Grant Tags to Target Actor
     </table>
 
     <div class="note-box">
-      <div class="note-label">ゲームでの使われ方</div>
+      <div class="note-label">他のキャラクターに付与したい場合</div>
       <p>
-        今回はキャラクター自身に付与しましたが、<strong style="color:#fff">他の Actor に付与することもできます。</strong>
-        例えば「攻撃がヒットした相手に GE_Stun を付与する」という実装も、
-        このノードの Target Actor を攻撃対象にするだけで実現できます。
+        今回は自分自身に付与しましたが、他のキャラクターに付与する場合は
+        <code>ApplyGameplayEffectToTarget (AbilitySystem)</code> を使います。
+        例えば「攻撃がヒットした相手に GE_Stun を付与する」実装に使えます。
       </p>
     </div>
 
@@ -531,7 +534,7 @@ Grant Tags to Target Actor
     <h2>うまくいかないときの確認ポイント</h2>
 
     <ul class="check-list">
-      <li>スタンが発動しない → <code>Apply Gameplay Effect to Actor</code> の Target Actor に Self が繋がっているか</li>
+      <li>スタンが発動しない → <code>ApplyGameplayEffectToSelf</code> の Target に AbilitySystem コンポーネントの参照が繋がっているか</li>
       <li>スタンが発動しない → <code>GE_Stun</code> の Components に Grant Tags to Target Actor が追加されているか</li>
       <li>スタンが発動しない → Grant Tags to Target Actor の Add to Inherited に <code>Status.Stunned</code> が設定されているか</li>
       <li>スタンは発動するが 3 秒で解除されない → <code>Duration Policy</code> が Has Duration になっているか</li>
