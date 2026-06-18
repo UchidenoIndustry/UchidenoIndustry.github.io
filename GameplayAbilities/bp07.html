@@ -392,6 +392,11 @@
           <strong style="color:#fff"><code>Status.Stunned</code></strong> を設定します。
         </p>
         <p>
+          <code>Wait Gameplay Tag Added</code> ノードの
+          <strong style="color:#fff">「Only Trigger Once」にチェックを入れます。</strong>
+          ノード上に見えない場合は右クリック →「Only Trigger Once」ピンを表示させてください。
+        </p>
+        <p>
           <code>Wait Gameplay Tag Added</code> の
           <strong style="color:#fff">「Added」出力ピン</strong>に
           <strong style="color:#fff">Print String</strong>（文字列: <code>"スタン検知！"</code>）を繋ぎます。
@@ -401,7 +406,7 @@
           <div class="bp-row">
             <span class="bp-node event">WatchForStun</span>
             <span class="bp-arrow">→</span>
-            <span class="bp-node">Wait Gameplay Tag Added<br><span style="color:#6a8a6a;font-size:0.75rem;">Tag: Status.Stunned</span></span>
+            <span class="bp-node">Wait Gameplay Tag Added<br><span style="color:#6a8a6a;font-size:0.75rem;">Tag: Status.Stunned · Only Trigger Once: ✓</span></span>
             <span class="bp-arrow">[Added] →</span>
             <span class="bp-node">Print String<br><span style="color:#6a8a6a;font-size:0.75rem;">"スタン検知！"</span></span>
           </div>
@@ -413,6 +418,17 @@
           <p>
             このノードに実行が届くと、<code>Status.Stunned</code> タグが ASC に追加されるまでアビリティが待機します。
             タグが追加された瞬間に <strong style="color:#fff">「Added」</strong> ピンから実行が再開されます。
+          </p>
+        </div>
+
+        <div class="note-box">
+          <div class="note-label">Only Trigger Once を ON にする理由</div>
+          <p>
+            デフォルト（OFF）のままだと発火後もタスクが生き続けます。
+            ループ構造では毎回新しいタスクが追加される一方で古いタスクが残るため、
+            テストを繰り返すたびに「スタン検知！」「スタン解除！」のメッセージが
+            2 回・3 回…と増え続けます。ON にすると発火後にタスクが自分で終了するため、
+            ループを何周しても 1 回ずつ表示されます。
           </p>
         </div>
       </div>
@@ -429,6 +445,10 @@
           グラフの空白を右クリックして
           <strong style="color:#fff">「Wait Gameplay Tag Removed」</strong> を検索して配置します。
           Tag ピンに <strong style="color:#fff"><code>Status.Stunned</code></strong> を設定します。
+        </p>
+        <p>
+          <code>Wait Gameplay Tag Removed</code> ノードも
+          <strong style="color:#fff">「Only Trigger Once」にチェックを入れます。</strong>
         </p>
         <p>
           <code>Wait Gameplay Tag Removed</code> の
@@ -453,7 +473,7 @@
           <div class="bp-row" style="margin-top:8px;">
             <span class="bp-node event">WatchForStun</span>
             <span class="bp-arrow">→</span>
-            <span class="bp-node">Wait Tag Added<br><span style="color:#6a8a6a;font-size:0.75rem;">Status.Stunned</span></span>
+            <span class="bp-node">Wait Tag Added<br><span style="color:#6a8a6a;font-size:0.75rem;">Status.Stunned · Only Trigger Once ✓</span></span>
             <span class="bp-arrow">[Added] →</span>
             <span class="bp-node">Print "スタン検知！"</span>
           </div>
@@ -461,7 +481,7 @@
             <span class="bp-arrow" style="padding-left:2em;">↓</span>
           </div>
           <div class="bp-row">
-            <span class="bp-node">Wait Tag Removed<br><span style="color:#6a8a6a;font-size:0.75rem;">Status.Stunned</span></span>
+            <span class="bp-node">Wait Tag Removed<br><span style="color:#6a8a6a;font-size:0.75rem;">Status.Stunned · Only Trigger Once ✓</span></span>
             <span class="bp-arrow">[Removed] →</span>
             <span class="bp-node">Print "スタン解除！"</span>
             <span class="bp-arrow">→</span>
@@ -525,20 +545,10 @@
       <div class="step-body">
         <p>プレイを開始して以下の順で操作します。</p>
         <ul class="check-list">
-          <li><strong style="color:#fff">E キーを 1 回押す</strong> → 「Stunned! (3s)」（bp06 の Print String）と「スタン検知！」が表示される</li>
+          <li><strong style="color:#fff">E キーを押す</strong> → 「Stunned! (3s)」（bp06 の Print String）と「スタン検知！」が表示される</li>
           <li><strong style="color:#fff">3 秒待つ</strong> → 「スタン解除！」が表示される</li>
           <li><strong style="color:#fff">E キーをもう一度押す</strong> → 再び「Stunned! (3s)」と「スタン検知！」が表示される（ループ動作）</li>
         </ul>
-
-        <div class="note-box">
-          <div class="note-label">E を連打するとメッセージが増える</div>
-          <p>
-            E を連打すると GE_Stun が複数積み重なり（Status.Stunned カウント &gt; 1）、
-            GE が 1 本期限切れになるたびに検知・解除のサイクルが回ります。
-            <strong style="color:#fff">「E を 1 回押して 3 秒待つ」</strong> を繰り返すと、
-            1 回の検知と 1 回の解除がきれいに対応する動作を確認できます。
-          </p>
-        </div>
 
         <div class="note-box">
           <div class="note-label">メッセージが表示されない場合</div>
@@ -622,6 +632,7 @@
       <li>「スタン検知！」が表示されない → <code>Wait Gameplay Tag Added</code> の Tag ピンに <code>Status.Stunned</code> が設定されているか</li>
       <li>「スタン解除！」が表示されない → <code>Wait Gameplay Tag Removed</code> の Tag ピンに <code>Status.Stunned</code> が設定されているか</li>
       <li>2 回目以降のスタンで検知しない → Print「スタン解除！」の後に <code>WatchForStun</code> カスタムイベントへの接続があるか（ループになっているか）</li>
+      <li>2 回目以降のスタンでメッセージが増える → <code>Wait Gameplay Tag Added</code> と <code>Wait Gameplay Tag Removed</code> の両方で <code>Only Trigger Once</code> が ON になっているか</li>
       <li>すべてのブループリントをコンパイル・保存済みか</li>
     </ul>
 
