@@ -525,10 +525,20 @@
       <div class="step-body">
         <p>プレイを開始して以下の順で操作します。</p>
         <ul class="check-list">
-          <li><strong style="color:#fff">E キーを押す</strong> → 「Stunned! (3s)」（bp06 の Print String）と「スタン検知！」が表示される</li>
+          <li><strong style="color:#fff">E キーを 1 回押す</strong> → 「Stunned! (3s)」（bp06 の Print String）と「スタン検知！」が表示される</li>
           <li><strong style="color:#fff">3 秒待つ</strong> → 「スタン解除！」が表示される</li>
           <li><strong style="color:#fff">E キーをもう一度押す</strong> → 再び「Stunned! (3s)」と「スタン検知！」が表示される（ループ動作）</li>
         </ul>
+
+        <div class="note-box">
+          <div class="note-label">E を連打するとメッセージが増える</div>
+          <p>
+            E を連打すると GE_Stun が複数積み重なり（Status.Stunned カウント &gt; 1）、
+            GE が 1 本期限切れになるたびに検知・解除のサイクルが回ります。
+            <strong style="color:#fff">「E を 1 回押して 3 秒待つ」</strong> を繰り返すと、
+            1 回の検知と 1 回の解除がきれいに対応する動作を確認できます。
+          </p>
+        </div>
 
         <div class="note-box">
           <div class="note-label">メッセージが表示されない場合</div>
