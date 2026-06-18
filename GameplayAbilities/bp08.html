@@ -397,6 +397,11 @@
           <strong style="color:#fff"><code>Event.Attack</code></strong> を設定します。
         </p>
         <p>
+          <code>Wait Gameplay Event</code> ノードの
+          <strong style="color:#fff">「Only Trigger Once」にチェックを入れます。</strong>
+          ノード上に見えない場合は右クリック →「Only Trigger Once」ピンを表示させてください。
+        </p>
+        <p>
           <code>Wait Gameplay Event</code> の
           <strong style="color:#fff">「EventReceived」出力ピン</strong>に
           <strong style="color:#fff">Print String</strong>（文字列: <code>"イベント受信！"</code>）を繋ぎます。
@@ -415,13 +420,23 @@
           <div class="bp-row" style="margin-top:8px;">
             <span class="bp-node event">WatchForEvent</span>
             <span class="bp-arrow">→</span>
-            <span class="bp-node">Wait Gameplay Event<br><span style="color:#6a8a6a;font-size:0.75rem;">Tag: Event.Attack</span></span>
+            <span class="bp-node">Wait Gameplay Event<br><span style="color:#6a8a6a;font-size:0.75rem;">Tag: Event.Attack · Only Trigger Once: ✓</span></span>
             <span class="bp-arrow">[EventReceived] →</span>
             <span class="bp-node">Print String<br><span style="color:#6a8a6a;font-size:0.75rem;">"イベント受信！"</span></span>
             <span class="bp-arrow">→</span>
             <span class="bp-node event">WatchForEvent ↺</span>
           </div>
           <div class="bp-comment">EndAbility は接続しない。イベントを繰り返し受け取れる。</div>
+        </div>
+
+        <div class="note-box">
+          <div class="note-label">Only Trigger Once を ON にする理由</div>
+          <p>
+            デフォルト（OFF）のままだと発火後もタスクが生き続けます。
+            ループ構造では毎回新しいタスクが追加される一方で古いタスクが残るため、
+            F を押すたびに「イベント受信！」が 2 回・3 回…と増え続けます。
+            ON にすると発火後にタスクが自分で終了するため、常に 1 回だけ表示されます。
+          </p>
         </div>
 
         <p>ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。</p>
@@ -659,6 +674,7 @@ Try Activate Ability By Class
       <li>「イベント受信！」が表示されない → <code>Wait Gameplay Event</code> の Tag ピンに <code>Event.Attack</code> が設定されているか</li>
       <li>「イベント受信！」が表示されない → BeginPlay で <code>GA_EventReceiver</code> の <code>Give Ability</code> と <code>Try Activate Ability By Class</code> が接続されているか</li>
       <li>2 回目以降のイベントで反応しない → Print String の後に <code>WatchForEvent</code> カスタムイベントへの接続があるか（ループになっているか）</li>
+      <li>F を複数回押すとメッセージが増える → <code>Wait Gameplay Event</code> ノードで <code>Only Trigger Once</code> が ON になっているか</li>
       <li>EventMagnitude の値が 0 になる → <code>Send Gameplay Event to Actor</code> の Payload ピンを Split して <code>Payload Event Magnitude</code> に値を設定したか</li>
       <li>すべてのブループリントをコンパイル・保存済みか</li>
     </ul>
