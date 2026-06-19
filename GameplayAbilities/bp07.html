@@ -130,34 +130,6 @@
     .concept-table td { padding: 10px 16px; border: 1px solid #2a2a4a; color: #c8d0e0; vertical-align: top; }
     .concept-table tr:nth-child(even) td { background: #111828; }
 
-    .next-track-box {
-      background: #0f1e30;
-      border: 1px solid #2a4a6a;
-      border-radius: 8px;
-      padding: 22px 26px;
-      margin: 32px 0;
-    }
-    .next-track-box .next-track-label {
-      font-size: 0.75rem;
-      color: #4a8090;
-      font-weight: bold;
-      letter-spacing: 0.1em;
-      margin-bottom: 8px;
-    }
-    .next-track-box p { margin-bottom: 10px; color: #8090a8; font-size: 0.9rem; }
-    .next-track-box p:last-child { margin-bottom: 0; }
-    .next-track-box a {
-      display: inline-block;
-      color: #7ec8e3;
-      text-decoration: none;
-      border: 1px solid #2a5a7a;
-      border-radius: 4px;
-      padding: 8px 18px;
-      font-size: 0.88rem;
-      transition: border-color 0.2s;
-    }
-    .next-track-box a:hover { border-color: #7ec8e3; }
-
     .ss { max-width: 100%; height: auto; border-radius: 6px; margin: 16px auto 4px; display: block; }
     .ss-caption { font-size: 0.75rem; color: #4a5068; margin-bottom: 16px; display: block; text-align: center; }
 
@@ -269,7 +241,7 @@
         <h1>タグの変化を待つ</h1>
         <span style="background:#1a3a1a;border:1px solid #2a6a2a;color:#a0e8a0;font-size:0.75rem;padding:2px 8px;border-radius:4px;font-family:'Consolas','Courier New',monospace;white-space:nowrap;">UE 5.5 版</span>
       </div>
-      <p><code>WaitGameplayTagAdded</code> / <code>WaitGameplayTagRemoved</code> で ASC のタグ変化に反応するアビリティを実装する。</p>
+      <p><code>Wait Gameplay Tag Removed</code> でタグ消滅を待ち、「構え → 解放」の 2 段階で処理するアビリティを作る。</p>
     </div>
   </header>
 
@@ -282,47 +254,120 @@
     <p>
       これまで作ったアビリティは「発動 → 処理 → 終了」という一方向の流れでした。
       このステップでは <strong style="color:#fff">Wait* ノード（Ability Tasks）</strong> を使い、
-      アビリティが途中で「タグが付くまで待つ」「タグが外れるまで待つ」処理を書けるようにします。
+      アビリティがグラフの途中で一時停止し、条件が揃ったら続きを動かせるようにします。
     </p>
 
     <p>
-      新しく <strong style="color:#fff">GA_StunWatcher</strong> というアビリティを作ります。
-      このアビリティはゲーム開始時から常時動作し、<code>Status.Stunned</code> タグが
-      追加されたとき・削除されたときを自動で検知します。
+      新しく <strong style="color:#fff">GA_Charge</strong> というアビリティを作ります。
+      R キーを押すと「構え中...」と表示され、2 秒後に自動で「解放！」と表示されます。
+      2 秒間の待機は Tick やタイマーではなく、
+      <strong style="color:#fff">Wait Gameplay Tag Removed</strong> が GE のタグ消滅を待つことで実現します。
     </p>
 
     <ul class="check-list">
-      <li>GA_StunWatcher Blueprint を作成する</li>
-      <li><code>Wait Gameplay Tag Added</code> でスタン発生を検知し「スタン検知！」を表示する</li>
-      <li><code>Wait Gameplay Tag Removed</code> でスタン解除を検知し「スタン解除！」を表示する</li>
-      <li>E キーを押すたびに 2 つのメッセージが順番に表示されることを確認する</li>
+      <li><code>Status.Charging</code> タグと <code>GE_Charge</code>（Has Duration 2s）を用意する</li>
+      <li>GA_Charge Blueprint を作成し、GE を付与したあと <code>Wait Gameplay Tag Removed</code> でタグ消滅を待つ</li>
+      <li>R キーを押すと「構え中...」→ 2 秒後 →「解放！」と順番に表示されることを確認する</li>
     </ul>
 
     <div class="point-box">
       <p>
-        GA_StunWatcher は「スタンがどうやって付与されたか」を知りません。
-        BP STEP 04 の <code>Add Loose Gameplay Tags</code> でも、
-        BP STEP 06 の <code>GE_Stun</code> でも、タグが変化すれば同じように反応します。
-        これが GameplayTag によるゆるやかな連携（疎結合）の便利さです。
+        <code>Wait Gameplay Tag Removed</code> ノードに実行が届くと、<code>Status.Charging</code> タグが消えるまでアビリティが一時停止します。
+        GE_Charge の Duration（2 秒）が終わってタグが消えると、自動的に続きが動き出します。
+        Tick もタイマーも不要で、「GE が切れるまで待つ」処理がノード 1 つで完結します。
       </p>
     </div>
 
-    <h2>GA_StunWatcher を作成する</h2>
+    <h2>Status.Charging タグを登録する</h2>
 
     <div class="step-block">
       <div class="step-head">
         <div class="step-num">1</div>
-        <div class="step-title">GA_StunWatcher Blueprint を作成する</div>
+        <div class="step-title">Status.Charging タグを追加する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          メニューバーの <strong style="color:#fff">Edit（編集） → Project Settings（プロジェクト設定）</strong> を開き、
+          左のリストから <strong style="color:#fff">「GameplayTags」</strong> を選択します。
+          <strong style="color:#fff">「Manage Gameplay Tags（ゲームプレイタグを管理）」</strong>をクリックし、
+          <strong style="color:#fff">「+」</strong> ボタンで新しいタグを追加します。
+        </p>
+        <div class="code-wrap">
+          <div class="code-label">追加するタグ</div>
+          <pre><code>Status.Charging</code></pre>
+        </div>
+        <p>
+          Source のドロップダウンから ini ファイルを選択して
+          <strong style="color:#fff">「Add New Tag（新しいタグを追加）」</strong> をクリックします。
+        </p>
+        <div class="note-box">
+          <div class="note-label">Status.Stunned がある場合</div>
+          <p>
+            BP STEP 04 以降で <code>Status.Stunned</code> を追加済みであれば、
+            同じ <code>Status</code> 親タグ配下に <code>Status.Charging</code> が追加されます。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <h2>GE_Charge を作成する</h2>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">2</div>
+        <div class="step-title">GE_Charge Blueprint を作成する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          Content Browser（コンテンツブラウザ）で右クリック →
+          <strong style="color:#fff">「Blueprint Class（ブループリントクラス）」</strong>を選択。
+          親クラスの検索欄に <strong style="color:#fff">「GameplayEffect」</strong> と入力して選択し、
+          名前を <strong style="color:#fff"><code>GE_Charge</code></strong> にして作成します。
+        </p>
+        <p>
+          <code>GE_Charge</code> を開き、Class Defaults（クラスのデフォルト）の詳細パネルで以下を設定します。
+        </p>
+        <div class="code-wrap">
+          <div class="code-label">GE_Charge の設定</div>
+          <pre><code>Duration Policy    : Has Duration
+Duration Magnitude : 2.0</code></pre>
+        </div>
+        <p>
+          次に <strong style="color:#fff">「Gameplay Effect」セクション → 「Components」の「+」</strong> をクリックし、
+          ドロップダウンから <strong style="color:#fff">「Grant Tags to Target Actor」</strong> を選択します。
+        </p>
+        <p>
+          追加されたコンポーネント（表示名: <strong style="color:#fff">「Target Tags (Granted to Actor)」</strong>）の
+          <strong style="color:#fff">「Add Tags」→「Add to Inherited」</strong> に
+          <strong style="color:#fff"><code>Status.Charging</code></strong> を追加します。
+        </p>
+        <p>ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。</p>
+        <div class="note-box">
+          <div class="note-label">GE_Stun と同じ作り方</div>
+          <p>
+            BP STEP 06 の <code>GE_Stun</code> と同じ手順です。
+            Duration を 2s に、付与するタグを <code>Status.Charging</code> に変えるだけです。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <h2>GA_Charge を作成する</h2>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">3</div>
+        <div class="step-title">GA_Charge Blueprint を作成する</div>
       </div>
       <div class="step-body">
         <p>
           Content Browser（コンテンツブラウザ）で右クリック →
           <strong style="color:#fff">「Blueprint Class（ブループリントクラス）」</strong>を選択。
           親クラスの検索欄に <strong style="color:#fff">「GameplayAbility」</strong> と入力して選択し、
-          名前を <strong style="color:#fff"><code>GA_StunWatcher</code></strong> にして作成します。
+          名前を <strong style="color:#fff"><code>GA_Charge</code></strong> にして作成します。
         </p>
         <p>
-          <code>GA_StunWatcher</code> を開くと、イベントグラフに
+          <code>GA_Charge</code> を開くと、イベントグラフに
           <code>Event ActivateAbility</code> がすでに配置されています。
         </p>
       </div>
@@ -331,203 +376,119 @@
     <h2>アビリティのグラフを組む</h2>
 
     <p>
-      通常のアビリティは「発動 → Commit → End」と一直線に終わります。
-      GA_StunWatcher は「発動 → Commit → <strong style="color:#fff">ループで待ち続ける</strong>」という構造にします。
-      <strong style="color:#fff">EndAbility は呼ばず</strong>、アビリティを常時起動したままにします。
+      GA_Charge は「GE を付与 → タグが消えるまで待機 → 終了」という一直線の流れです。
+      ループ構造は使わず、<strong style="color:#fff">1 回の発動で完結</strong>します。
     </p>
 
     <div class="step-block">
       <div class="step-head">
-        <div class="step-num">2</div>
-        <div class="step-title">Commit とカスタムイベントを接続する</div>
+        <div class="step-num">4</div>
+        <div class="step-title">GE を付与して Wait Tag Removed に繋げる</div>
       </div>
       <div class="step-body">
         <p>
           イベントグラフの空白を右クリックして
-          <strong style="color:#fff">「Commit Ability」</strong> ノードを配置し、
+          <strong style="color:#fff">「Commit Ability」</strong> を配置し、
           <code>Event ActivateAbility</code> の実行ピンに繋ぎます。
         </p>
         <p>
-          次に空白を右クリックして
-          <strong style="color:#fff">「Add Custom Event...」</strong>を選択し、
-          イベント名を <strong style="color:#fff"><code>WatchForStun</code></strong> にします。
-          <code>Commit Ability</code> の実行出力ピンを <code>WatchForStun</code> に繋ぎます。
-        </p>
-
-        <div class="bp-flow">
-          <div class="bp-row">
-            <span class="bp-node event">Event ActivateAbility</span>
-            <span class="bp-arrow">→</span>
-            <span class="bp-node">Commit Ability</span>
-            <span class="bp-arrow">→</span>
-            <span class="bp-node event">WatchForStun（カスタムイベント）</span>
-          </div>
-        </div>
-
-        <div class="note-box">
-          <div class="note-label">EndAbility を呼ばない理由</div>
-          <p>
-            GA_StunWatcher はゲーム中ずっとタグの変化を監視します。
-            EndAbility を呼ぶとアビリティが終了して監視が止まります。
-            常時動作させるため、ここでは EndAbility を使いません。
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <div class="step-block">
-      <div class="step-head">
-        <div class="step-num">3</div>
-        <div class="step-title">Wait Gameplay Tag Added でスタンを検知する</div>
-      </div>
-      <div class="step-body">
-        <p>
-          <code>WatchForStun</code> カスタムイベントの実行ピンから続きを作ります。
-          グラフの空白を右クリックして
-          <strong style="color:#fff">「Wait Gameplay Tag Added」</strong> で検索し、ノードを配置します。
-          <code>WatchForStun</code> の実行ピンを繋ぎます。
+          続けて空白を右クリックして
+          <strong style="color:#fff">「Apply Gameplay Effect to Owner」</strong> を検索してノードを配置します。
+          <strong style="color:#fff">Gameplay Effect Class</strong> に <strong style="color:#fff"><code>GE_Charge</code></strong> を設定します。
+          <code>Commit Ability</code> の実行出力ピンに繋ぎます。
         </p>
         <p>
-          <code>Wait Gameplay Tag Added</code> の <strong style="color:#fff">Tag ピン</strong>に
-          <strong style="color:#fff"><code>Status.Stunned</code></strong> を設定します。
+          続けて <strong style="color:#fff">Print String</strong>（文字列: <code>"構え中..."</code>）を配置して繋ぎます。
         </p>
         <p>
-          <code>Wait Gameplay Tag Added</code> ノードの
-          <strong style="color:#fff">「Only Trigger Once」にチェックを入れます。</strong>
-          ノード上に見えない場合は右クリック →「Only Trigger Once」ピンを表示させてください。
-        </p>
-        <p>
-          <code>Wait Gameplay Tag Added</code> の
-          <strong style="color:#fff">「Added」出力ピン</strong>に
-          <strong style="color:#fff">Print String</strong>（文字列: <code>"スタン検知！"</code>）を繋ぎます。
-        </p>
-
-        <div class="bp-flow">
-          <div class="bp-row">
-            <span class="bp-node event">WatchForStun</span>
-            <span class="bp-arrow">→</span>
-            <span class="bp-node">Wait Gameplay Tag Added<br><span style="color:#6a8a6a;font-size:0.75rem;">Tag: Status.Stunned · Only Trigger Once: ✓</span></span>
-            <span class="bp-arrow">[Added] →</span>
-            <span class="bp-node">Print String<br><span style="color:#6a8a6a;font-size:0.75rem;">"スタン検知！"</span></span>
-          </div>
-          <div class="bp-comment">タグが付くまでここで待機。付いた瞬間に「Added」ピンから続く。</div>
-        </div>
-
-        <div class="note-box">
-          <div class="note-label">Wait Gameplay Tag Added の動作</div>
-          <p>
-            このノードに実行が届くと、<code>Status.Stunned</code> タグが ASC に追加されるまでアビリティが待機します。
-            タグが追加された瞬間に <strong style="color:#fff">「Added」</strong> ピンから実行が再開されます。
-          </p>
-        </div>
-
-        <div class="note-box">
-          <div class="note-label">Only Trigger Once を ON にする理由</div>
-          <p>
-            デフォルト（OFF）のままだと発火後もタスクが生き続けます。
-            ループ構造では毎回新しいタスクが追加される一方で古いタスクが残るため、
-            テストを繰り返すたびに「スタン検知！」「スタン解除！」のメッセージが
-            2 回・3 回…と増え続けます。ON にすると発火後にタスクが自分で終了するため、
-            ループを何周しても 1 回ずつ表示されます。
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <div class="step-block">
-      <div class="step-head">
-        <div class="step-num">4</div>
-        <div class="step-title">Wait Gameplay Tag Removed で解除を検知し、ループさせる</div>
-      </div>
-      <div class="step-body">
-        <p>
-          Print String「スタン検知！」の実行出力ピンから続きを作ります。
-          グラフの空白を右クリックして
-          <strong style="color:#fff">「Wait Gameplay Tag Removed」</strong> を検索して配置します。
-          Tag ピンに <strong style="color:#fff"><code>Status.Stunned</code></strong> を設定します。
-        </p>
-        <p>
-          <code>Wait Gameplay Tag Removed</code> ノードも
-          <strong style="color:#fff">「Only Trigger Once」にチェックを入れます。</strong>
+          続けて <strong style="color:#fff">「Wait Gameplay Tag Removed」</strong> を検索してノードを配置します。
+          <strong style="color:#fff">Tag ピン</strong>に <strong style="color:#fff"><code>Status.Charging</code></strong> を設定します。
         </p>
         <p>
           <code>Wait Gameplay Tag Removed</code> の
           <strong style="color:#fff">「Removed」出力ピン</strong>に
-          <strong style="color:#fff">Print String</strong>（文字列: <code>"スタン解除！"</code>）を繋ぎます。
+          <strong style="color:#fff">Print String</strong>（文字列: <code>"解放！"</code>）を繋ぎます。
         </p>
         <p>
-          Print String「スタン解除！」の実行出力ピンを
-          <strong style="color:#fff"><code>WatchForStun</code> カスタムイベントに繋いでループを作ります。</strong>
-          これで、スタン解除後も次のスタンを待ち続けます。
+          最後に Print String「解放！」の実行出力ピンに
+          <strong style="color:#fff">「End Ability」</strong> を繋ぎます。
         </p>
 
         <div class="bp-flow">
-          <div class="bp-comment" style="color:#7ec8e3;margin-bottom:12px;">グラフ全体の流れ</div>
+          <div class="bp-comment" style="color:#7ec8e3;margin-bottom:12px;">GA_Charge のグラフ全体</div>
           <div class="bp-row">
             <span class="bp-node event">Event ActivateAbility</span>
             <span class="bp-arrow">→</span>
             <span class="bp-node">Commit Ability</span>
             <span class="bp-arrow">→</span>
-            <span class="bp-node event">WatchForStun</span>
+            <span class="bp-node">Apply GE to Owner<br><span style="color:#6a8a6a;font-size:0.75rem;">GE_Charge</span></span>
           </div>
-          <div class="bp-row" style="margin-top:8px;">
-            <span class="bp-node event">WatchForStun</span>
+          <div class="bp-row" style="margin-top:4px;">
+            <span class="bp-arrow" style="padding-left:1em;">→</span>
+            <span class="bp-node">Print "構え中..."</span>
             <span class="bp-arrow">→</span>
-            <span class="bp-node">Wait Tag Added<br><span style="color:#6a8a6a;font-size:0.75rem;">Status.Stunned · Only Trigger Once ✓</span></span>
-            <span class="bp-arrow">[Added] →</span>
-            <span class="bp-node">Print "スタン検知！"</span>
+            <span class="bp-node">Wait Tag Removed<br><span style="color:#6a8a6a;font-size:0.75rem;">Status.Charging</span></span>
           </div>
-          <div class="bp-row">
-            <span class="bp-arrow" style="padding-left:2em;">↓</span>
-          </div>
-          <div class="bp-row">
-            <span class="bp-node">Wait Tag Removed<br><span style="color:#6a8a6a;font-size:0.75rem;">Status.Stunned · Only Trigger Once ✓</span></span>
-            <span class="bp-arrow">[Removed] →</span>
-            <span class="bp-node">Print "スタン解除！"</span>
+          <div class="bp-row" style="margin-top:4px;">
+            <span class="bp-arrow" style="padding-left:1em;">[Removed] →</span>
+            <span class="bp-node">Print "解放！"</span>
             <span class="bp-arrow">→</span>
-            <span class="bp-node event">WatchForStun ↺</span>
+            <span class="bp-node green">End Ability</span>
           </div>
-          <div class="bp-comment">EndAbility は接続しない。解除後も次のスタンを待ち続ける。</div>
+          <div class="bp-comment">ループなし。1 回の発動で「構え中...」→ 2 秒 →「解放！」→ 終了。</div>
+        </div>
+
+        <div class="note-box">
+          <div class="note-label">「Apply Gameplay Effect to Owner」が見つからない場合</div>
+          <p>
+            GA Blueprint 内で使えるノードです。見つからない場合は代わりに、
+            My Blueprint → Components → AbilitySystem をドラッグして参照ノードを作り、
+            そこから <strong style="color:#fff">「ApplyGameplayEffectToSelf」</strong> を繋ぐ方法（BP STEP 06 と同じ手順）でも同じ結果になります。
+          </p>
         </div>
 
         <p>ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。</p>
       </div>
     </div>
 
-    <h2>BeginPlay でアビリティを常時起動する</h2>
+    <h2>キャラクターに割り当てる</h2>
 
     <div class="step-block">
       <div class="step-head">
         <div class="step-num">5</div>
-        <div class="step-title">キャラクターの BeginPlay に追加する</div>
+        <div class="step-title">BeginPlay と R キーに設定する</div>
       </div>
       <div class="step-body">
         <p>
           <code>BP_ThirdPersonCharacter</code>（使用中のキャラクター Blueprint）のイベントグラフを開きます。
-          既存の <code>Event BeginPlay</code> に、<code>GA_StunWatcher</code> の登録と起動を<strong style="color:#fff">後ろに追加</strong>します。
         </p>
         <p>
-          <code>Give Ability</code>（Ability Class: <code>GA_StunWatcher</code>）を配置し、
-          その後に <code>Try Activate Ability By Class</code>（In Ability to Activate: <code>GA_StunWatcher</code>）を繋ぎます。
-          どちらも右クリック検索で配置でき、Target に AbilitySystem が自動接続されます。
+          既存の <code>Event BeginPlay</code> の末尾に
+          <strong style="color:#fff"><code>Give Ability</code>（Ability Class: <code>GA_Charge</code>）</strong>
+          を追加します。<code>Try Activate Ability By Class</code> は不要です。
+        </p>
+        <p>
+          次に、グラフの空白を右クリックして <strong style="color:#fff">「R」</strong> で検索し、
+          <strong style="color:#fff">「R」キーの入力イベント</strong>を配置します。
+          R（Pressed）の実行ピンに
+          <strong style="color:#fff"><code>Try Activate Ability By Class</code>（In Ability to Activate: <code>GA_Charge</code>）</strong>
+          を繋ぎます。
         </p>
 
-        <div class="note-box">
-          <div class="note-label">既存のノードは残す</div>
-          <p>
-            BP STEP 03 以降で追加した <code>GA_MyFirstAbility</code> の <code>Give Ability</code> は
-            <strong style="color:#fff">削除せずそのまま</strong>残してください。
-            <code>GA_StunWatcher</code> の <code>Give Ability</code> → <code>Try Activate Ability By Class</code> を
-            その後ろに追加します。
-          </p>
+        <div class="bp-flow">
+          <div class="bp-row">
+            <span class="bp-node event">R（Pressed）</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Try Activate Ability By Class<br><span style="color:#6a8a6a;font-size:0.75rem;">GA_Charge</span></span>
+          </div>
+          <div class="bp-comment">R を押すたびに 1 回の「構え → 解放」サイクルが実行される。</div>
         </div>
 
         <div class="note-box">
-          <div class="note-label">TryActivateAbilityByClass で即座に起動する</div>
+          <div class="note-label">BeginPlay では TryActivate しない理由</div>
           <p>
-            GA_StunWatcher はゲーム開始直後から監視を始める必要があります。
-            BeginPlay で <code>Try Activate Ability By Class</code> を呼ぶことで、
-            ゲーム開始後すぐにアビリティが起動してタグの変化を待機し始めます。
+            GA_Charge は R キーを押すたびに起動し、1 回の処理で完結します。
+            常時動作させる必要がないため、BeginPlay では登録（<code>Give Ability</code>）だけ行います。
           </p>
         </div>
 
@@ -540,22 +501,29 @@
     <div class="step-block">
       <div class="step-head">
         <div class="step-num">6</div>
-        <div class="step-title">スタン検知・解除を確認する</div>
+        <div class="step-title">2 段階実行を確認する</div>
       </div>
       <div class="step-body">
-        <p>プレイを開始して以下の順で操作します。</p>
+        <p>プレイを開始して以下の操作で確認します。</p>
         <ul class="check-list">
-          <li><strong style="color:#fff">E キーを押す</strong> → 「Stunned! (3s)」（bp06 の Print String）と「スタン検知！」が表示される</li>
-          <li><strong style="color:#fff">3 秒待つ</strong> → 「スタン解除！」が表示される</li>
-          <li><strong style="color:#fff">E キーをもう一度押す</strong> → 再び「Stunned! (3s)」と「スタン検知！」が表示される（ループ動作）</li>
+          <li><strong style="color:#fff">R キーを押す</strong> → 「構え中...」が即座に表示される</li>
+          <li><strong style="color:#fff">2 秒後</strong> → 「解放！」が自動で表示される</li>
+          <li><strong style="color:#fff">R キーをもう一度押す</strong> → 同じ流れが繰り返される</li>
         </ul>
-
         <div class="note-box">
-          <div class="note-label">メッセージが表示されない場合</div>
+          <div class="note-label">「構え中...」が表示されない場合</div>
           <p>
-            BeginPlay で <code>Give Ability</code> と <code>Try Activate Ability By Class</code> の両方が
-            <code>GA_StunWatcher</code> に対して接続されているか確認してください。
-            片方だけでは動作しません。
+            BeginPlay に <code>Give Ability（GA_Charge）</code> があるか確認してください。
+            R（Pressed）から <code>Try Activate Ability By Class（GA_Charge）</code> が繋がっているかも確認してください。
+          </p>
+        </div>
+        <div class="note-box">
+          <div class="note-label">「解放！」が表示されない場合</div>
+          <p>
+            <code>GE_Charge</code> の「Target Tags (Granted to Actor)」→「Add to Inherited」に
+            <code>Status.Charging</code> が設定されているか確認してください。
+            <code>Wait Gameplay Tag Removed</code> の Tag ピンに
+            <code>Status.Charging</code> が設定されているかも確認してください。
           </p>
         </div>
       </div>
@@ -564,75 +532,52 @@
     <h2>Wait* ノードとは</h2>
 
     <p>
-      <code>Wait Gameplay Tag Added</code> / <code>Wait Gameplay Tag Removed</code> は
+      <code>Wait Gameplay Tag Removed</code> は
       <strong style="color:#fff">Ability Task</strong> という仕組みで実装された非同期ノードです。
-      アビリティ内で「何かが起きるまで待つ」処理を書くことができます。
+      アビリティが「中断して条件を待ち、条件が満たされたら続きを実行する」ことを可能にします。
     </p>
 
     <table class="concept-table">
       <tr>
         <th>ノード</th>
-        <th>待つ条件</th>
-        <th>発火する出力ピン</th>
-      </tr>
-      <tr>
-        <td><code>Wait Gameplay Tag Added</code></td>
-        <td>指定タグが ASC に追加されるまで</td>
-        <td><strong style="color:#a0c8e8;">Added</strong></td>
+        <th>一時停止する条件</th>
+        <th>再開するタイミング</th>
       </tr>
       <tr>
         <td><code>Wait Gameplay Tag Removed</code></td>
-        <td>指定タグが ASC から削除されるまで</td>
-        <td><strong style="color:#a0c8e8;">Removed</strong></td>
+        <td>指定タグが ASC に付いている間</td>
+        <td>指定タグが ASC から削除された瞬間</td>
+      </tr>
+      <tr>
+        <td><code>Wait Gameplay Tag Added</code></td>
+        <td>指定タグが ASC に付いていない間</td>
+        <td>指定タグが ASC に追加された瞬間</td>
       </tr>
     </table>
+
+    <p>
+      GA_Charge のグラフが「構え中... → <em>ここで 2 秒止まる</em> → 解放！」と一直線に読める点に注目してください。
+      Tick や条件分岐がなくても、タグの変化がアビリティの「続き」を自動で動かします。
+    </p>
 
     <div class="note-box">
       <div class="note-label">Ability Task とは</div>
       <p>
         Ability Task は GameplayAbility 内で非同期処理を行うための仕組みです。
-        <code>Wait Gameplay Tag Added</code> 以外にも
-        <code>Wait Input Pressed</code>（入力を待つ）・<code>Wait Delay</code>（時間を待つ）・
-        <code>Wait Target Data</code>（ターゲット選択を待つ）など多くの種類があります。
-        グラフで「Wait」と検索すると一覧が表示されます。
-      </p>
-    </div>
-
-    <h2>Wait* パターンとサンプルプロジェクト</h2>
-
-    <p>
-      Lyra などの公式サンプルプロジェクトを見ると、アビリティのグラフに
-      <code>Wait～</code> から始まるノードが多数登場します。
-      これは「アビリティが能動的に何かを待つ」という GAS 特有のパターンです。
-    </p>
-
-    <p>
-      このパターンの特徴は <strong style="color:#fff">疎結合</strong> です。
-      GA_StunWatcher は「スタンを付与する側」を知りません。
-      <code>Add Loose Gameplay Tags</code> で付与しても、<code>GE_Stun</code> で付与しても、
-      将来 C++ で付与しても、<code>Status.Stunned</code> タグが変化する限り同じように動作します。
-      「タグが変化したという事実」だけを介して連携するため、
-      付与側と検知側を独立して変更できます。
-    </p>
-
-    <div class="note-box">
-      <div class="note-label">サンプルプロジェクトを読むために</div>
-      <p>
-        Wait* ノードに慣れると、GAS を使ったプロジェクトのアビリティが読みやすくなります。
-        「このアビリティはここで何を待っているのか」を読み解くのが GAS 理解の鍵です。
-        次のステップでは <code>Wait Gameplay Event</code> を使い、
-        アビリティ間でのイベント連携を学びます。
+        <code>Wait Gameplay Tag Removed</code> 以外にも
+        <code>Wait Input Pressed</code>（入力を待つ）・<code>Wait Gameplay Event</code>（イベントを待つ）など多くの種類があります。
+        グラフで「Wait」と検索すると一覧が表示されます。次のステップではイベントを待つ <code>Wait Gameplay Event</code> を使います。
       </p>
     </div>
 
     <h2>うまくいかないときの確認ポイント</h2>
 
     <ul class="check-list">
-      <li>「スタン検知！」が表示されない → BeginPlay で <code>Give Ability</code> と <code>Try Activate Ability By Class</code> に <code>GA_StunWatcher</code> が設定されているか</li>
-      <li>「スタン検知！」が表示されない → <code>Wait Gameplay Tag Added</code> の Tag ピンに <code>Status.Stunned</code> が設定されているか</li>
-      <li>「スタン解除！」が表示されない → <code>Wait Gameplay Tag Removed</code> の Tag ピンに <code>Status.Stunned</code> が設定されているか</li>
-      <li>2 回目以降のスタンで検知しない → Print「スタン解除！」の後に <code>WatchForStun</code> カスタムイベントへの接続があるか（ループになっているか）</li>
-      <li>2 回目以降のスタンでメッセージが増える → <code>Wait Gameplay Tag Added</code> と <code>Wait Gameplay Tag Removed</code> の両方で <code>Only Trigger Once</code> が ON になっているか</li>
+      <li>「構え中...」が表示されない → BeginPlay に <code>Give Ability（GA_Charge）</code> があるか</li>
+      <li>「構え中...」が表示されない → R（Pressed）から <code>Try Activate Ability By Class（GA_Charge）</code> が繋がっているか</li>
+      <li>「構え中...」が表示されない → GA_Charge のグラフで <code>Apply Gameplay Effect to Owner</code> に <code>GE_Charge</code> が設定されているか</li>
+      <li>「解放！」が表示されない → <code>GE_Charge</code> の Grant Tags to Target Actor に <code>Status.Charging</code> が設定されているか</li>
+      <li>「解放！」が表示されない → <code>Wait Gameplay Tag Removed</code> の Tag ピンに <code>Status.Charging</code> が設定されているか</li>
       <li>すべてのブループリントをコンパイル・保存済みか</li>
     </ul>
 
@@ -645,10 +590,9 @@
 
     <div class="point-box">
       <p>
-        <code>Wait Gameplay Tag Added</code> / <code>Wait Gameplay Tag Removed</code> を使うと、
-        アビリティが「タグの変化を待つ」ことができます。<br>
-        タグを付与する手段を問わず反応できるため、システムを疎結合に保てます。
-        これが GameplayTag の「管理が便利」という実感の核心です。
+        <code>Wait Gameplay Tag Removed</code> を使うと、アビリティがグラフの途中で一時停止し、
+        タグが消えた瞬間に自動で続きを動かせます。<br>
+        Tick もタイマーも不要。GE の Duration という「既存の仕組み」をそのままアビリティの待機時間として使えるのが、GAS らしい設計です。
       </p>
     </div>
 
