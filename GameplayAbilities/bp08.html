@@ -305,7 +305,7 @@
 
     <p>
       コンボの核心は <strong style="color:#fff">コンボウィンドウ</strong> という短い時間枠です。
-      攻撃の当たり判定フレームで Duration GE を付与し、
+      モンタージュの任意のフレームに配置した <code>AN_ComboReady</code> が発火すると Duration GE が付与され、
       「この GE が ASC に存在する間（約 0.5 秒）だけ次の段が発動できる」という仕組みで
       タイミングを要求します。
     </p>
@@ -321,7 +321,7 @@
         <span class="bp-node">AM_Combo1 再生</span>
       </div>
       <div class="bp-row bp-indent">
-        <span class="bp-arrow">↓ 当たり判定フレーム（AnimNotify）</span>
+        <span class="bp-arrow">↓ AN_ComboReady 発火</span>
       </div>
       <div class="bp-row bp-indent">
         <span class="bp-node orange">GE_ComboWindow<strong>1</strong> 付与<br><span style="font-size:0.75em;">Status.ComboWindow.1 を 0.5 秒間 ASC に付ける</span></span>
@@ -337,7 +337,7 @@
         <span class="bp-node red">GA_Combo1 キャンセル</span>
       </div>
       <div class="bp-row bp-indent">
-        <span class="bp-arrow">↓ 当たり判定フレーム</span>
+        <span class="bp-arrow">↓ AN_ComboReady 発火</span>
       </div>
       <div class="bp-row bp-indent">
         <span class="bp-node orange">GE_ComboWindow<strong>2</strong> 付与<br><span style="font-size:0.75em;">Status.ComboWindow.2 を 0.5 秒間 ASC に付ける</span></span>
