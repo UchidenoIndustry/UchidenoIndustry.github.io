@@ -522,7 +522,7 @@
           </div>
           <div class="bp-row bp-indent" style="margin-top:8px;">
             <span class="bp-arrow">Then 1 →</span>
-            <span class="bp-node">Wait Gameplay Event<br><span style="color:#6a8a6a;font-size:0.75em;">Event.Attack.Hit / Only Trigger Once: true</span></span>
+            <span class="bp-node">Wait Gameplay Event<br><span style="color:#6a8a6a;font-size:0.75em;">Event.Combo.Ready / Only Trigger Once: true</span></span>
           </div>
           <div class="bp-row bp-indent" style="padding-left:8.5em;">
             <span class="bp-arrow">Event Received →</span>
@@ -537,8 +537,9 @@
         </div>
 
         <div class="note-box">
-          <div class="note-label">AnimNotify の設定（BP STEP 06 の応用）</div>
-          <p>AM_Combo1 の当たり判定フレームに <code>AN_AttackHit</code>（AnimNotify Blueprint）を配置します。<code>AN_AttackHit</code> が <code>Send Gameplay Event to Actor (Event.Attack.Hit)</code> を呼ぶ設定は BP STEP 06 で作成済みです。各モンタージュの当たり判定フレームに同じ Notify を置くだけです。</p>
+          <div class="note-label">AN_ComboReady を新規作成する</div>
+          <p>Content Browser で Blueprint Class → 親クラス <code>AnimNotify</code> → 名前 <strong style="color:#c8d0e0;"><code>AN_ComboReady</code></strong> として新規作成します。作成手順は BP STEP 06 の <code>AN_AttackHit</code> と同じです。<code>Received Notify</code> → <code>Get Owner</code> → <code>Send Gameplay Event to Actor</code> と繋ぎ、Event Tag に <strong style="color:#c8d0e0;"><code>Event.Combo.Ready</code></strong> を設定します。</p>
+          <p>作成後、AM_Combo1 の当たり判定フレームに <code>AN_ComboReady</code> を配置します。AM_Combo2 も同様です。</p>
         </div>
       </div>
     </div>
@@ -613,7 +614,7 @@
           </div>
           <div class="bp-row bp-indent" style="margin-top:4px;">
             <span class="bp-arrow">Then 1 →</span>
-            <span class="bp-node">Wait Gameplay Event<br><span style="color:#6a8a6a;font-size:0.75em;">Event.Attack.Hit / Only Trigger Once: true</span></span>
+            <span class="bp-node">Wait Gameplay Event<br><span style="color:#6a8a6a;font-size:0.75em;">Event.Combo.Ready / Only Trigger Once: true</span></span>
             <span class="bp-arrow">Event Received →</span>
             <span class="bp-node orange">Apply Gameplay Effect<br>to Owner (GE_ComboWindow<strong>2</strong>)</span>
           </div>
