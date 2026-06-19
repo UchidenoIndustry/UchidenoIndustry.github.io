@@ -456,33 +456,19 @@
       </div>
       <div class="step-body">
         <p>
-          Content Browser で右クリック → <strong style="color:#fff">Blueprint Class</strong> →
-          親クラスに <strong style="color:#fff"><code>AnimNotify</code></strong> を指定し、
-          名前を <strong style="color:#fff"><code>AN_ComboReady</code></strong> とします。
+          Content Browser で <code>AN_AttackHit</code> を右クリック →
+          <strong style="color:#fff">Duplicate（複製）</strong> し、
+          名前を <strong style="color:#fff"><code>AN_ComboReady</code></strong> に変更します。
         </p>
         <p>
-          <code>AN_ComboReady</code> を開き、My Blueprint パネル → FUNCTIONS → Override（+）→
-          <strong style="color:#fff">Received Notify</strong> を選択してグラフに配置します。
-          以下のようにノードを接続します。
+          <code>AN_ComboReady</code> を開き、<code>Send Gameplay Event to Actor</code> ノードの
+          Event Tag を <strong style="color:#fff"><code>Event.Combo.Ready</code></strong> に変更します。
+          それ以外のノード接続はそのままで構いません。
         </p>
-        <div class="bp-flow">
-          <div class="bp-row">
-            <span class="bp-node event">Received Notify<br><span style="color:#6a5a6a;font-size:0.75em;">Mesh Component, Animation</span></span>
-            <span class="bp-arrow">→</span>
-            <span class="bp-node">Get Owner<br><span style="color:#6a8a6a;font-size:0.75em;">Mesh Component から</span></span>
-            <span class="bp-arrow">→</span>
-            <span class="bp-node">Send Gameplay Event<br>to Actor<br><span style="color:#6a8a6a;font-size:0.75em;">Event Tag: Event.Combo.Ready</span></span>
-          </div>
-          <div class="bp-comment">Actor ピンに Get Owner の戻り値を繋ぐのを忘れずに。未接続だとサイレント失敗する。</div>
-        </div>
-        <p style="margin-top:12px;">
+        <p>
           作成後、AM_Combo1 と AM_Combo2 のコンボ受付を開始したいフレームに
           <code>AN_ComboReady</code> を Notifies トラックへ配置します。
         </p>
-        <div class="note-box">
-          <div class="note-label">bp06 の AN_AttackHit との違い</div>
-          <p><code>AN_AttackHit</code>（<code>Event.Attack.Hit</code>）はヒット検出やダメージ処理用です。<code>AN_ComboReady</code> はコンボウィンドウを開くためだけに使います。役割が異なるため別の Notify として作成します。</p>
-        </div>
       </div>
     </div>
 
