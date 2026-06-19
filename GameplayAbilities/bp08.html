@@ -295,12 +295,6 @@
       </p>
     </div>
 
-    <div class="note-box">
-      <div class="note-label">なぜモンタージュを 3 つに分けるのか</div>
-      <p>ActionRPG などのサンプルでは、1 つのモンタージュをセクション（Section 1 / Section 2 / Section 3）で分割し、1 つの GA がセクションをジャンプしながらコンボを進めるアプローチもあります。アニメーション担当が 1 アセットで全段を管理しやすい利点があります。</p>
-      <p>このステップでは GAS のタグシステム（<code>Activation Required Tags</code> / <code>Cancel Abilities with Tag</code>）を実感することが目的のため、各段を独立したアビリティとして分割しています。アビリティを分けることで「条件が揃ったときだけ次の段を発動する」という GAS らしい制御の流れが見えやすくなります。また、各段が独立した部品になっているため、「パンチ→パンチ→蹴り」「蹴り→パンチ→パンチ」のような別コンボパターンも、アビリティの組み合わせを差し替えるだけで作れます。</p>
-    </div>
-
     <h2>仕組みを理解する</h2>
 
     <p>
@@ -803,7 +797,13 @@
 
     <div class="note-box">
       <div class="note-label">GE_ComboWindow の持続時間の調整</div>
-      <p>0.5 秒では厳しすぎる・または緩すぎる場合は <code>GE_ComboWindow</code> の Duration Magnitude を変更してください。ウィンドウの長さはアニメーションのテンポに合わせて調整します。</p>
+      <p>0.5 秒では厳しすぎる・または緩すぎる場合は <code>GE_ComboWindow1</code> / <code>GE_ComboWindow2</code> の Duration Magnitude を変更してください。ウィンドウの長さはアニメーションのテンポに合わせて調整します。</p>
+    </div>
+
+    <div class="note-box">
+      <div class="note-label">なぜモンタージュを 3 つに分けるのか</div>
+      <p>ActionRPG などのサンプルでは、1 つのモンタージュをセクション（Section 1 / Section 2 / Section 3）で分割し、1 つの GA がセクションをジャンプしながらコンボを進めるアプローチもあります。アニメーション担当が 1 アセットで全段を管理しやすい利点があります。</p>
+      <p>このステップでは GAS のタグシステム（<code>Activation Required Tags</code> / <code>Cancel Abilities with Tag</code>）を実感することが目的のため、各段を独立したアビリティとして分割しています。アビリティを分けることで「条件が揃ったときだけ次の段を発動する」という GAS らしい制御の流れが見えやすくなります。また、各段が独立した部品になっているため、「パンチ→パンチ→蹴り」「蹴り→パンチ→パンチ」のような別コンボパターンも、アビリティの組み合わせを差し替えるだけで作れます。</p>
     </div>
 
     <h2>まとめ</h2>
