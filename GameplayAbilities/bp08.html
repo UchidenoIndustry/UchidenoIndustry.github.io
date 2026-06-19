@@ -324,15 +324,15 @@
         <span class="bp-arrow">↓ 当たり判定フレーム（AnimNotify）</span>
       </div>
       <div class="bp-row bp-indent">
-        <span class="bp-node orange">GE_ComboWindow 付与<br><span style="font-size:0.75em;">Status.ComboWindow を 0.5 秒間 ASC に付ける</span></span>
+        <span class="bp-node orange">GE_ComboWindow<strong>1</strong> 付与<br><span style="font-size:0.75em;">Status.ComboWindow.1 を 0.5 秒間 ASC に付ける</span></span>
       </div>
 
       <div class="bp-row" style="margin-top:12px;">
         <span class="bp-node event">② Q Pressed</span>
         <span class="bp-arrow">→</span>
-        <span class="bp-node yellow">Combo3 → 失敗</span>
+        <span class="bp-node yellow">Combo3 → 失敗<br><span style="font-size:0.75em;">.2 がないため</span></span>
         <span class="bp-arrow">→</span>
-        <span class="bp-node green">GA_Combo2 発動</span>
+        <span class="bp-node green">GA_Combo2 発動<br><span style="font-size:0.75em;">.1 があるため成功</span></span>
         <span class="bp-arrow">→</span>
         <span class="bp-node red">GA_Combo1 キャンセル</span>
       </div>
@@ -340,7 +340,7 @@
         <span class="bp-arrow">↓ 当たり判定フレーム</span>
       </div>
       <div class="bp-row bp-indent">
-        <span class="bp-node orange">GE_ComboWindow 再付与</span>
+        <span class="bp-node orange">GE_ComboWindow<strong>2</strong> 付与<br><span style="font-size:0.75em;">Status.ComboWindow.2 を 0.5 秒間 ASC に付ける</span></span>
       </div>
 
       <div class="bp-row" style="margin-top:12px;">
@@ -376,8 +376,12 @@
         <td>GA_Combo3 の識別タグ。自己ブロックに使う。</td>
       </tr>
       <tr>
-        <td><code>Status.ComboWindow</code></td>
-        <td>コンボウィンドウが開いている状態を表す。GE_ComboWindow が付与する Duration タグ。GA_Combo2 / GA_Combo3 の <code>Activation Required Tags</code> に設定する。</td>
+        <td><code>Status.ComboWindow.1</code></td>
+        <td>Combo1 の当たりフレームで開くウィンドウ。GE_ComboWindow1 が付与する。GA_Combo2 の <code>Activation Required Tags</code> に設定する。</td>
+      </tr>
+      <tr>
+        <td><code>Status.ComboWindow.2</code></td>
+        <td>Combo2 の当たりフレームで開くウィンドウ。GE_ComboWindow2 が付与する。GA_Combo3 の <code>Activation Required Tags</code> に設定する。</td>
       </tr>
     </table>
 
@@ -391,48 +395,54 @@
     <div class="step-block">
       <div class="step-head">
         <div class="step-num">1</div>
-        <div class="step-title">タグと GE_ComboWindow を作成する</div>
+        <div class="step-title">タグと GE を 2 つ作成する</div>
       </div>
       <div class="step-body">
         <p>
-          まず任意の GameplayAbility の Class Defaults → AssetTags の「+」からタグを4つ新規作成します。
+          まず任意の GameplayAbility の Class Defaults → AssetTags の「+」からタグを5つ新規作成します。
         </p>
         <ul>
           <li><code>Ability.Combo.1</code></li>
           <li><code>Ability.Combo.2</code></li>
           <li><code>Ability.Combo.3</code></li>
-          <li><code>Status.ComboWindow</code></li>
+          <li><code>Status.ComboWindow.1</code></li>
+          <li><code>Status.ComboWindow.2</code></li>
         </ul>
         <p style="margin-top:12px;">
-          次に Content Browser（コンテンツブラウザ）で右クリック →
-          <strong style="color:#fff">Blueprint Class（ブループリントクラス）</strong> →
-          親クラスに <strong style="color:#fff"><code>GameplayEffect</code></strong> を指定し、
-          名前を <strong style="color:#fff"><code>GE_ComboWindow</code></strong> とします。
+          次に GE を <strong style="color:#fff">2 つ</strong>作成します。
+          Content Browser で右クリック → Blueprint Class → 親クラス <code>GameplayEffect</code> で
+          <strong style="color:#fff"><code>GE_ComboWindow1</code></strong> と
+          <strong style="color:#fff"><code>GE_ComboWindow2</code></strong> をそれぞれ作成します。
         </p>
-        <p>
-          <code>GE_ComboWindow</code> を開き、Class Defaults を以下のように設定します。
-        </p>
+        <p>各 GE の Class Defaults を以下のように設定します。</p>
         <table class="concept-table">
           <tr>
             <th>設定箇所</th>
-            <th>値</th>
+            <th>GE_ComboWindow1</th>
+            <th>GE_ComboWindow2</th>
           </tr>
           <tr>
             <td>Duration Policy</td>
             <td><code>Has Duration</code></td>
+            <td><code>Has Duration</code></td>
           </tr>
           <tr>
-            <td>Duration Magnitude（Scalable Float Value）</td>
+            <td>Duration Magnitude</td>
+            <td><code>0.5</code></td>
             <td><code>0.5</code></td>
           </tr>
           <tr>
-            <td>Components → 「+」→ Grant Tags to Target Actor<br>Target Tags (Granted to Actor) → Add Tags → Add to Inherited</td>
-            <td><code>Status.ComboWindow</code></td>
+            <td>Components → Grant Tags → Add to Inherited</td>
+            <td><code>Status.ComboWindow.1</code></td>
+            <td><code>Status.ComboWindow.2</code></td>
           </tr>
         </table>
         <div class="note-box">
-          <div class="note-label">補足</div>
-          <p>GE の Components へのタグ追加方法は BP STEP 04 の GE_Stun 作成と同じ手順です。</p>
+          <div class="note-label">なぜ GE を分けるのか</div>
+          <p>
+            GE を 1 つ（<code>Status.ComboWindow</code>）にすると、Combo1 のウィンドウが開いた時点で GA_Combo2 だけでなく GA_Combo3 の条件も満たされてしまい、Combo1 → Combo3 と段を飛ばして発動してしまいます。
+            GE を段ごとに分けて別々のタグを使うことで「Combo1 のウィンドウでは Combo2 だけ、Combo2 のウィンドウでは Combo3 だけ」が発動できる状態を正確に作れます。
+          </p>
         </div>
       </div>
     </div>
@@ -516,14 +526,14 @@
           </div>
           <div class="bp-row bp-indent" style="padding-left:8.5em;">
             <span class="bp-arrow">Event Received →</span>
-            <span class="bp-node orange">Apply Gameplay Effect<br>to Owner<br><span style="color:#8a6a3a;font-size:0.75em;">GE_ComboWindow</span></span>
+            <span class="bp-node orange">Apply Gameplay Effect<br>to Owner<br><span style="color:#8a6a3a;font-size:0.75em;">GE_ComboWindow<strong>1</strong></span></span>
           </div>
-          <div class="bp-comment">Wait Gameplay Event が発火すると GE_ComboWindow が付与され、0.5 秒間 Status.ComboWindow が ASC に付く。</div>
+          <div class="bp-comment">Wait Gameplay Event が発火すると GE_ComboWindow1 が付与され、0.5 秒間 Status.ComboWindow.1 が ASC に付く。</div>
         </div>
 
         <div class="note-box">
           <div class="note-label">Apply Gameplay Effect to Owner の場所</div>
-          <p>GA Blueprint のイベントグラフで右クリック → <strong style="color:#c8d0e0;">「Apply Gameplay Effect to Owner」</strong> を検索します。見つからない場合は <strong style="color:#c8d0e0;">「Apply Gameplay Effect to Self」</strong> も試してみてください。Gameplay Effect Class に <code>GE_ComboWindow</code>、Level に <code>1.0</code> を設定します。</p>
+          <p>GA Blueprint のイベントグラフで右クリック → <strong style="color:#c8d0e0;">「Apply Gameplay Effect to Owner」</strong> を検索します。見つからない場合は <strong style="color:#c8d0e0;">「Apply Gameplay Effect to Self」</strong> も試してみてください。Gameplay Effect Class に <code>GE_ComboWindow1</code>、Level に <code>1.0</code> を設定します。</p>
         </div>
 
         <div class="note-box">
@@ -558,8 +568,8 @@
           </tr>
           <tr>
             <td><code>Activation Required Tags</code></td>
-            <td><code>Status.ComboWindow</code></td>
-            <td><strong style="color:#fff">新概念：</strong>ASC に <code>Status.ComboWindow</code> がある間だけ発動できる。GE_ComboWindow が切れると発動できなくなる。</td>
+            <td><code>Status.ComboWindow.1</code></td>
+            <td><strong style="color:#fff">新概念：</strong>ASC に <code>Status.ComboWindow.1</code> がある間だけ発動できる。Combo1 のウィンドウ（GE_ComboWindow1）が切れると発動できなくなる。</td>
           </tr>
           <tr>
             <td><code>Cancel Abilities with Tag</code></td>
@@ -605,9 +615,9 @@
             <span class="bp-arrow">Then 1 →</span>
             <span class="bp-node">Wait Gameplay Event<br><span style="color:#6a8a6a;font-size:0.75em;">Event.Attack.Hit / Only Trigger Once: true</span></span>
             <span class="bp-arrow">Event Received →</span>
-            <span class="bp-node orange">Apply Gameplay Effect<br>to Owner (GE_ComboWindow)</span>
+            <span class="bp-node orange">Apply Gameplay Effect<br>to Owner (GE_ComboWindow<strong>2</strong>)</span>
           </div>
-          <div class="bp-comment">GA_Combo2 の当たり判定フレームでも GE_ComboWindow を付与し、3 段目へのウィンドウを開く。</div>
+          <div class="bp-comment">GA_Combo2 の当たり判定フレームで GE_ComboWindow2 を付与し、Status.ComboWindow.2 を ASC に付けて 3 段目へのウィンドウを開く。</div>
         </div>
       </div>
     </div>
@@ -635,7 +645,7 @@
           </tr>
           <tr>
             <td><code>Activation Required Tags</code></td>
-            <td><code>Status.ComboWindow</code></td>
+            <td><code>Status.ComboWindow.2</code></td>
           </tr>
           <tr>
             <td><code>Cancel Abilities with Tag</code></td>
@@ -752,7 +762,7 @@
 
         <div class="note-box">
           <div class="note-label">なぜ高い番号から試すのか</div>
-          <p>3 段目を優先してチェックすることで、<code>Status.ComboWindow</code> がある状態では必ず次段が発動します。低い番号から試すと、Combo1 が常に発動してしまい順番に進みません。</p>
+          <p>Combo1 のウィンドウ中は <code>Status.ComboWindow.1</code> だけが存在します。Combo3（<code>Status.ComboWindow.2</code> 要求）は失敗し、Combo2（<code>Status.ComboWindow.1</code> 要求）が成功します。Combo2 のウィンドウ中は <code>Status.ComboWindow.2</code> が存在するため Combo3 が成功します。低い番号から試すと Combo1 が常に発動してしまい順番に進みません。</p>
         </div>
       </div>
     </div>
@@ -783,7 +793,7 @@
     <ul>
       <li><strong style="color:#fff">Activation Required Tags</strong>：ASC に指定タグがある間だけ発動できる。コンボウィンドウ制御のように「条件が揃ったときだけ」という発動制限に使う。</li>
       <li><strong style="color:#fff">Cancel Abilities with Tag</strong>：発動時に、指定タグを持つ他のアビリティを強制終了する。コンボの段切り替えに使う。</li>
-      <li><strong style="color:#fff">cascading TryActivate</strong>：高い番号から順に TryActivate を試すパターン。Activation Required Tags と組み合わせることで、条件が揃った最大段数に自動的に飛ぶ。</li>
+      <li><strong style="color:#fff">cascading TryActivate</strong>：高い番号から順に TryActivate を試すパターン。段ごとに異なるウィンドウタグ（<code>Status.ComboWindow.1</code> / <code>.2</code>）を使うことで、各段が自分の直前ウィンドウでのみ発動できるよう制御する。</li>
     </ul>
 
     <p>
