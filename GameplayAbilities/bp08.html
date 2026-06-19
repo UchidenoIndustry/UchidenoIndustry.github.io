@@ -447,11 +447,50 @@
       </div>
     </div>
 
-    <h2>GA_Combo1 を作る</h2>
+    <h2>AN_ComboReady を作る</h2>
 
     <div class="step-block">
       <div class="step-head">
         <div class="step-num">2</div>
+        <div class="step-title">AN_ComboReady を作成する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          Content Browser で右クリック → <strong style="color:#fff">Blueprint Class</strong> →
+          親クラスに <strong style="color:#fff"><code>AnimNotify</code></strong> を指定し、
+          名前を <strong style="color:#fff"><code>AN_ComboReady</code></strong> とします。
+        </p>
+        <p>
+          <code>AN_ComboReady</code> を開き、My Blueprint パネル → FUNCTIONS → Override（+）→
+          <strong style="color:#fff">Received Notify</strong> を選択してグラフに配置します。
+          以下のようにノードを接続します。
+        </p>
+        <div class="bp-flow">
+          <div class="bp-row">
+            <span class="bp-node event">Received Notify<br><span style="color:#6a5a6a;font-size:0.75em;">Mesh Component, Animation</span></span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Get Owner<br><span style="color:#6a8a6a;font-size:0.75em;">Mesh Component から</span></span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Send Gameplay Event<br>to Actor<br><span style="color:#6a8a6a;font-size:0.75em;">Event Tag: Event.Combo.Ready</span></span>
+          </div>
+          <div class="bp-comment">Actor ピンに Get Owner の戻り値を繋ぐのを忘れずに。未接続だとサイレント失敗する。</div>
+        </div>
+        <p style="margin-top:12px;">
+          作成後、AM_Combo1 と AM_Combo2 のコンボ受付を開始したいフレームに
+          <code>AN_ComboReady</code> を Notifies トラックへ配置します。
+        </p>
+        <div class="note-box">
+          <div class="note-label">bp06 の AN_AttackHit との違い</div>
+          <p><code>AN_AttackHit</code>（<code>Event.Attack.Hit</code>）はヒット検出やダメージ処理用です。<code>AN_ComboReady</code> はコンボウィンドウを開くためだけに使います。役割が異なるため別の Notify として作成します。</p>
+        </div>
+      </div>
+    </div>
+
+    <h2>GA_Combo1 を作る</h2>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">3</div>
         <div class="step-title">GA_Combo1 Blueprint を作成して Class Defaults を設定する</div>
       </div>
       <div class="step-body">
@@ -483,7 +522,7 @@
 
     <div class="step-block">
       <div class="step-head">
-        <div class="step-num">3</div>
+        <div class="step-num">4</div>
         <div class="step-title">GA_Combo1 のグラフを組む</div>
       </div>
       <div class="step-body">
@@ -536,11 +575,6 @@
           <p>GA Blueprint のイベントグラフで右クリック → <strong style="color:#c8d0e0;">「Apply Gameplay Effect to Owner」</strong> を検索します。見つからない場合は <strong style="color:#c8d0e0;">「Apply Gameplay Effect to Self」</strong> も試してみてください。Gameplay Effect Class に <code>GE_ComboWindow1</code>、Level に <code>1.0</code> を設定します。</p>
         </div>
 
-        <div class="note-box">
-          <div class="note-label">AN_ComboReady を新規作成する</div>
-          <p>Content Browser で Blueprint Class → 親クラス <code>AnimNotify</code> → 名前 <strong style="color:#c8d0e0;"><code>AN_ComboReady</code></strong> として新規作成します。作成手順は BP STEP 06 の <code>AN_AttackHit</code> と同じです。<code>Received Notify</code> → <code>Get Owner</code> → <code>Send Gameplay Event to Actor</code> と繋ぎ、Event Tag に <strong style="color:#c8d0e0;"><code>Event.Combo.Ready</code></strong> を設定します。</p>
-          <p>作成後、AM_Combo1 の当たり判定フレームに <code>AN_ComboReady</code> を配置します。AM_Combo2 も同様です。</p>
-        </div>
       </div>
     </div>
 
@@ -548,7 +582,7 @@
 
     <div class="step-block">
       <div class="step-head">
-        <div class="step-num">4</div>
+        <div class="step-num">5</div>
         <div class="step-title">GA_Combo2 Blueprint を作成して Class Defaults を設定する</div>
       </div>
       <div class="step-body">
@@ -593,7 +627,7 @@
 
     <div class="step-block">
       <div class="step-head">
-        <div class="step-num">5</div>
+        <div class="step-num">6</div>
         <div class="step-title">GA_Combo2 のグラフを組む</div>
       </div>
       <div class="step-body">
@@ -627,7 +661,7 @@
 
     <div class="step-block">
       <div class="step-head">
-        <div class="step-num">6</div>
+        <div class="step-num">7</div>
         <div class="step-title">GA_Combo3 Blueprint を作成して設定する</div>
       </div>
       <div class="step-body">
@@ -694,7 +728,7 @@
 
     <div class="step-block">
       <div class="step-head">
-        <div class="step-num">7</div>
+        <div class="step-num">8</div>
         <div class="step-title">BeginPlay に Give Ability を追加する</div>
       </div>
       <div class="step-body">
@@ -724,7 +758,7 @@
 
     <div class="step-block">
       <div class="step-head">
-        <div class="step-num">8</div>
+        <div class="step-num">9</div>
         <div class="step-title">Q キーのロジックを cascading TryActivate に更新する</div>
       </div>
       <div class="step-body">
