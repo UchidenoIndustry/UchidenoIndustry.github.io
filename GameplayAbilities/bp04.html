@@ -48,14 +48,17 @@
     .nav-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
     .nav-item.done    .nav-dot { background: #a0e8a0; }
     .nav-item.current .nav-dot { background: #e94560; box-shadow: 0 0 7px #e94560aa; }
+    .nav-item.coming  .nav-dot { background: transparent; border: 1px solid #2a3060; }
 
     .nav-text { display: flex; flex-direction: column; }
     .nav-step { font-size: 0.7rem; letter-spacing: 0.08em; display: block; }
     .nav-item.done    .nav-step { color: #4a7860; }
     .nav-item.current .nav-step { color: #e94560; }
+    .nav-item.coming  .nav-step { color: #2a3060; }
     .nav-title { font-size: 0.83rem; display: block; line-height: 1.45; margin-top: 2px; }
     .nav-item.done    .nav-title { color: #90a8a0; }
     .nav-item.current .nav-title { color: #e0e8f8; }
+    .nav-item.coming  .nav-title { color: #2a3060; }
 
     .nav-divider { border-top: 1px solid #1a1a2e; margin: 12px 0 6px; }
     .nav-next-track .nav-dot { background: #3a6a8a; }
@@ -240,6 +243,22 @@
         <span class="nav-title">攻撃フレームを制御する</span>
       </span>
     </a>
+
+    <a class="nav-item done" href="bp07.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 07</span>
+        <span class="nav-title">複数のアビリティとタグを組み合わせる</span>
+      </span>
+    </a>
+
+    <div class="nav-item coming">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 08</span>
+        <span class="nav-title">コンボ攻撃（3連撃）</span>
+      </span>
+    </div>
 
     <div class="nav-divider"></div>
     <a class="nav-item nav-next-track" href="step01.html">

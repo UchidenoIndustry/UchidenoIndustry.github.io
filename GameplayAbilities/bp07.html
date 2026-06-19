@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BP 07 タグの変化を待つ | GameplayAbilities 入門</title>
+  <title>BP 07 複数のアビリティとタグを組み合わせる | GameplayAbilities 入門</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -48,17 +48,17 @@
     .nav-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
     .nav-item.done    .nav-dot { background: #a0e8a0; }
     .nav-item.current .nav-dot { background: #e94560; box-shadow: 0 0 7px #e94560aa; }
-    .nav-item.coming  .nav-dot { border: 1.5px solid #3a4058; background: transparent; }
+    .nav-item.coming  .nav-dot { background: transparent; border: 1px solid #2a3060; }
 
     .nav-text { display: flex; flex-direction: column; }
     .nav-step { font-size: 0.7rem; letter-spacing: 0.08em; display: block; }
     .nav-item.done    .nav-step { color: #4a7860; }
     .nav-item.current .nav-step { color: #e94560; }
-    .nav-item.coming  .nav-step { color: #3a4058; }
+    .nav-item.coming  .nav-step { color: #2a3060; }
     .nav-title { font-size: 0.83rem; display: block; line-height: 1.45; margin-top: 2px; }
     .nav-item.done    .nav-title { color: #90a8a0; }
     .nav-item.current .nav-title { color: #e0e8f8; }
-    .nav-item.coming  .nav-title { color: #3a4058; }
+    .nav-item.coming  .nav-title { color: #2a3060; }
 
     .nav-divider { border-top: 1px solid #1a1a2e; margin: 12px 0 6px; }
     .nav-next-track .nav-dot { background: #3a6a8a; }
@@ -89,6 +89,8 @@
     h2 { font-size: 1.3rem; color: #7ec8e3; margin: 52px 0 16px; padding-bottom: 8px; border-bottom: 1px solid #2a2a4a; }
     h2:first-of-type { margin-top: 0; }
     p { margin-bottom: 16px; color: #c8d0e0; }
+    ul, ol { padding-left: 1.5em; margin-bottom: 16px; color: #c8d0e0; }
+    li { margin-bottom: 6px; }
 
     .step-block { border: 1px solid #2a2a4a; border-radius: 8px; margin: 24px 0; overflow: hidden; }
     .step-block .step-head { background: #1a2a4a; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
@@ -110,8 +112,9 @@
     .note-box { background: #131c2e; border: 1px solid #2a2a4a; border-radius: 6px; padding: 16px 20px; margin: 16px 0; }
     .note-box .note-label { font-size: 0.75rem; color: #6070a0; font-weight: bold; letter-spacing: 0.1em; margin-bottom: 6px; }
     .note-box p { margin-bottom: 0; font-size: 0.9rem; color: #8090a8; }
+    .note-box p + p { margin-top: 8px; }
 
-    .check-list { list-style: none; margin: 16px 0; }
+    .check-list { list-style: none; margin: 16px 0; padding-left: 0; }
     .check-list li { padding: 8px 0 8px 32px; position: relative; color: #c8d0e0; border-bottom: 1px solid #1a2030; }
     .check-list li:last-child { border-bottom: none; }
     .check-list li::before { content: "✓"; position: absolute; left: 0; color: #a0e8a0; font-weight: bold; }
@@ -120,9 +123,11 @@
     .bp-node { display: inline-block; background: #1a2a4a; border: 1px solid #3a4a6a; border-radius: 4px; padding: 4px 12px; color: #a0c8e8; white-space: nowrap; }
     .bp-node.event { background: #2a1a2a; border-color: #6a3a6a; color: #c8a0e8; }
     .bp-node.green { background: #1a2a1a; border-color: #3a6a3a; color: #90e890; }
+    .bp-node.red { background: #2a1a1a; border-color: #6a3a3a; color: #e89090; }
+    .bp-node.orange { background: #2a1a00; border-color: #6a4a00; color: #e8c080; }
     .bp-arrow { color: #4a6a8a; margin: 0 6px; font-size: 1rem; }
     .bp-comment { color: #4a6060; font-size: 0.78rem; margin-top: 8px; font-family: "Hiragino Kaku Gothic ProN","Meiryo",sans-serif; }
-    .bp-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0; margin-bottom: 12px; }
+    .bp-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0; margin-bottom: 8px; }
     .bp-row:last-child { margin-bottom: 0; }
 
     .concept-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.88rem; }
@@ -189,7 +194,7 @@
       <span class="nav-dot"></span>
       <span class="nav-text">
         <span class="nav-step">BP STEP 05</span>
-        <span class="nav-title">アビリティの排他とクールダウン</span>
+        <span class="nav-title">攻撃アビリティを作る</span>
       </span>
     </a>
 
@@ -197,7 +202,7 @@
       <span class="nav-dot"></span>
       <span class="nav-text">
         <span class="nav-step">BP STEP 06</span>
-        <span class="nav-title">Duration GE でスタン自動解除</span>
+        <span class="nav-title">攻撃フレームを制御する</span>
       </span>
     </a>
 
@@ -205,17 +210,17 @@
       <span class="nav-dot"></span>
       <span class="nav-text">
         <span class="nav-step">BP STEP 07</span>
-        <span class="nav-title">タグの変化を待つ</span>
+        <span class="nav-title">複数のアビリティとタグを組み合わせる</span>
       </span>
     </div>
 
-    <a class="nav-item done" href="bp08.html">
+    <div class="nav-item coming">
       <span class="nav-dot"></span>
       <span class="nav-text">
         <span class="nav-step">BP STEP 08</span>
-        <span class="nav-title">イベントで連携する</span>
+        <span class="nav-title">コンボ攻撃（3連撃）</span>
       </span>
-    </a>
+    </div>
 
     <div class="nav-divider"></div>
     <a class="nav-item nav-next-track" href="step01.html">
@@ -238,10 +243,10 @@
       </div>
       <div class="step-label">BP STEP 07</div>
       <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px;">
-        <h1>タグの変化を待つ</h1>
+        <h1>複数のアビリティとタグを組み合わせる</h1>
         <span style="background:#1a3a1a;border:1px solid #2a6a2a;color:#a0e8a0;font-size:0.75rem;padding:2px 8px;border-radius:4px;font-family:'Consolas','Courier New',monospace;white-space:nowrap;">UE 5.5 版</span>
       </div>
-      <p><code>Wait Gameplay Tag Removed</code> でタグ消滅を待ち、「構え → 解放」の 2 段階で処理するアビリティを作る。</p>
+      <p>ダッシュ（Shift）と攻撃（Q）の相互制御を通じて、<code>Activation Owned Tags</code> とタグ設計パターンを体験する。</p>
     </div>
   </header>
 
@@ -252,353 +257,335 @@
     <h2>このステップのゴール</h2>
 
     <p>
-      これまで作ったアビリティは「発動 → 処理 → 終了」という一方向の流れでした。
-      このステップでは <strong style="color:#fff">Wait* ノード（Ability Tasks）</strong> を使い、
-      アビリティがグラフの途中で一時停止し、条件が揃ったら続きを動かせるようにします。
-    </p>
-
-    <p>
-      新しく <strong style="color:#fff">GA_Charge</strong> というアビリティを作ります。
-      R キーを押すと「構え中...」と表示され、2 秒後に自動で「解放！」と表示されます。
-      2 秒間の待機は Tick やタイマーではなく、
-      <strong style="color:#fff">Wait Gameplay Tag Removed</strong> が GE のタグ消滅を待つことで実現します。
+      BP STEP 04 でスタン中に攻撃できなくする制御を実装しました。
+      このステップでは複数のアビリティを組み合わせ、
+      <strong style="color:#fff">「ダッシュ中は攻撃できない」「攻撃中はダッシュできない」</strong>
+      という双方向の制御を実装します。
     </p>
 
     <ul class="check-list">
-      <li><code>Status.Charging</code> タグと <code>GE_Charge</code>（Has Duration 2s）を用意する</li>
-      <li>GA_Charge Blueprint を作成し、GE を付与したあと <code>Wait Gameplay Tag Removed</code> でタグ消滅を待つ</li>
-      <li>R キーを押すと「構え中...」→ 2 秒後 →「解放！」と順番に表示されることを確認する</li>
+      <li>タグを <code>Ability.*</code>（アビリティの識別）と <code>Status.*</code>（キャラクターの状態）に分けて設計する</li>
+      <li>新概念 <code>Activation Owned Tags</code> で、ダッシュ中に <code>Status.Dashing</code> タグを ASC に自動付与する</li>
+      <li>GA_Dash（Shift キー）を新しく作る</li>
+      <li>GA_Attack に設定を追加し、ダッシュ中と攻撃中の相互制御を完成させる</li>
     </ul>
 
     <div class="point-box">
       <p>
-        <code>Wait Gameplay Tag Removed</code> ノードに実行が届くと、<code>Status.Charging</code> タグが消えるまでアビリティが一時停止します。
-        GE_Charge の Duration（2 秒）が終わってタグが消えると、自動的に続きが動き出します。
-        Tick もタイマーも不要で、「GE が切れるまで待つ」処理がノード 1 つで完結します。
+        実際のゲームでは、アビリティの数が増えるほどタグ設計の重要性が増します。
+        「どのタグをどの目的で使うか」を最初に決めておくと、
+        後から追加するアビリティも同じルールに乗れます。
+        このステップで紹介する <code>Ability.*</code> / <code>Status.*</code> の分け方は、
+        Lyra などのサンプルプロジェクトでも採用されているパターンです。
       </p>
     </div>
 
-    <h2>Status.Charging タグを登録する</h2>
+    <h2>タグを設計する</h2>
+
+    <p>
+      今回使うタグは3種類です。<code>Ability.Attack</code> は BP STEP 04 で作成済みなので、
+      新しく作るのは <code>Ability.Dash</code> と <code>Status.Dashing</code> の2つです。
+    </p>
+
+    <table class="concept-table">
+      <tr>
+        <th>タグ</th>
+        <th>種類</th>
+        <th>用途</th>
+      </tr>
+      <tr>
+        <td><code>Ability.Attack</code></td>
+        <td>Ability（識別）</td>
+        <td>GA_Attack を識別するラベル。攻撃中に GA_Dash をブロックするために使う。</td>
+      </tr>
+      <tr>
+        <td><code>Ability.Dash</code></td>
+        <td>Ability（識別）</td>
+        <td>GA_Dash を識別するラベル。攻撃中に GA_Dash をブロックするために参照される。</td>
+      </tr>
+      <tr>
+        <td><code>Status.Dashing</code></td>
+        <td>Status（状態）</td>
+        <td>「ダッシュ中」というキャラクターの状態を表す。GA_Dash の発動中、ASC に自動付与される。</td>
+      </tr>
+    </table>
+
+    <div class="note-box">
+      <div class="note-label">タグ設計の2層構造</div>
+      <p><code>Ability.*</code> タグはアビリティ同士が互いを識別するために使います。<code>Block Abilities with Tag</code> でよく登場します。</p>
+      <p><code>Status.*</code> タグはキャラクターの「いま何をしているか」を表します。<code>Activation Blocked Tags</code> / <code>Activation Required Tags</code> でよく登場します。</p>
+    </div>
+
+    <h2>GA_Dash を作る</h2>
 
     <div class="step-block">
       <div class="step-head">
         <div class="step-num">1</div>
-        <div class="step-title">Status.Charging タグを追加する</div>
+        <div class="step-title">新しいタグを作成する</div>
       </div>
       <div class="step-body">
         <p>
-          メニューバーの <strong style="color:#fff">Edit（編集） → Project Settings（プロジェクト設定）</strong> を開き、
-          左のリストから <strong style="color:#fff">「GameplayTags」</strong> を選択します。
-          <strong style="color:#fff">「Manage Gameplay Tags（ゲームプレイタグを管理）」</strong>をクリックし、
-          <strong style="color:#fff">「+」</strong> ボタンで新しいタグを追加します。
-        </p>
-        <div class="code-wrap">
-          <div class="code-label">追加するタグ</div>
-          <pre><code>Status.Charging</code></pre>
-        </div>
-        <p>
-          Source のドロップダウンから ini ファイルを選択して
-          <strong style="color:#fff">「Add New Tag（新しいタグを追加）」</strong> をクリックします。
+          任意の GameplayAbility Blueprint の Class Defaults を開き、
+          <strong style="color:#fff">AssetTags (Default AbilityTags)</strong> の「+」をクリックします。
+          タグブラウザで <code>Ability.Dash</code> を新規作成します。
+          同様に <code>Status.Dashing</code> も作成します。
+          Source は <code>DefaultGameplayTags.ini</code>（またはプロジェクト名 .ini）を選択してください。
         </p>
         <div class="note-box">
-          <div class="note-label">Status.Stunned がある場合</div>
-          <p>
-            BP STEP 04 以降で <code>Status.Stunned</code> を追加済みであれば、
-            同じ <code>Status</code> 親タグ配下に <code>Status.Charging</code> が追加されます。
-          </p>
+          <div class="note-label">補足</div>
+          <p>タグはどのアビリティの詳細パネルから作成しても、同じ <code>DefaultGameplayTags.ini</code> に保存されます。作成場所は問いません。</p>
         </div>
       </div>
     </div>
-
-    <h2>GE_Charge を作成する</h2>
 
     <div class="step-block">
       <div class="step-head">
         <div class="step-num">2</div>
-        <div class="step-title">GE_Charge Blueprint を作成する</div>
+        <div class="step-title">GA_Dash Blueprint を作成する</div>
       </div>
       <div class="step-body">
         <p>
           Content Browser（コンテンツブラウザ）で右クリック →
-          <strong style="color:#fff">「Blueprint Class（ブループリントクラス）」</strong>を選択。
-          親クラスの検索欄に <strong style="color:#fff">「GameplayEffect」</strong> と入力して選択し、
-          名前を <strong style="color:#fff"><code>GE_Charge</code></strong> にして作成します。
+          <strong style="color:#fff">Blueprint Class（ブループリントクラス）</strong>を選択します。
+          親クラスに <strong style="color:#fff"><code>GameplayAbility</code></strong> を指定し、
+          名前を <strong style="color:#fff"><code>GA_Dash</code></strong> とします。
         </p>
-        <p>
-          <code>GE_Charge</code> を開き、Class Defaults（クラスのデフォルト）の詳細パネルで以下を設定します。
-        </p>
-        <div class="code-wrap">
-          <div class="code-label">GE_Charge の設定</div>
-          <pre><code>Duration Policy    : Has Duration
-Duration Magnitude : 2.0</code></pre>
-        </div>
-        <p>
-          次に <strong style="color:#fff">「Gameplay Effect」セクション → 「Components」の「+」</strong> をクリックし、
-          ドロップダウンから <strong style="color:#fff">「Grant Tags to Target Actor」</strong> を選択します。
-        </p>
-        <p>
-          追加されたコンポーネント（表示名: <strong style="color:#fff">「Target Tags (Granted to Actor)」</strong>）の
-          <strong style="color:#fff">「Add Tags」→「Add to Inherited」</strong> に
-          <strong style="color:#fff"><code>Status.Charging</code></strong> を追加します。
-        </p>
-        <p>ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。</p>
-        <div class="note-box">
-          <div class="note-label">GE_Stun と同じ作り方</div>
-          <p>
-            BP STEP 06 の <code>GE_Stun</code> と同じ手順です。
-            Duration を 2s に、付与するタグを <code>Status.Charging</code> に変えるだけです。
-          </p>
-        </div>
       </div>
     </div>
-
-    <h2>GA_Charge を作成する</h2>
 
     <div class="step-block">
       <div class="step-head">
         <div class="step-num">3</div>
-        <div class="step-title">GA_Charge Blueprint を作成する</div>
+        <div class="step-title">GA_Dash の Class Defaults でタグを設定する</div>
       </div>
       <div class="step-body">
         <p>
-          Content Browser（コンテンツブラウザ）で右クリック →
-          <strong style="color:#fff">「Blueprint Class（ブループリントクラス）」</strong>を選択。
-          親クラスの検索欄に <strong style="color:#fff">「GameplayAbility」</strong> と入力して選択し、
-          名前を <strong style="color:#fff"><code>GA_Charge</code></strong> にして作成します。
+          <code>GA_Dash</code> を開き、ツールバーの <strong style="color:#fff">Class Defaults（クラスのデフォルト）</strong>をクリックして詳細パネルを開きます。
+          Tags セクションで以下の3つを設定します。
         </p>
-        <p>
-          <code>GA_Charge</code> を開くと、イベントグラフに
-          <code>Event ActivateAbility</code> がすでに配置されています。
-        </p>
+
+        <table class="concept-table">
+          <tr>
+            <th>フィールド</th>
+            <th>設定値</th>
+            <th>意味</th>
+          </tr>
+          <tr>
+            <td><code>AssetTags</code><br><span style="font-size:0.8em;color:#6070a0;">(Default AbilityTags)</span></td>
+            <td><code>Ability.Dash</code></td>
+            <td>このアビリティのラベル。他のアビリティから「ダッシュアビリティ」として参照される。</td>
+          </tr>
+          <tr>
+            <td><code>Activation Owned Tags</code></td>
+            <td><code>Status.Dashing</code></td>
+            <td><strong style="color:#fff">新概念：</strong>このアビリティが発動中、ASC に <code>Status.Dashing</code> タグを自動付与する。EndAbility が呼ばれると自動的に除去される。</td>
+          </tr>
+          <tr>
+            <td><code>Block Abilities with Tag</code></td>
+            <td><code>Ability.Dash</code></td>
+            <td>発動中、<code>Ability.Dash</code> タグを持つアビリティ（自分自身）の再発動を防ぐ。</td>
+          </tr>
+        </table>
+
+        <div class="note-box">
+          <div class="note-label">Activation Owned Tags のポイント</div>
+          <p><code>Activation Owned Tags</code> に設定したタグは、このアビリティが <code>End Ability</code> を呼んだ瞬間に ASC から自動的に除去されます。<code>Remove Loose Gameplay Tags</code> で手動削除する必要はありません。</p>
+        </div>
       </div>
     </div>
-
-    <h2>アビリティのグラフを組む</h2>
-
-    <p>
-      GA_Charge は「GE を付与 → タグが消えるまで待機 → 終了」という一直線の流れです。
-      ループ構造は使わず、<strong style="color:#fff">1 回の発動で完結</strong>します。
-    </p>
 
     <div class="step-block">
       <div class="step-head">
         <div class="step-num">4</div>
-        <div class="step-title">GE を付与して Wait Tag Removed に繋げる</div>
+        <div class="step-title">GA_Dash のグラフを組む</div>
       </div>
       <div class="step-body">
         <p>
-          イベントグラフの空白を右クリックして
-          <strong style="color:#fff">「Commit Ability」</strong> を配置し、
-          <code>Event ActivateAbility</code> の実行ピンに繋ぎます。
-        </p>
-        <p>
-          続けて空白を右クリックして
-          <strong style="color:#fff">「Apply Gameplay Effect to Owner」</strong> を検索してノードを配置します。
-          <strong style="color:#fff">Gameplay Effect Class</strong> に <strong style="color:#fff"><code>GE_Charge</code></strong> を設定します。
-          <code>Commit Ability</code> の実行出力ピンに繋ぎます。
-        </p>
-        <p>
-          続けて <strong style="color:#fff">Print String</strong>（文字列: <code>"構え中..."</code>）を配置して繋ぎます。
-        </p>
-        <p>
-          続けて <strong style="color:#fff">「Wait Gameplay Tag Removed」</strong> を検索してノードを配置します。
-          <strong style="color:#fff">Tag ピン</strong>に <strong style="color:#fff"><code>Status.Charging</code></strong> を設定します。
-        </p>
-        <p>
-          <code>Wait Gameplay Tag Removed</code> の
-          <strong style="color:#fff">「Removed」出力ピン</strong>に
-          <strong style="color:#fff">Print String</strong>（文字列: <code>"解放！"</code>）を繋ぎます。
-        </p>
-        <p>
-          最後に Print String「解放！」の実行出力ピンに
-          <strong style="color:#fff">「End Ability」</strong> を繋ぎます。
+          <code>GA_Dash</code> のイベントグラフを開きます。
+          <code>Event ActivateAbility</code> はすでにグラフに配置されています。
+          <code>Commit Ability</code> → <code>Delay</code>（0.5 秒）→ <code>End Ability</code> の順に接続します。
         </p>
 
         <div class="bp-flow">
-          <div class="bp-comment" style="color:#7ec8e3;margin-bottom:12px;">GA_Charge のグラフ全体</div>
           <div class="bp-row">
             <span class="bp-node event">Event ActivateAbility</span>
             <span class="bp-arrow">→</span>
-            <span class="bp-node">Commit Ability</span>
+            <span class="bp-node green">Commit Ability</span>
             <span class="bp-arrow">→</span>
-            <span class="bp-node">Apply GE to Owner<br><span style="color:#6a8a6a;font-size:0.75rem;">GE_Charge</span></span>
-          </div>
-          <div class="bp-row" style="margin-top:4px;">
-            <span class="bp-arrow" style="padding-left:1em;">→</span>
-            <span class="bp-node">Print "構え中..."</span>
-            <span class="bp-arrow">→</span>
-            <span class="bp-node">Wait Tag Removed<br><span style="color:#6a8a6a;font-size:0.75rem;">Status.Charging</span></span>
-          </div>
-          <div class="bp-row" style="margin-top:4px;">
-            <span class="bp-arrow" style="padding-left:1em;">[Removed] →</span>
-            <span class="bp-node">Print "解放！"</span>
+            <span class="bp-node">Delay<br><span style="color:#6a8a6a;font-size:0.75em;">Duration: 0.5</span></span>
             <span class="bp-arrow">→</span>
             <span class="bp-node green">End Ability</span>
           </div>
-          <div class="bp-comment">ループなし。1 回の発動で「構え中...」→ 2 秒 →「解放！」→ 終了。</div>
+          <div class="bp-comment">Delay の間 GA_Dash が発動中なので、Activation Owned Tags で Status.Dashing が ASC に付いている。</div>
         </div>
 
         <div class="note-box">
-          <div class="note-label">「Apply Gameplay Effect to Owner」が見つからない場合</div>
-          <p>
-            GA Blueprint 内で使えるノードです。見つからない場合は代わりに、
-            My Blueprint → Components → AbilitySystem をドラッグして参照ノードを作り、
-            そこから <strong style="color:#fff">「ApplyGameplayEffectToSelf」</strong> を繋ぐ方法（BP STEP 06 と同じ手順）でも同じ結果になります。
-          </p>
+          <div class="note-label">アニメーションを使う場合</div>
+          <p>実際のゲームでは <code>Delay</code> の代わりに BP STEP 05 で学んだ <code>Play Montage and Wait</code> を使います。ここではシンプルに <code>Delay</code> で動作を確認します。</p>
         </div>
-
-        <p>ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。</p>
       </div>
     </div>
 
-    <h2>キャラクターに割り当てる</h2>
+    <h2>GA_Attack にタグを追加する</h2>
+
+    <p>
+      BP STEP 05 で作成した <code>GA_Attack</code> の Class Defaults を開き、
+      Tags セクションに2つの設定を追加します。
+    </p>
 
     <div class="step-block">
       <div class="step-head">
         <div class="step-num">5</div>
-        <div class="step-title">BeginPlay と R キーに設定する</div>
+        <div class="step-title">GA_Attack の Tags セクションを編集する</div>
+      </div>
+      <div class="step-body">
+        <table class="concept-table">
+          <tr>
+            <th>フィールド</th>
+            <th>追加する値</th>
+            <th>意味</th>
+          </tr>
+          <tr>
+            <td><code>Block Abilities with Tag</code></td>
+            <td><code>Ability.Dash</code> を追加</td>
+            <td>攻撃中は、<code>Ability.Dash</code> タグを持つアビリティ（GA_Dash）をブロックする。</td>
+          </tr>
+          <tr>
+            <td><code>Activation Blocked Tags</code></td>
+            <td><code>Status.Dashing</code> を追加</td>
+            <td>ASC に <code>Status.Dashing</code> タグがある間（ダッシュ中）、GA_Attack は発動できない。</td>
+          </tr>
+        </table>
+
+        <div class="note-box">
+          <div class="note-label">Block Abilities with Tag と Activation Blocked Tags の使い分け</div>
+          <p><strong style="color:#c8d0e0;">Block Abilities with Tag</strong>（攻撃 → ダッシュをブロック）: 攻撃アビリティが発動中に、指定タグ（<code>Ability.Dash</code>）を AssetTags に<strong style="color:#fff">持つアビリティ</strong>を直接ブロックします。「相手を名指しする」イメージ。</p>
+          <p><strong style="color:#c8d0e0;">Activation Blocked Tags</strong>（ダッシュ中 → 攻撃をブロック）: ASC に指定タグ（<code>Status.Dashing</code>）が付いている間、<strong style="color:#fff">自分自身</strong>が発動できなくなります。「状態を経由して制御する」イメージ。</p>
+        </div>
+      </div>
+    </div>
+
+    <h2>2つの制御パターンの全体像</h2>
+
+    <p>設定完了後の制御の仕組みをまとめます。</p>
+
+    <table class="concept-table">
+      <tr>
+        <th>制御したい状況</th>
+        <th>使ったフィールド</th>
+        <th>仕組み</th>
+      </tr>
+      <tr>
+        <td>ダッシュ中は攻撃できない</td>
+        <td>GA_Dash: <code>Activation Owned Tags: Status.Dashing</code><br>GA_Attack: <code>Activation Blocked Tags: Status.Dashing</code></td>
+        <td>GA_Dash の発動中、ASC に <code>Status.Dashing</code> が付く。GA_Attack はこのタグがある間は発動できない。</td>
+      </tr>
+      <tr>
+        <td>攻撃中はダッシュできない</td>
+        <td>GA_Attack: <code>Block Abilities with Tag: Ability.Dash</code></td>
+        <td>GA_Attack の発動中、<code>Ability.Dash</code> を AssetTags に持つアビリティ（GA_Dash）がブロックされる。</td>
+      </tr>
+      <tr>
+        <td>ダッシュ中にダッシュできない</td>
+        <td>GA_Dash: <code>Block Abilities with Tag: Ability.Dash</code></td>
+        <td>GA_Dash の発動中、自分自身の再発動がブロックされる。</td>
+      </tr>
+    </table>
+
+    <h2>キャラクター BP にダッシュを組み込む</h2>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">6</div>
+        <div class="step-title">BeginPlay に Give Ability を追加する</div>
       </div>
       <div class="step-body">
         <p>
-          <code>BP_ThirdPersonCharacter</code>（使用中のキャラクター Blueprint）のイベントグラフを開きます。
-        </p>
-        <p>
-          既存の <code>Event BeginPlay</code> の末尾に
-          <strong style="color:#fff"><code>Give Ability</code>（Ability Class: <code>GA_Charge</code>）</strong>
-          を追加します。<code>Try Activate Ability By Class</code> は不要です。
-        </p>
-        <p>
-          次に、グラフの空白を右クリックして <strong style="color:#fff">「R」</strong> で検索し、
-          <strong style="color:#fff">「R」キーの入力イベント</strong>を配置します。
-          R（Pressed）の実行ピンに
-          <strong style="color:#fff"><code>Try Activate Ability By Class</code>（In Ability to Activate: <code>GA_Charge</code>）</strong>
-          を繋ぎます。
+          キャラクター Blueprint を開き、Event BeginPlay のグラフで
+          既存の <code>Give Ability (GA_Attack)</code> の次に
+          <strong style="color:#fff"><code>Give Ability (GA_Dash)</code></strong> を追加します。
         </p>
 
         <div class="bp-flow">
           <div class="bp-row">
-            <span class="bp-node event">R（Pressed）</span>
+            <span class="bp-node event">Event BeginPlay</span>
             <span class="bp-arrow">→</span>
-            <span class="bp-node">Try Activate Ability By Class<br><span style="color:#6a8a6a;font-size:0.75rem;">GA_Charge</span></span>
+            <span class="bp-node">Give Ability<br><span style="color:#6a8a6a;font-size:0.75em;">GA_Attack</span></span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Give Ability<br><span style="color:#6a8a6a;font-size:0.75em;">GA_Dash</span></span>
           </div>
-          <div class="bp-comment">R を押すたびに 1 回の「構え → 解放」サイクルが実行される。</div>
+          <div class="bp-comment">GA_Dash を Give しないと TryActivateAbilityByClass を呼んでも何も起きない。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">7</div>
+        <div class="step-title">Shift キーで GA_Dash を発動させる</div>
+      </div>
+      <div class="step-body">
+        <p>
+          イベントグラフの空白部分を右クリックし、
+          <strong style="color:#fff">「Left Shift」</strong>を検索して
+          <strong style="color:#fff">Keyboard Events（キーボードイベント） → Left Shift</strong> ノードを配置します。
+          <strong style="color:#fff">Pressed</strong> 出力から <code>Try Activate Ability By Class</code> に繋ぎ、
+          <strong style="color:#fff">In Ability to Activate</strong> に <code>GA_Dash</code> を指定します。
+        </p>
+
+        <div class="bp-flow">
+          <div class="bp-row">
+            <span class="bp-node event">Left Shift<br>Pressed</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Try Activate Ability By Class<br><span style="color:#6a8a6a;font-size:0.75em;">In Ability to Activate: GA_Dash</span></span>
+          </div>
         </div>
 
         <div class="note-box">
-          <div class="note-label">BeginPlay では TryActivate しない理由</div>
-          <p>
-            GA_Charge は R キーを押すたびに起動し、1 回の処理で完結します。
-            常時動作させる必要がないため、BeginPlay では登録（<code>Give Ability</code>）だけ行います。
-          </p>
+          <div class="note-label">補足</div>
+          <p>サードパーソンテンプレートのデフォルト設定では Left Shift には何も割り当てられていません。別のアクションと競合する場合はキーを変更してください。</p>
         </div>
-
-        <p>ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。</p>
       </div>
     </div>
 
     <h2>動作確認</h2>
 
-    <div class="step-block">
-      <div class="step-head">
-        <div class="step-num">6</div>
-        <div class="step-title">2 段階実行を確認する</div>
-      </div>
-      <div class="step-body">
-        <p>プレイを開始して以下の操作で確認します。</p>
-        <ul class="check-list">
-          <li><strong style="color:#fff">R キーを押す</strong> → 「構え中...」が即座に表示される</li>
-          <li><strong style="color:#fff">2 秒後</strong> → 「解放！」が自動で表示される</li>
-          <li><strong style="color:#fff">R キーをもう一度押す</strong> → 同じ流れが繰り返される</li>
-        </ul>
-        <div class="note-box">
-          <div class="note-label">「構え中...」が表示されない場合</div>
-          <p>
-            BeginPlay に <code>Give Ability（GA_Charge）</code> があるか確認してください。
-            R（Pressed）から <code>Try Activate Ability By Class（GA_Charge）</code> が繋がっているかも確認してください。
-          </p>
-        </div>
-        <div class="note-box">
-          <div class="note-label">「解放！」が表示されない場合</div>
-          <p>
-            <code>GE_Charge</code> の「Target Tags (Granted to Actor)」→「Add to Inherited」に
-            <code>Status.Charging</code> が設定されているか確認してください。
-            <code>Wait Gameplay Tag Removed</code> の Tag ピンに
-            <code>Status.Charging</code> が設定されているかも確認してください。
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <h2>Wait* ノードとは</h2>
-
-    <p>
-      <code>Wait Gameplay Tag Removed</code> は
-      <strong style="color:#fff">Ability Task</strong> という仕組みで実装された非同期ノードです。
-      アビリティが「中断して条件を待ち、条件が満たされたら続きを実行する」ことを可能にします。
-    </p>
-
-    <table class="concept-table">
-      <tr>
-        <th>ノード</th>
-        <th>一時停止する条件</th>
-        <th>再開するタイミング</th>
-      </tr>
-      <tr>
-        <td><code>Wait Gameplay Tag Removed</code></td>
-        <td>指定タグが ASC に付いている間</td>
-        <td>指定タグが ASC から削除された瞬間</td>
-      </tr>
-      <tr>
-        <td><code>Wait Gameplay Tag Added</code></td>
-        <td>指定タグが ASC に付いていない間</td>
-        <td>指定タグが ASC に追加された瞬間</td>
-      </tr>
-    </table>
-
-    <p>
-      GA_Charge のグラフが「構え中... → <em>ここで 2 秒止まる</em> → 解放！」と一直線に読める点に注目してください。
-      Tick や条件分岐がなくても、タグの変化がアビリティの「続き」を自動で動かします。
-    </p>
-
-    <div class="note-box">
-      <div class="note-label">Ability Task とは</div>
-      <p>
-        Ability Task は GameplayAbility 内で非同期処理を行うための仕組みです。
-        <code>Wait Gameplay Tag Removed</code> 以外にも
-        <code>Wait Input Pressed</code>（入力を待つ）・<code>Wait Gameplay Event</code>（イベントを待つ）など多くの種類があります。
-        グラフで「Wait」と検索すると一覧が表示されます。次のステップではイベントを待つ <code>Wait Gameplay Event</code> を使います。
-      </p>
-    </div>
-
-    <h2>うまくいかないときの確認ポイント</h2>
+    <p>Play（プレイ）してキャラクターを動かし、以下を確認します。</p>
 
     <ul class="check-list">
-      <li>「構え中...」が表示されない → BeginPlay に <code>Give Ability（GA_Charge）</code> があるか</li>
-      <li>「構え中...」が表示されない → R（Pressed）から <code>Try Activate Ability By Class（GA_Charge）</code> が繋がっているか</li>
-      <li>「構え中...」が表示されない → GA_Charge のグラフで <code>Apply Gameplay Effect to Owner</code> に <code>GE_Charge</code> が設定されているか</li>
-      <li>「解放！」が表示されない → <code>GE_Charge</code> の Grant Tags to Target Actor に <code>Status.Charging</code> が設定されているか</li>
-      <li>「解放！」が表示されない → <code>Wait Gameplay Tag Removed</code> の Tag ピンに <code>Status.Charging</code> が設定されているか</li>
-      <li>すべてのブループリントをコンパイル・保存済みか</li>
+      <li>Q キーを押すと攻撃が発動する</li>
+      <li>Shift キーを押すと 0.5 秒ほどダッシュ（Delay）が発動する</li>
+      <li>Shift 押下中（Delay の間）に Q キーを押しても攻撃が発動しない</li>
+      <li>Q キーの攻撃中に Shift キーを押してもダッシュが発動しない</li>
+      <li>Q や Shift を素早く連打しても二重発動しない</li>
     </ul>
 
     <div class="note-box">
-      <div class="note-label">チュートリアル通りにならない場合</div>
-      <p>このチュートリアルは UE 5.5 で動作確認しています。別バージョンをお使いの場合は UE 5.5 で試してみてください。</p>
+      <div class="note-label">動作確認のヒント</div>
+      <p>ブロックが機能しているか確認するには、<code>Try Activate Ability By Class</code> の <strong style="color:#fff">Return Value（戻り値）</strong>を <code>Print String</code> に繋ぎます。ブロックされたときは <code>false</code> が表示されます。</p>
     </div>
 
     <h2>まとめ</h2>
 
-    <div class="point-box">
-      <p>
-        <code>Wait Gameplay Tag Removed</code> を使うと、アビリティがグラフの途中で一時停止し、
-        タグが消えた瞬間に自動で続きを動かせます。<br>
-        Tick もタイマーも不要。GE の Duration という「既存の仕組み」をそのままアビリティの待機時間として使えるのが、GAS らしい設計です。
-      </p>
-    </div>
+    <p>
+      このステップでは、2つのアビリティが互いを制御し合う仕組みを実装しました。
+    </p>
+
+    <ul>
+      <li><strong style="color:#fff">Activation Owned Tags</strong>：アビリティが発動中、指定タグを ASC に自動付与する。<code>EndAbility</code> で自動除去されるため、手動管理が不要。</li>
+      <li><strong style="color:#fff">Block Abilities with Tag</strong>：発動中に、特定タグを AssetTags に持つ他のアビリティをブロックする（相手を名指し）。</li>
+      <li><strong style="color:#fff">Activation Blocked Tags</strong>：ASC に特定タグがある間、そのアビリティ自身が発動できなくなる（状態を経由して制御）。</li>
+    </ul>
+
+    <p>
+      この3つのフィールドを組み合わせると、スタン・無敵・チャージ中など
+      あらゆる「状態と制御の関係」をタグだけで表現できます。
+      次のステップでは、このタグ設計を活かしてコンボ攻撃（3連撃）を実装します。
+    </p>
 
     <div class="page-nav">
-      <a href="bp06.html">&#8592; BP STEP 06 Duration GE でスタン自動解除</a>
-      <a class="next" href="bp08.html">BP STEP 08 イベントで連携する &#8594;</a>
+      <a href="bp06.html">&#8592; BP STEP 06 攻撃フレームを制御する</a>
+      <a class="next" href="bp08.html">BP STEP 08 コンボ攻撃（3連撃） &#8594;</a>
     </div>
 
   </main>
