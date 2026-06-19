@@ -194,26 +194,14 @@
 
         <a class="card bp" href="bp05.html">
           <div class="number">BP STEP 05</div>
-          <h3>アビリティの排他とクールダウン</h3>
-          <p>Block Abilities with Tag で同時発動を防ぎ、Duration GE でクールダウンを実装する。</p>
+          <h3>攻撃アビリティを作る</h3>
+          <p>Play Montage and Wait でアニメーションと同期した攻撃アビリティを作る。Block Abilities with Tag で発動中の再発動を防ぐ。</p>
         </a>
 
         <a class="card bp" href="bp06.html">
           <div class="number">BP STEP 06</div>
-          <h3>Duration GE でスタン自動解除</h3>
-          <p>ApplyGameplayEffectToSelf で GE_Stun を付与し、スタンを 3 秒後に自動解除する。</p>
-        </a>
-
-        <a class="card bp" href="bp07.html">
-          <div class="number">BP STEP 07</div>
-          <h3>タグの変化を待つ</h3>
-          <p>WaitGameplayTagAdded / WaitGameplayTagRemoved で ASC のタグ変化に反応するアビリティを実装する。</p>
-        </a>
-
-        <a class="card bp" href="bp08.html">
-          <div class="number">BP STEP 08</div>
-          <h3>イベントで連携する</h3>
-          <p>Send Gameplay Event to Actor でイベントを送り、Wait Gameplay Event でアビリティ内から受け取る。</p>
+          <h3>攻撃フレームを制御する</h3>
+          <p>AnimNotify Blueprint から Send Gameplay Event を呼び、Wait Gameplay Event でアビリティ内にフレーム精度のイベントを受け取る。</p>
         </a>
 
       </div>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BP 06 Duration GE でスタン自動解除 | GameplayAbilities 入門</title>
+  <title>BP 06 攻撃フレームを制御する | GameplayAbilities 入門</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -48,17 +48,14 @@
     .nav-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
     .nav-item.done    .nav-dot { background: #a0e8a0; }
     .nav-item.current .nav-dot { background: #e94560; box-shadow: 0 0 7px #e94560aa; }
-    .nav-item.coming  .nav-dot { border: 1.5px solid #3a4058; background: transparent; }
 
     .nav-text { display: flex; flex-direction: column; }
     .nav-step { font-size: 0.7rem; letter-spacing: 0.08em; display: block; }
     .nav-item.done    .nav-step { color: #4a7860; }
     .nav-item.current .nav-step { color: #e94560; }
-    .nav-item.coming  .nav-step { color: #3a4058; }
     .nav-title { font-size: 0.83rem; display: block; line-height: 1.45; margin-top: 2px; }
     .nav-item.done    .nav-title { color: #90a8a0; }
     .nav-item.current .nav-title { color: #e0e8f8; }
-    .nav-item.coming  .nav-title { color: #3a4058; }
 
     .nav-divider { border-top: 1px solid #1a1a2e; margin: 12px 0 6px; }
     .nav-next-track .nav-dot { background: #3a6a8a; }
@@ -110,6 +107,7 @@
     .note-box { background: #131c2e; border: 1px solid #2a2a4a; border-radius: 6px; padding: 16px 20px; margin: 16px 0; }
     .note-box .note-label { font-size: 0.75rem; color: #6070a0; font-weight: bold; letter-spacing: 0.1em; margin-bottom: 6px; }
     .note-box p { margin-bottom: 0; font-size: 0.9rem; color: #8090a8; }
+    .note-box p + p { margin-top: 8px; }
 
     .check-list { list-style: none; margin: 16px 0; }
     .check-list li { padding: 8px 0 8px 32px; position: relative; color: #c8d0e0; border-bottom: 1px solid #1a2030; }
@@ -120,10 +118,11 @@
     .bp-node { display: inline-block; background: #1a2a4a; border: 1px solid #3a4a6a; border-radius: 4px; padding: 4px 12px; color: #a0c8e8; white-space: nowrap; }
     .bp-node.event { background: #2a1a2a; border-color: #6a3a6a; color: #c8a0e8; }
     .bp-node.green { background: #1a2a1a; border-color: #3a6a3a; color: #90e890; }
-    .bp-node.red   { background: #2a1a1a; border-color: #7a2a3a; color: #e89090; }
+    .bp-node.red { background: #2a1a1a; border-color: #6a3a3a; color: #e89090; }
+    .bp-node.orange { background: #2a1a00; border-color: #6a4a00; color: #e8c080; }
     .bp-arrow { color: #4a6a8a; margin: 0 6px; font-size: 1rem; }
     .bp-comment { color: #4a6060; font-size: 0.78rem; margin-top: 8px; font-family: "Hiragino Kaku Gothic ProN","Meiryo",sans-serif; }
-    .bp-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0; margin-bottom: 12px; }
+    .bp-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0; margin-bottom: 8px; }
     .bp-row:last-child { margin-bottom: 0; }
 
     .concept-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.88rem; }
@@ -131,40 +130,24 @@
     .concept-table td { padding: 10px 16px; border: 1px solid #2a2a4a; color: #c8d0e0; vertical-align: top; }
     .concept-table tr:nth-child(even) td { background: #111828; }
 
-    .next-track-box {
-      background: #0f1e30;
-      border: 1px solid #2a4a6a;
-      border-radius: 8px;
-      padding: 22px 26px;
-      margin: 32px 0;
-    }
-
-    .next-track-box .next-track-label {
-      font-size: 0.75rem;
-      color: #4a8090;
-      font-weight: bold;
-      letter-spacing: 0.1em;
-      margin-bottom: 8px;
-    }
-
-    .next-track-box p { margin-bottom: 10px; color: #8090a8; font-size: 0.9rem; }
-    .next-track-box p:last-child { margin-bottom: 0; }
-
-    .next-track-box a {
-      display: inline-block;
-      color: #7ec8e3;
-      text-decoration: none;
-      border: 1px solid #2a5a7a;
-      border-radius: 4px;
-      padding: 8px 18px;
-      font-size: 0.88rem;
-      transition: border-color 0.2s;
-    }
-
-    .next-track-box a:hover { border-color: #7ec8e3; }
-
     .ss { max-width: 100%; height: auto; border-radius: 6px; margin: 16px auto 4px; display: block; }
     .ss-caption { font-size: 0.75rem; color: #4a5068; margin-bottom: 16px; display: block; text-align: center; }
+
+    .next-track-box {
+      background: #0f1a2a; border: 1px solid #2a4060; border-radius: 8px;
+      padding: 28px 32px; margin: 40px 0;
+    }
+    .next-track-label {
+      font-size: 0.75rem; font-weight: bold; color: #4a8090;
+      letter-spacing: 0.12em; margin-bottom: 12px;
+    }
+    .next-track-box p { color: #8090a8; font-size: 0.9rem; margin-bottom: 16px; }
+    .next-track-box a {
+      display: inline-block; color: #7ec8e3; text-decoration: none;
+      border: 1px solid #3a6a8a; padding: 10px 20px; border-radius: 4px;
+      font-size: 0.9rem; transition: border-color 0.2s, color 0.2s;
+    }
+    .next-track-box a:hover { border-color: #7ec8e3; color: #fff; }
 
     .page-nav { display: flex; justify-content: space-between; margin-top: 64px; padding-top: 24px; border-top: 1px solid #2a2a4a; }
     .page-nav a { color: #7ec8e3; text-decoration: none; font-size: 0.9rem; padding: 10px 20px; border: 1px solid #2a2a4a; border-radius: 4px; transition: border-color 0.2s; }
@@ -222,7 +205,7 @@
       <span class="nav-dot"></span>
       <span class="nav-text">
         <span class="nav-step">BP STEP 05</span>
-        <span class="nav-title">アビリティの排他とクールダウン</span>
+        <span class="nav-title">攻撃アビリティを作る</span>
       </span>
     </a>
 
@@ -230,25 +213,9 @@
       <span class="nav-dot"></span>
       <span class="nav-text">
         <span class="nav-step">BP STEP 06</span>
-        <span class="nav-title">Duration GE でスタン自動解除</span>
+        <span class="nav-title">攻撃フレームを制御する</span>
       </span>
     </div>
-
-    <a class="nav-item done" href="bp07.html">
-      <span class="nav-dot"></span>
-      <span class="nav-text">
-        <span class="nav-step">BP STEP 07</span>
-        <span class="nav-title">タグの変化を待つ</span>
-      </span>
-    </a>
-
-    <a class="nav-item done" href="bp08.html">
-      <span class="nav-dot"></span>
-      <span class="nav-text">
-        <span class="nav-step">BP STEP 08</span>
-        <span class="nav-title">イベントで連携する</span>
-      </span>
-    </a>
 
     <div class="nav-divider"></div>
     <a class="nav-item nav-next-track" href="step01.html">
@@ -271,10 +238,10 @@
       </div>
       <div class="step-label">BP STEP 06</div>
       <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px;">
-        <h1>Duration GE でスタン自動解除</h1>
+        <h1>攻撃フレームを制御する</h1>
         <span style="background:#1a3a1a;border:1px solid #2a6a2a;color:#a0e8a0;font-size:0.75rem;padding:2px 8px;border-radius:4px;font-family:'Consolas','Courier New',monospace;white-space:nowrap;">UE 5.5 版</span>
       </div>
-      <p><code>ApplyGameplayEffectToSelf</code> で GE_Stun を付与し、<code>Status.Stunned</code> タグを 3 秒間自動管理する。</p>
+      <p>AnimNotify Blueprint から <code>Send Gameplay Event</code> を呼び、<code>Wait Gameplay Event</code> でアビリティ内に受け取る。</p>
     </div>
   </header>
 
@@ -285,158 +252,262 @@
     <h2>このステップのゴール</h2>
 
     <p>
-      BP STEP 04 では E キーを押している間だけスタン状態にする手動管理を実装しました。
-      このステップでは、同じスタンを「E キーを一度押したら 3 秒間持続して自動解除」
-      という GameplayEffect 方式に置き換えます。
+      BP STEP 05 の <code>GA_Attack</code> は、モンタージュが終わると自動で終了しましたが、
+      「アニメーションのどのフレームで何が起きるか」は制御できていませんでした。
+      このステップでは <strong style="color:#fff">AnimNotify Blueprint</strong> を使って
+      攻撃の当たり判定フレームを指定し、
+      <strong style="color:#fff">Wait Gameplay Event</strong> でアビリティ内に受け取ります。
     </p>
 
     <ul class="check-list">
-      <li>GE_Stun（Has Duration / Status.Stunned タグ付与）を作成する</li>
-      <li><code>ApplyGameplayEffectToSelf (AbilitySystem)</code> ノードで GE_Stun を付与する</li>
-      <li>E キー 1 回でスタンが 3 秒間継続し、自動で解除されることを確認する</li>
+      <li>AnimNotify Blueprint（<code>AN_AttackHit</code>）を作成して、特定フレームで Gameplay Event を送る</li>
+      <li><code>AM_Attack</code> に Notify を配置して「当たり判定フレーム」を設定する</li>
+      <li><code>GA_Attack</code> に <code>Wait Gameplay Event</code> を追加して、イベントを受け取った瞬間に処理する</li>
+      <li>Q を押すと攻撃アニメーションが再生され、指定フレームで「ヒット！」が表示されることを確認する</li>
     </ul>
 
-    <h2>GE_Stun を作成する</h2>
+    <div class="point-box">
+      <p>
+        Lyra や ActionRPG などのサンプルプロジェクトで「アニメーションの特定フレームで何かを起こす」場合、
+        この <strong style="color:#fff">AnimNotify → Send Gameplay Event → Wait Gameplay Event</strong>
+        というパターンが多用されます。
+        タイミングをアニメーション側が持つことで、コード側はイベントを待つだけでよくなります。
+      </p>
+    </div>
 
-    <p>
-      BP STEP 05 で作った <code>GE_AttackCooldown</code> と構造は同じです。
-      付与するタグだけが異なります。
-    </p>
+    <h2>全体の流れ</h2>
+
+    <div class="bp-flow">
+      <div class="bp-comment" style="color:#7ec8e3;margin-bottom:12px;">Q キーを押したあとの処理の流れ</div>
+      <div class="bp-row">
+        <span class="bp-node event">Q Pressed</span>
+        <span class="bp-arrow">→</span>
+        <span class="bp-node">Try Activate<br>GA_Attack</span>
+        <span class="bp-arrow">→</span>
+        <span class="bp-node">Play Montage<br>and Wait</span>
+        <span class="bp-arrow">→</span>
+        <span class="bp-node orange">（再生中）<br>AnimNotify 発火</span>
+        <span class="bp-arrow">→</span>
+        <span class="bp-node">Send Gameplay<br>Event to Actor</span>
+      </div>
+      <div class="bp-row" style="padding-left:22em;">
+        <span class="bp-arrow">↓</span>
+      </div>
+      <div class="bp-row" style="padding-left:18em;">
+        <span class="bp-node">Wait Gameplay<br>Event 受信</span>
+        <span class="bp-arrow">→</span>
+        <span class="bp-node green">Print "ヒット！"</span>
+      </div>
+      <div class="bp-comment">GA_Attack 内で Play Montage and Wait と Wait Gameplay Event が並行して動く。</div>
+    </div>
+
+    <h2>Event.Attack.Hit タグを登録する</h2>
 
     <div class="step-block">
       <div class="step-head">
         <div class="step-num">1</div>
-        <div class="step-title">GE_Stun を作成する</div>
+        <div class="step-title">Event.Attack.Hit タグを作成する</div>
       </div>
       <div class="step-body">
         <p>
-          Content Browser（コンテンツブラウザ）で右クリック →
-          <strong style="color:#fff">「Blueprint Class（ブループリントクラス）」</strong>を選択。
-          親クラスの検索欄に <strong style="color:#fff">「GameplayEffect」</strong> と入力して選択し、
-          名前を <strong style="color:#fff"><code>GE_Stun</code></strong> にして作成します。
+          AnimNotify から GA_Attack に送るイベントの識別に使うタグです。
+          <code>GA_Attack</code> の Class Defaults を開き、Tags セクションの
+          <strong style="color:#fff">AssetTags</strong> の「+」をクリックします。
+          タグブラウザで <strong style="color:#fff"><code>Event.Attack.Hit</code></strong> を新規作成します。
         </p>
-
         <p>
-          <code>GE_Stun</code> を開き、
-          <strong style="color:#fff">「Class Defaults（クラスのデフォルト）」</strong>を選択。
-          詳細パネルの <strong style="color:#fff">「Duration」セクション</strong>で以下を設定します。
+          AssetTags に追加する必要はありません。
+          タグをシステムに登録することが目的です。
+          タグブラウザで作成したあとはキャンセルして閉じてください。
         </p>
-
-        <div class="code-wrap">
-          <div class="code-label">Duration セクション</div>
-          <pre><code>Duration Policy          : Has Duration
-Scalable Float Magnitude : 3.0</code></pre>
-        </div>
-
-        <p>
-          次に <strong style="color:#fff">「Gameplay Effect」セクション</strong>の
-          <strong style="color:#fff">Components</strong> の <strong style="color:#fff">「+」</strong>をクリックします。
-          ドロップダウンから <strong style="color:#fff">「Grant Tags to Target Actor」</strong>を選択します。
-        </p>
-
-        <p>
-          <strong style="color:#fff">「Target Tags (Granted to Actor)」</strong>コンポーネントが追加されます。
-          <strong style="color:#fff">「Add Tags」</strong>の中の
-          <strong style="color:#fff">「Add to Inherited」</strong>の欄に
-          <code>Status.Stunned</code> を設定します。
-          （BP STEP 04 で作成済みのタグなので、新規作成は不要です。）
-        </p>
-
-        <div class="code-wrap">
-          <div class="code-label">GE_Stun の最終設定</div>
-          <pre><code>Duration Policy          : Has Duration
-Scalable Float Magnitude : 3.0
-Grant Tags to Target Actor
-  └ Add to Inherited     : Status.Stunned</code></pre>
-        </div>
-
         <div class="note-box">
-          <div class="note-label">GE_AttackCooldown との違い</div>
+          <div class="note-label">Project Settings から登録する方法</div>
           <p>
-            <code>GE_AttackCooldown</code> は <code>Cooldown.Attack</code> タグを付与していました。
-            <code>GE_Stun</code> は <code>Status.Stunned</code> タグを付与します。
-            Duration・設定手順はまったく同じです。
+            Edit（編集）→ Project Settings（プロジェクト設定）→ GameplayTags →
+            「Manage Gameplay Tags（Gameplay タグを管理）」でも同じ登録ができます。
           </p>
         </div>
-
-        <img class="ss" src="img/bp06-ge-stun-details.png" alt="GE_Stun の詳細パネル：Has Duration / Scalable Float Magnitude 3.0 / Target Tags = Status.Stunned">
-        <span class="ss-caption">▲ UE 5.5 のスクリーンショット</span>
-
-        <p>
-          ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。
-        </p>
       </div>
     </div>
 
-    <h2>スタン実装を GE 方式に置き換える</h2>
-
-    <p>
-      BP STEP 04 で組んだキャラクターの Blueprint を修正します。
-      E キーの Pressed・Released に繋いだノードを GE 方式に変更します。
-    </p>
+    <h2>AnimNotify Blueprint を作成する</h2>
 
     <div class="step-block">
       <div class="step-head">
         <div class="step-num">2</div>
-        <div class="step-title">E キーのスタン実装を置き換える</div>
+        <div class="step-title">AN_AttackHit Blueprint を作成する</div>
       </div>
       <div class="step-body">
         <p>
-          <code>BP_ThirdPersonCharacter</code>（使用中のキャラクター Blueprint）のイベントグラフを開きます。
-          BP STEP 04 で組んだ以下のノードを探してください。
+          Content Browser で右クリック →
+          <strong style="color:#fff">Blueprint Class（ブループリントクラス）</strong> を選択。
+          親クラスの検索欄に <strong style="color:#fff">「AnimNotify」</strong> と入力して選択し、
+          名前を <strong style="color:#fff"><code>AN_AttackHit</code></strong> にして作成します。
         </p>
-
-        <img class="ss" src="img/bp04-add-remove-loose-gameplay-tags.png" alt="BP STEP 04 の実装：E Pressed → Add Loose Gameplay Tags / E Released → Remove Loose Gameplay Tags">
-        <span class="ss-caption">▲ BP STEP 04 で組んだノード（置き換え前）</span>
-
-        <p>次の手順で変更します。</p>
-
         <p>
-          <strong style="color:#fff">① E（Released）から繋がるノードをすべて削除します。</strong><br>
-          <code>Remove Loose Gameplay Tags</code> と続く <code>Print String</code> を選択して Delete キーで削除してください。
-          E ノードの Released ピンから出ているワイヤーも切断されます。
+          <code>AN_AttackHit</code> を開き、左側の My Blueprint パネルで
+          <strong style="color:#fff">FUNCTIONS → Override（+ボタン）→ Received Notify</strong>
+          を選択します。
+          イベントグラフに <code>Received Notify</code> ノード（<code>Mesh Component</code> と <code>Animation</code> ピンを持つ）が配置されます。
         </p>
-
         <p>
-          <strong style="color:#fff">② E（Pressed）から繋がる <code>Add Loose Gameplay Tags</code> を削除します。</strong><br>
-          Print String「Stunned!」はそのまま残しておきます。
-        </p>
-
-        <p>
-          <strong style="color:#fff">③ My Blueprint パネルの Components から <code>AbilitySystem</code> をグラフにドラッグします。</strong><br>
-          作成された参照ノードからワイヤーを引き出し、<strong style="color:#fff">「apply gameplay effect」</strong> で検索して
-          <strong style="color:#fff"><code>ApplyGameplayEffectToSelf (AbilitySystem)</code></strong> を選択します。
-          E（Pressed）→ ApplyGameplayEffectToSelf → Print String「Stunned! (3s)」の順に接続します。
+          次のように接続します。
         </p>
 
         <div class="bp-flow">
-          <div class="bp-comment" style="color:#7ec8e3;margin-bottom:10px;">変更後</div>
+          <div class="bp-comment" style="color:#7ec8e3;margin-bottom:12px;">AN_AttackHit のグラフ</div>
           <div class="bp-row">
-            <span class="bp-node event">E（Pressed）</span>
-            <span class="bp-arrow">→</span>
-            <span class="bp-node">ApplyGameplayEffectToSelf<br><span style="color:#6a8a6a;font-size:0.75rem;">Target: AbilitySystem<br>GE Class: GE_Stun</span></span>
-            <span class="bp-arrow">→</span>
-            <span class="bp-node">Print String<br><span style="color:#6a8a6a;font-size:0.75rem;">"Stunned! (3s)"</span></span>
+            <span class="bp-node event">Received Notify<br><span style="color:#6a6a9a;font-size:0.75rem;">Mesh Component, Animation</span></span>
           </div>
-          <div class="bp-comment">E（Released）のノードは不要。GE が 3 秒後に自動解除する。</div>
+          <div class="bp-row" style="padding-left:1em;">
+            <span class="bp-arrow">Mesh Component → </span>
+            <span class="bp-node">Get Owner</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Send Gameplay Event<br>to Actor<br><span style="color:#6a8a6a;font-size:0.75rem;">Event Tag: Event.Attack.Hit</span></span>
+          </div>
+          <div class="bp-comment">
+            Get Owner の戻り値（Actor）を Send Gameplay Event to Actor の「Actor」ピンに繋ぐ。<br>
+            Received Notify の実行ピンも Send Gameplay Event to Actor の実行ピンに繋ぐ。
+          </div>
         </div>
 
         <div class="note-box">
-          <div class="note-label">ApplyGameplayEffectToSelf のピン設定</div>
+          <div class="note-label">Send Gameplay Event to Actor の Payload について</div>
           <p>
-            <code>Target</code> ピンには My Blueprint パネルの Components から
-            <strong style="color:#fff">AbilitySystem</strong> をドラッグした参照ノードを繋いでください。<br>
-            <code>Gameplay Effect Class</code> ピンに <strong style="color:#fff">GE_Stun</strong> を選択します。<br>
-            <code>Level</code> は 0.0 のまま（デフォルト）で問題ありません。
+            <strong style="color:#fff">Payload</strong> ピン（<code>FGameplayEventData</code> 型）は空のままでも動作します。
+            ヒット時のダメージ量などを渡したい場合は <code>Make GameplayEventData</code> ノードで組み立てて接続します。
           </p>
         </div>
 
-        <img class="ss" src="img/bp06-apply-gameplay-effect-to-self.png" alt="E(Pressed) → ApplyGameplayEffectToSelf → Print String ノード接続">
-        <span class="ss-caption">▲ UE 5.5 のスクリーンショット</span>
+        <p>ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。</p>
+      </div>
+    </div>
+
+    <h2>AM_Attack に Notify を配置する</h2>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">3</div>
+        <div class="step-title">攻撃フレームに AN_AttackHit を配置する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          <code>AM_Attack</code> を開きます。
+          タイムライン上の <strong style="color:#fff">「Notifies」トラック</strong>（「Notify」行）で、
+          攻撃が当たるタイミング（モンタージュの中盤あたり）を
+          <strong style="color:#fff">右クリック → Add Notify（通知を追加） → AN_AttackHit</strong>
+          を選択して Notify を配置します。
+        </p>
+        <div class="note-box">
+          <div class="note-label">AN_AttackHit が選択肢に表示されない場合</div>
+          <p>
+            Notify のドロップダウンには「New Notify...（新規通知を作成...）」と既存の AnimNotify クラスが並びます。
+            <code>AN_AttackHit</code> が表示されない場合は、一度 Content Browser に戻って
+            <code>AN_AttackHit</code> を開いてコンパイル・保存してから再試行してください。
+          </p>
+        </div>
+        <p>
+          モンタージュを<strong style="color:#fff">保存</strong>してください。
+        </p>
+      </div>
+    </div>
+
+    <h2>GA_Attack のグラフを更新する</h2>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">4</div>
+        <div class="step-title">Sequence と Wait Gameplay Event を追加する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          <code>GA_Attack</code> を開き、グラフを変更します。
+          <code>Commit Ability</code> と <code>Play Montage and Wait</code> の間に
+          <strong style="color:#fff">Sequence</strong> ノードを挿入します。
+        </p>
+
+        <div class="code-wrap">
+          <div class="code-label">GA_Attack グラフの変更前 → 変更後</div>
+          <pre><code>【変更前】
+Event ActivateAbility → Commit Ability → Play Montage and Wait → ...
+
+【変更後】
+Event ActivateAbility → Commit Ability → Sequence
+                                          ├─ Then 0 → Play Montage and Wait
+                                          │           [On Completed]   → End Ability
+                                          │           [On Blend Out]   → End Ability
+                                          │           [On Interrupted] → End Ability
+                                          │           [On Cancelled]   → End Ability
+                                          └─ Then 1 → Wait Gameplay Event
+                                                      (Event Tag: Event.Attack.Hit)
+                                                      [Event Received] → Print "ヒット！"</code></pre>
+        </div>
 
         <p>
-          ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。
+          <strong style="color:#fff">Sequence</strong> ノードは、空白を右クリック → 「Sequence」で検索して配置できます。
+          Then 0 と Then 1 に、それぞれ <code>Play Montage and Wait</code> と <code>Wait Gameplay Event</code> を繋ぎます。
         </p>
+
+        <div class="bp-flow">
+          <div class="bp-comment" style="color:#7ec8e3;margin-bottom:12px;">GA_Attack の更新後グラフ</div>
+          <div class="bp-row">
+            <span class="bp-node event">Event ActivateAbility</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Commit Ability</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Sequence</span>
+          </div>
+          <div class="bp-row" style="padding-left:1.5em;margin-top:4px;">
+            <span style="color:#4a6a8a;margin-right:4px;">[Then 0] →</span>
+            <span class="bp-node">Play Montage and Wait<br><span style="color:#6a8a6a;font-size:0.75rem;">Montage to Play: AM_Attack</span></span>
+          </div>
+          <div class="bp-row" style="padding-left:4.5em;">
+            <span style="color:#4a6a8a;margin-right:4px;">[On Completed] →</span>
+            <span class="bp-node green">End Ability</span>
+          </div>
+          <div class="bp-row" style="padding-left:4.5em;">
+            <span style="color:#4a6a8a;margin-right:4px;">[On Blend Out] →</span>
+            <span class="bp-node green">End Ability</span>
+          </div>
+          <div class="bp-row" style="padding-left:4.5em;">
+            <span style="color:#4a6a8a;margin-right:4px;">[On Interrupted] →</span>
+            <span class="bp-node red">End Ability</span>
+          </div>
+          <div class="bp-row" style="padding-left:1.5em;margin-top:4px;">
+            <span style="color:#4a6a8a;margin-right:4px;">[Then 1] →</span>
+            <span class="bp-node">Wait Gameplay Event<br><span style="color:#6a8a6a;font-size:0.75rem;">Event Tag: Event.Attack.Hit</span></span>
+          </div>
+          <div class="bp-row" style="padding-left:4.5em;">
+            <span style="color:#4a6a8a;margin-right:4px;">[Event Received] →</span>
+            <span class="bp-node green">Print "ヒット！"</span>
+          </div>
+          <div class="bp-comment">
+            Sequence は Then 0（Play Montage and Wait）を起動し、続けて Then 1（Wait Gameplay Event）も起動する。<br>
+            両タスクが同時に走り、AnimNotify が発火するとイベントが GA_Attack に届く。
+          </div>
+        </div>
+
+        <div class="note-box">
+          <div class="note-label">Sequence と Ability Task の動作について</div>
+          <p>
+            <code>Play Montage and Wait</code> などの Ability Task ノードは、Blueprint の通常の待機（Delay など）とは異なり、
+            ノードの入力が実行されると即座にタスクを登録して次の処理へ進みます。
+            そのため Sequence の Then 0 が Play Montage and Wait を起動したあと、
+            Then 1 の Wait Gameplay Event も続けて起動され、両者が並行して動作します。
+          </p>
+        </div>
+
+        <div class="note-box">
+          <div class="note-label">Wait Gameplay Event のパラメーター</div>
+          <p>
+            <strong style="color:#fff">Event Tag</strong>: <code>Event.Attack.Hit</code> を設定します。<br>
+            <strong style="color:#fff">Only Trigger Once</strong>: チェック ON（true）を推奨します。
+            1 回の攻撃で複数の AnimNotify が発火するモンタージュを使う場合は OFF のままにすると、
+            ヒットごとに EventReceived が発火します。
+          </p>
+        </div>
+
+        <p>ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。</p>
       </div>
     </div>
 
@@ -444,139 +515,96 @@ Grant Tags to Target Actor
 
     <div class="step-block">
       <div class="step-head">
-        <div class="step-num">3</div>
-        <div class="step-title">スタン自動解除を確認する</div>
+        <div class="step-num">5</div>
+        <div class="step-title">攻撃フレームでヒットが検出されることを確認する</div>
       </div>
       <div class="step-body">
-        <p>プレイを開始して以下の順で操作します。</p>
         <ul class="check-list">
-          <li><strong style="color:#fff">E キーを一度押す</strong> → 「Stunned! (3s)」が表示される</li>
-          <li><strong style="color:#fff">すぐに E キーを離す</strong> → スタンは継続する（以前は離すと解除されていた）</li>
-          <li><strong style="color:#fff">3 秒間は Q キーを押しても</strong>何も表示されない（Activation Blocked Tags が機能中）</li>
-          <li><strong style="color:#fff">3 秒後に Q キーを押す</strong> → 「Ability Activated!」が表示される（自動解除済み）</li>
+          <li>Q キーを押す → 攻撃アニメーションが再生される</li>
+          <li>アニメーションが Notify フレームに到達する → Output Log に「ヒット！」が表示される</li>
+          <li>「ヒット！」の表示タイミングが Notify を配置した攻撃フレームと一致している</li>
         </ul>
-
         <div class="note-box">
-          <div class="note-label">E を連打した場合</div>
+          <div class="note-label">「ヒット！」が表示されない場合の確認点</div>
           <p>
-            3 秒のクールダウン中に再び E を押すと GE_Stun が再付与されます。
-            デフォルトでは先に付与された GE と同時に存在し、それぞれ独立してカウントします。
-            今回のチュートリアルでは、この動作はそのままで構いません。
+            AN_AttackHit の <code>Get Owner</code> の戻り値が Send Gameplay Event to Actor の
+            <strong style="color:#fff">Actor</strong> ピンに繋がっているか確認してください。
+            Actor ピンが未接続だと ASC が見つからず、イベントが送信されません。
+          </p>
+          <p>
+            AM_Attack に Notify（AN_AttackHit）が配置されているか確認してください。
+            Montage エディターのタイムラインで確認できます。
+          </p>
+          <p>
+            GA_Attack の Wait Gameplay Event の Event Tag が <code>Event.Attack.Hit</code> になっているか確認してください。
           </p>
         </div>
       </div>
     </div>
 
-    <h2>ApplyGameplayEffectToSelf とは</h2>
+    <h2>このパターンが優れている理由</h2>
 
     <p>
-      <code>ApplyGameplayEffectToSelf</code> は AbilitySystem コンポーネントのメソッドで、
-      ASC を持つキャラクター自身に GameplayEffect を付与します。
-      My Blueprint パネルの AbilitySystem コンポーネントから呼び出すため、
-      <code>Has Matching Gameplay Tag</code> と同じ要領で使えます。
+      アニメーションの「当たり判定フレーム」はキャラクターが腕を振り切る瞬間など、
+      アーティストが決める要素です。
+      Notify をアニメーション側に配置することで、
+      コード側はタイミングを知らなくてよくなります。
     </p>
 
     <table class="concept-table">
       <tr>
-        <th>ピン</th>
-        <th>説明</th>
+        <th>比較</th>
+        <th>タイマーや Delay でタイミングを指定する</th>
+        <th>AnimNotify → Wait Gameplay Event パターン</th>
       </tr>
       <tr>
-        <td><strong style="color:#ffcb6b;">Target</strong></td>
-        <td>AbilitySystem コンポーネントの参照。My Blueprint パネルからドラッグして接続。</td>
+        <td><strong style="color:#fff">タイミングの変更</strong></td>
+        <td>コードの数値を調整して再コンパイル</td>
+        <td>Montage エディターで Notify を動かすだけ</td>
       </tr>
       <tr>
-        <td><strong style="color:#ffcb6b;">Gameplay Effect Class</strong></td>
-        <td>付与する GE のクラス。今回は GE_Stun。</td>
+        <td><strong style="color:#fff">アニメーション速度変更</strong></td>
+        <td>ズレが生じる（固定秒数なので）</td>
+        <td>自動で追従する（アニメーションの割合で決まるため）</td>
       </tr>
       <tr>
-        <td><strong style="color:#ffcb6b;">Level</strong></td>
-        <td>GE の強度。Scalable Curve を使う場合に影響。通常は 0.0（デフォルト）のまま。</td>
-      </tr>
-      <tr>
-        <td><strong style="color:#ffcb6b;">戻り値（Active GE Handle）</strong></td>
-        <td>付与した GE の識別子。Infinite GE を手動解除するときに使う。Has Duration GE では不要。</td>
+        <td><strong style="color:#fff">役割の分離</strong></td>
+        <td>プログラマーがタイミングも管理</td>
+        <td>アーティストが Notify でタイミングを管理</td>
       </tr>
     </table>
-
-    <div class="note-box">
-      <div class="note-label">他のキャラクターに付与したい場合</div>
-      <p>
-        今回は自分自身に付与しましたが、他のキャラクターに付与する場合は
-        <code>ApplyGameplayEffectToTarget (AbilitySystem)</code> を使います。
-        例えば「攻撃がヒットした相手に GE_Stun を付与する」実装に使えます。
-      </p>
-    </div>
-
-    <h2>Loose Gameplay Tags と GE によるタグ付与の違い</h2>
-
-    <p>
-      BP STEP 04 の手動管理と今回の GE 方式を比べると、用途の違いが見えてきます。
-    </p>
-
-    <table class="concept-table">
-      <tr>
-        <th>方法</th>
-        <th>付与</th>
-        <th>解除</th>
-        <th>向いている用途</th>
-      </tr>
-      <tr>
-        <td><strong style="color:#ffcb6b;">Add Loose Gameplay Tags</strong></td>
-        <td>ノードで直接付与</td>
-        <td>Remove Loose Gameplay Tags で手動解除</td>
-        <td>テスト・単純な状態フラグ</td>
-      </tr>
-      <tr>
-        <td><strong style="color:#ffcb6b;">GE + Grant Tags to Target Actor</strong></td>
-        <td>ApplyGameplayEffectToSelf (AbilitySystem)</td>
-        <td>Has Duration なら時間切れで自動解除</td>
-        <td>時間制限のあるデバフ・バフ</td>
-      </tr>
-    </table>
-
-    <p>
-      Loose Gameplay Tags は「押している間だけ」のようなリアルタイム制御に向いています。
-      GE 方式は「付与した瞬間から n 秒間」という時間管理が自動化されるため、
-      より実際のゲームの挙動に近くなります。
-    </p>
-
-    <h2>うまくいかないときの確認ポイント</h2>
-
-    <ul class="check-list">
-      <li>スタンが発動しない → <code>ApplyGameplayEffectToSelf</code> の Target に AbilitySystem コンポーネントの参照が繋がっているか</li>
-      <li>スタンが発動しない → <code>GE_Stun</code> の Components に Grant Tags to Target Actor が追加されているか</li>
-      <li>スタンが発動しない → Grant Tags to Target Actor の Add to Inherited に <code>Status.Stunned</code> が設定されているか</li>
-      <li>スタンは発動するが 3 秒で解除されない → <code>Duration Policy</code> が Has Duration になっているか</li>
-      <li>スタン中も Q キーが発動する → <code>GA_MyFirstAbility</code> の Activation Blocked Tags に <code>Status.Stunned</code> が設定されているか（BP STEP 04 で設定済みのはず）</li>
-      <li>すべてのブループリントをコンパイル・保存済みか</li>
-    </ul>
-
-    <div class="note-box">
-      <div class="note-label">チュートリアル通りにならない場合</div>
-      <p>このチュートリアルは UE 5.5 で動作確認しています。別バージョンをお使いの場合は UE 5.5 で試してみてください。</p>
-    </div>
 
     <h2>まとめ</h2>
 
     <div class="point-box">
       <p>
-        GameplayEffect の Has Duration と Grant Tags to Target Actor を組み合わせると、
-        「タグの付与・時間管理・自動解除」をコード不要で一括管理できます。<br>
-        Loose Gameplay Tags が<strong style="color:#fff">手動のフラグ管理</strong>なら、
-        GE 方式はそれを<strong style="color:#fff">時間管理付き</strong>に高度化したものです。
+        <code>AN_AttackHit</code>（AnimNotify Blueprint）が攻撃フレームで <code>Send Gameplay Event</code> を呼び、
+        <code>GA_Attack</code> の <code>Wait Gameplay Event</code> がそれを受け取る。
+        この「AnimNotify → Send Gameplay Event → Wait Gameplay Event」パターンは、
+        GAS を使うサンプルプロジェクトで広く使われている設計です。
       </p>
     </div>
 
     <p>
-      Blueprint 編の6ステップを通じて、GAS の主要要素
-      （<strong style="color:#fff">AbilitySystemComponent・GameplayAbility・GameplayTag・GameplayEffect</strong>）
-      を Blueprint だけで動かすことができました。
+      Blueprint 編では ASC、GameplayAbility、GameplayTag の 3 要素を中心に学んできました。
+      ダメージの数値管理（AttributeSet）や複雑なゲームプレイ効果（GameplayEffect）を
+      本格的に扱うには C++ が必要になります。
+      GAS をさらに深く使いたい場合は C++ 編でステップアップしてください。
     </p>
 
+    <div class="next-track-box">
+      <div class="next-track-label">次のステップへ — C++ 編</div>
+      <p>
+        AttributeSet で HP やスタミナなどの数値を定義し、
+        GameplayEffect でダメージ・回復を実装する。
+        GAS のフル機能を活用したい場合はこちら。
+      </p>
+      <a href="step01.html">C++ 編 STEP 01 から始める →</a>
+    </div>
+
     <div class="page-nav">
-      <a href="bp05.html">&#8592; BP STEP 05 アビリティの排他とクールダウン</a>
-      <a class="next" href="bp07.html">BP STEP 07 タグの変化を待つ &#8594;</a>
+      <a href="bp05.html">&#8592; BP STEP 05 攻撃アビリティを作る</a>
+      <a class="next" href="./">チュートリアル一覧へ &#8594;</a>
     </div>
 
   </main>

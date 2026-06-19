@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BP 05 アビリティの排他とクールダウン | GameplayAbilities 入門</title>
+  <title>BP 05 攻撃アビリティを作る | GameplayAbilities 入門</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -107,6 +107,7 @@
     .note-box { background: #131c2e; border: 1px solid #2a2a4a; border-radius: 6px; padding: 16px 20px; margin: 16px 0; }
     .note-box .note-label { font-size: 0.75rem; color: #6070a0; font-weight: bold; letter-spacing: 0.1em; margin-bottom: 6px; }
     .note-box p { margin-bottom: 0; font-size: 0.9rem; color: #8090a8; }
+    .note-box p + p { margin-top: 8px; }
 
     .check-list { list-style: none; margin: 16px 0; }
     .check-list li { padding: 8px 0 8px 32px; position: relative; color: #c8d0e0; border-bottom: 1px solid #1a2030; }
@@ -117,48 +118,16 @@
     .bp-node { display: inline-block; background: #1a2a4a; border: 1px solid #3a4a6a; border-radius: 4px; padding: 4px 12px; color: #a0c8e8; white-space: nowrap; }
     .bp-node.event { background: #2a1a2a; border-color: #6a3a6a; color: #c8a0e8; }
     .bp-node.green { background: #1a2a1a; border-color: #3a6a3a; color: #90e890; }
-    .bp-node.red   { background: #2a1a1a; border-color: #7a2a3a; color: #e89090; }
+    .bp-node.red { background: #2a1a1a; border-color: #6a3a3a; color: #e89090; }
     .bp-arrow { color: #4a6a8a; margin: 0 6px; font-size: 1rem; }
     .bp-comment { color: #4a6060; font-size: 0.78rem; margin-top: 8px; font-family: "Hiragino Kaku Gothic ProN","Meiryo",sans-serif; }
-    .bp-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0; margin-bottom: 12px; }
+    .bp-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0; margin-bottom: 8px; }
     .bp-row:last-child { margin-bottom: 0; }
 
     .concept-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.88rem; }
     .concept-table th { background: #1a2a4a; color: #7ec8e3; padding: 10px 16px; text-align: left; border: 1px solid #2a2a4a; }
     .concept-table td { padding: 10px 16px; border: 1px solid #2a2a4a; color: #c8d0e0; vertical-align: top; }
     .concept-table tr:nth-child(even) td { background: #111828; }
-
-    .next-track-box {
-      background: #0f1e30;
-      border: 1px solid #2a4a6a;
-      border-radius: 8px;
-      padding: 22px 26px;
-      margin: 32px 0;
-    }
-
-    .next-track-box .next-track-label {
-      font-size: 0.75rem;
-      color: #4a8090;
-      font-weight: bold;
-      letter-spacing: 0.1em;
-      margin-bottom: 8px;
-    }
-
-    .next-track-box p { margin-bottom: 10px; color: #8090a8; font-size: 0.9rem; }
-    .next-track-box p:last-child { margin-bottom: 0; }
-
-    .next-track-box a {
-      display: inline-block;
-      color: #7ec8e3;
-      text-decoration: none;
-      border: 1px solid #2a5a7a;
-      border-radius: 4px;
-      padding: 8px 18px;
-      font-size: 0.88rem;
-      transition: border-color 0.2s;
-    }
-
-    .next-track-box a:hover { border-color: #7ec8e3; }
 
     .ss { max-width: 100%; height: auto; border-radius: 6px; margin: 16px auto 4px; display: block; }
     .ss-caption { font-size: 0.75rem; color: #4a5068; margin-bottom: 16px; display: block; text-align: center; }
@@ -219,7 +188,7 @@
       <span class="nav-dot"></span>
       <span class="nav-text">
         <span class="nav-step">BP STEP 05</span>
-        <span class="nav-title">アビリティの排他とクールダウン</span>
+        <span class="nav-title">攻撃アビリティを作る</span>
       </span>
     </div>
 
@@ -227,23 +196,7 @@
       <span class="nav-dot"></span>
       <span class="nav-text">
         <span class="nav-step">BP STEP 06</span>
-        <span class="nav-title">Duration GE でスタン自動解除</span>
-      </span>
-    </a>
-
-    <a class="nav-item done" href="bp07.html">
-      <span class="nav-dot"></span>
-      <span class="nav-text">
-        <span class="nav-step">BP STEP 07</span>
-        <span class="nav-title">タグの変化を待つ</span>
-      </span>
-    </a>
-
-    <a class="nav-item done" href="bp08.html">
-      <span class="nav-dot"></span>
-      <span class="nav-text">
-        <span class="nav-step">BP STEP 08</span>
-        <span class="nav-title">イベントで連携する</span>
+        <span class="nav-title">攻撃フレームを制御する</span>
       </span>
     </a>
 
@@ -268,10 +221,10 @@
       </div>
       <div class="step-label">BP STEP 05</div>
       <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px;">
-        <h1>アビリティの排他とクールダウン</h1>
+        <h1>攻撃アビリティを作る</h1>
         <span style="background:#1a3a1a;border:1px solid #2a6a2a;color:#a0e8a0;font-size:0.75rem;padding:2px 8px;border-radius:4px;font-family:'Consolas','Courier New',monospace;white-space:nowrap;">UE 5.5 版</span>
       </div>
-      <p><code>Block Abilities with Tag</code> でアビリティの重複発動を防ぎ、Duration GameplayEffect でクールダウンを実装する。</p>
+      <p><code>Play Montage and Wait</code> でアニメーションと同期した攻撃アビリティを作る。発動中は再発動できない。</p>
     </div>
   </header>
 
@@ -282,264 +235,238 @@
     <h2>このステップのゴール</h2>
 
     <p>
-      BP STEP 04 で使った <code>GA_MyFirstAbility</code> をベースに、2つの制御機能を追加します。
+      これまでの <code>GA_MyFirstAbility</code> は Print String を表示するだけでした。
+      このステップでは <strong style="color:#fff">Play Montage and Wait</strong> を使い、
+      アビリティの発動中にアニメーションを再生します。
+      アニメーションが終わると自動でアビリティも終了し、
+      途中でも再発動できないよう制御します。
     </p>
 
     <ul class="check-list">
-      <li>アビリティの実行中に同じアビリティが重複発動しないよう排他制御を設定する</li>
-      <li>Duration GameplayEffect を作成して、クールダウンとして GA_MyFirstAbility に設定する</li>
-      <li>Q キーを押してから 3 秒間は再発動できないことを確認する</li>
+      <li>攻撃アニメーションから <code>AM_Attack</code>（Animation Montage）を作成する</li>
+      <li><code>GA_Attack</code> Blueprint を作り、<code>Play Montage and Wait</code> でモンタージュを再生する</li>
+      <li><code>Block Abilities with Tag</code> で発動中の再発動を防ぐ</li>
+      <li>Q キーで攻撃アニメーションが再生され、完了まで再発動できないことを確認する</li>
     </ul>
 
-    <h2>GA_MyFirstAbility に Delay を加える</h2>
+    <div class="point-box">
+      <p>
+        <code>Play Montage and Wait</code> は <strong style="color:#fff">Ability Task</strong> の一種です。
+        アビリティがモンタージュの再生中「一時停止」し、
+        アニメーションが完了・中断されたときに続きを実行します。
+        Tick やタイマーを書かなくても、GAS がアニメーションの長さに合わせて自動で管理します。
+      </p>
+    </div>
 
-    <p>
-      排他とクールダウンの効果を確認しやすくするため、まずアビリティに Delay ノードを追加して
-      「一定時間、アビリティが持続している」状態を作ります。
-    </p>
+    <h2>Animation Montage を用意する</h2>
 
     <div class="step-block">
       <div class="step-head">
         <div class="step-num">1</div>
-        <div class="step-title">Delay ノードを追加してアビリティが 1.5 秒間持続するようにする</div>
+        <div class="step-title">攻撃アニメーションと AM_Attack を準備する</div>
       </div>
       <div class="step-body">
         <p>
-          <code>GA_MyFirstAbility</code> のイベントグラフを開き、
-          <strong style="color:#fff">Commit Ability</strong> と <strong style="color:#fff">End Ability</strong> の間に
-          <strong style="color:#fff">Delay</strong> ノードを挿入します。
-          Duration は <strong style="color:#fff">1.5</strong>（秒）に設定。
+          Third Person Template には攻撃アニメーションが含まれていないため、
+          以下のいずれかの方法でアセットを用意してください。
         </p>
-
-        <div class="bp-flow">
-          <div class="bp-row">
-            <span class="bp-node event">Event ActivateAbility</span>
-            <span class="bp-arrow">→</span>
-            <span class="bp-node">Print String<br><span style="color:#6a8a6a;font-size:0.75rem;">"Ability Activated!"</span></span>
-            <span class="bp-arrow">→</span>
-            <span class="bp-node">Commit Ability</span>
-            <span class="bp-arrow">→</span>
-            <span class="bp-node">Delay<br><span style="color:#6a8a6a;font-size:0.75rem;">Duration: 1.5</span></span>
-            <span class="bp-arrow">→</span>
-            <span class="bp-node green">End Ability</span>
-          </div>
-          <div class="bp-comment">Commit Ability の直後に Delay を追加する。Delay の Duration は 1.5（秒）。</div>
+        <div class="note-box">
+          <div class="note-label">アニメーションの入手方法（いずれか 1 つ）</div>
+          <p>
+            <strong style="color:#fff">Marketplace の Animation Starter Pack（無料）:</strong>
+            Epic Games Launcher のライブラリから「Animation Starter Pack」をプロジェクトに追加できます。
+            UE5 Manny への IK Retarget が必要です。
+          </p>
+          <p>
+            <strong style="color:#fff">Mixamo（Adobe アカウントがあれば無料）:</strong>
+            mixamo.com から攻撃アニメーションを FBX でダウンロードしてインポートできます。
+          </p>
+          <p>
+            <strong style="color:#fff">既存アニメーションを代替使用:</strong>
+            <code>MM_Land</code> など Third Person Template のアニメーションをそのまま使うと、
+            見た目は攻撃に見えませんが「GAS とモンタージュの連携」の動作確認はできます。
+          </p>
         </div>
-
-        <img class="ss" src="img/bp05-ga-delay15.png" alt="Event ActivateAbility から Print String、CommitAbility、Delay（Duration: 1.5）、End Ability を順に接続した Blueprint">
-        <span class="ss-caption">▲ UE 5.5 のスクリーンショット</span>
-
         <p>
-          ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。
+          アニメーションアセットが用意できたら、Content Browser（コンテンツブラウザ）でそのアセットを
+          <strong style="color:#fff">右クリック → Create（作成） → Animation Montage（アニメーションモンタージュ）</strong>
+          を選択します。名前を <strong style="color:#fff"><code>AM_Attack</code></strong> にします。
         </p>
+        <p>
+          <code>AM_Attack</code> を開き、Slot が
+          <strong style="color:#fff">「DefaultGroup.DefaultSlot」</strong> になっていることを確認してください。
+        </p>
+        <div class="note-box">
+          <div class="note-label">モンタージュが視覚的に再生されない場合（AnimBP の Slot 設定）</div>
+          <p>
+            キャラクターの Animation Blueprint（<code>ABP_Manny</code> など）の AnimGraph に
+            <strong style="color:#fff">Slot ノード（名前: DefaultSlot）</strong> が必要です。
+            AnimGraph を開いて Output Pose の手前に挿入してください（右クリック → 「Slot」で検索）。
+            この設定がないとアニメーションは視覚的に再生されませんが、
+            GAS のイベント処理自体は正常に動作します。
+          </p>
+        </div>
       </div>
     </div>
 
-    <h2>Block Abilities with Tag でアビリティを排他にする</h2>
-
-    <p>
-      BP STEP 04 で <code>AssetTags</code> に <code>Ability.Attack</code> を設定しました。
-      <code>Block Abilities with Tag</code> に同じ <code>Ability.Attack</code> を追加することで、
-      「このアビリティが実行中は、同じタグを持つアビリティを発動できない」状態を作ります。
-    </p>
+    <h2>GA_Attack を作成する</h2>
 
     <div class="step-block">
       <div class="step-head">
         <div class="step-num">2</div>
-        <div class="step-title">Block Abilities with Tag に Ability.Attack を設定する</div>
+        <div class="step-title">GA_Attack Blueprint を作成する</div>
       </div>
       <div class="step-body">
         <p>
-          <code>GA_MyFirstAbility</code> の
-          <strong style="color:#fff">「Class Defaults（クラスのデフォルト）」</strong> を開き、
-          詳細パネルの <strong style="color:#fff">「Tags」セクション</strong>から
-          <strong style="color:#fff">Block Abilities with Tag</strong> の <strong style="color:#fff">「+」</strong>を押します。
-          タグブラウザが開くので <code>Ability.Attack</code> を選択します。
-          （BP STEP 04 で作成済みのタグなので、新規作成は不要です。）
+          Content Browser で右クリック →
+          <strong style="color:#fff">Blueprint Class（ブループリントクラス）</strong> を選択。
+          親クラスの検索欄に <strong style="color:#fff">「GameplayAbility」</strong> と入力して選択し、
+          名前を <strong style="color:#fff"><code>GA_Attack</code></strong> にして作成します。
         </p>
-
-        <div class="code-wrap">
-          <div class="code-label">GA_MyFirstAbility Tags セクションの最終状態</div>
-          <pre><code>AssetTags (Default AbilityTags) : Ability.Attack
-Block Abilities with Tag        : Ability.Attack
-Activation Blocked Tags         : Status.Stunned</code></pre>
-        </div>
-
-        <img class="ss" src="img/bp05-ga-block-abilities-with-tag.png" alt="GA_MyFirstAbility の Tags セクション。AssetTags に Ability.Attack、Block Abilities with Tag に Ability.Attack、Activation Blocked Tags に Status.Stunned が設定されている">
-        <span class="ss-caption">▲ UE 5.5 のスクリーンショット</span>
-
         <p>
-          ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。
-        </p>
-
-        <div class="note-box">
-          <div class="note-label">この設定でどう動くか</div>
-          <p>
-            <code>GA_MyFirstAbility</code> が実行中（Delay の 1.5 秒間）は、
-            <code>Ability.Attack</code> タグを持つアビリティの発動がブロックされます。
-            <code>GA_MyFirstAbility</code> 自身も <code>Ability.Attack</code> タグを持っているため、
-            実行中に Q キーを押しても追加発動しません。
-          </p>
-        </div>
-
-        <p>
-          プレイして Q キーを連打してみてください。
-          1.5 秒間は「Ability Activated!」が 1 回しか表示されないことを確認できます。
+          <code>GA_Attack</code> を開くと、イベントグラフに
+          <code>Event ActivateAbility</code> がすでに配置されています。
         </p>
       </div>
     </div>
 
-    <h2>Block Abilities with Tag とは</h2>
-
-    <p>
-      <code>Block Abilities with Tag</code> は、「このアビリティが実行中に、
-      指定したタグを持つ<strong style="color:#fff">他の</strong>アビリティの発動をブロックする」設定です。
-    </p>
-
-    <p>
-      BP STEP 04 で学んだ <code>Activation Blocked Tags</code> と混同しやすいので整理します。
-    </p>
-
-    <table class="concept-table">
-      <tr>
-        <th>設定項目</th>
-        <th>何をブロックするか</th>
-      </tr>
-      <tr>
-        <td><strong style="color:#ffcb6b;">Block Abilities with Tag</strong></td>
-        <td>このアビリティが実行中、指定タグを持つ<strong style="color:#fff">他のアビリティ</strong>をブロックする</td>
-      </tr>
-      <tr>
-        <td><strong style="color:#ffcb6b;">Activation Blocked Tags</strong></td>
-        <td>ASC に指定タグが存在する間、<strong style="color:#fff">このアビリティ自身</strong>の発動をブロックする</td>
-      </tr>
-    </table>
-
-    <p>
-      今回は <code>AssetTags</code> と <code>Block Abilities with Tag</code> の両方に
-      同じ <code>Ability.Attack</code> を設定しました。
-      「実行中は自分自身も再発動できない」という排他制御になります。
-    </p>
-
-    <div class="note-box">
-      <div class="note-label">複数アビリティの排他にも使える</div>
-      <p>
-        例えば <code>GA_Attack</code>（AssetTags: <code>Ability.Attack</code>）と
-        <code>GA_Heal</code>（AssetTags: <code>Ability.Heal</code>）があるとき、
-        <code>GA_Attack</code> の <code>Block Abilities with Tag: Ability.Heal</code> を設定すれば
-        「攻撃中は回復できない」という制御もタグ1つで実現できます。
-      </p>
-    </div>
-
-    <h2>クールダウン用 GameplayEffect を作る</h2>
-
-    <p>
-      排他制御に加えて、アビリティが終了してからも一定時間は発動できない
-      クールダウンを実装します。
-    </p>
-
-    <p>
-      クールダウンには <strong style="color:#fff">GameplayEffect</strong> を使います。
-      GameplayEffect は GAS の効果を表現するアセットです。
-      今回は「クールダウン中」という状態を 3 秒間維持するためだけに使います。
-    </p>
+    <h2>アビリティのグラフを組む</h2>
 
     <div class="step-block">
       <div class="step-head">
         <div class="step-num">3</div>
-        <div class="step-title">GE_AttackCooldown を作成する</div>
+        <div class="step-title">Play Montage and Wait でモンタージュを再生する</div>
       </div>
       <div class="step-body">
         <p>
-          Content Browser（コンテンツブラウザ）で右クリック →
-          <strong style="color:#fff">「Blueprint Class（ブループリントクラス）」</strong>を選択。
-          親クラスの検索欄に <strong style="color:#fff">「GameplayEffect」</strong> と入力して選択し、
-          名前を <strong style="color:#fff"><code>GE_AttackCooldown</code></strong> にして作成します。
+          イベントグラフの空白を右クリックして
+          <strong style="color:#fff">「Commit Ability」</strong> を検索して配置し、
+          <code>Event ActivateAbility</code> の実行ピンに繋ぎます。
         </p>
-
         <p>
-          <code>GE_AttackCooldown</code> を開き、
-          <strong style="color:#fff">「Class Defaults（クラスのデフォルト）」</strong>を選択。
-          詳細パネルの <strong style="color:#fff">「Duration」セクション</strong>で以下を設定します。
+          続けて <strong style="color:#fff">「Play Montage and Wait」</strong> を検索して配置します。
+          <strong style="color:#fff">Montage to Play</strong> に <strong style="color:#fff"><code>AM_Attack</code></strong> を設定します。
+        </p>
+        <p>
+          <code>Play Montage and Wait</code> の出力ピンを以下のように繋ぎます。
+          いずれも <strong style="color:#fff">End Ability</strong> に繋いでください。
         </p>
 
-        <div class="code-wrap">
-          <div class="code-label">Duration セクション</div>
-          <pre><code>Duration Policy          : Has Duration
-Scalable Float Magnitude : 3.0</code></pre>
+        <div class="bp-flow">
+          <div class="bp-comment" style="color:#7ec8e3;margin-bottom:12px;">GA_Attack のグラフ</div>
+          <div class="bp-row">
+            <span class="bp-node event">Event ActivateAbility</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Commit Ability</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Play Montage and Wait<br><span style="color:#6a8a6a;font-size:0.75rem;">Montage to Play: AM_Attack</span></span>
+          </div>
+          <div class="bp-row" style="margin-top:4px;padding-left:1.5em;">
+            <span style="color:#4a6a8a;margin-right:6px;">[On Completed]  →</span>
+            <span class="bp-node green">End Ability</span>
+          </div>
+          <div class="bp-row" style="padding-left:1.5em;">
+            <span style="color:#4a6a8a;margin-right:6px;">[On Blend Out]  →</span>
+            <span class="bp-node green">End Ability</span>
+          </div>
+          <div class="bp-row" style="padding-left:1.5em;">
+            <span style="color:#4a6a8a;margin-right:6px;">[On Interrupted] →</span>
+            <span class="bp-node red">End Ability</span>
+          </div>
+          <div class="bp-row" style="padding-left:1.5em;">
+            <span style="color:#4a6a8a;margin-right:6px;">[On Cancelled]  →</span>
+            <span class="bp-node red">End Ability</span>
+          </div>
+          <div class="bp-comment">4 本の出力ピンをすべて End Ability に繋ぐ。</div>
         </div>
 
         <div class="note-box">
-          <div class="note-label">Scalable Float Magnitude の場所</div>
+          <div class="note-label">OnCompleted と OnBlendOut の違い</div>
           <p>
-            <code>Duration Policy</code> を <strong style="color:#fff">Has Duration</strong> に変更すると
-            <code>Duration Magnitude</code> の入力欄が現れます。
-            <code>Magnitude Calculation Type</code> が <strong style="color:#fff">Scalable Float</strong> になっていることを確認し、
-            <code>Scalable Float Magnitude</code> に <strong style="color:#fff">3.0</strong> を入力します。
+            <strong style="color:#fff">On Completed</strong> はモンタージュが最後のフレームまで再生された瞬間、
+            <strong style="color:#fff">On Blend Out</strong> はその直前の終了フェード開始時に発火します。
+            どちらも End Ability に繋ぐのが一般的で、2 回目の End Ability は内部で無視されます。
           </p>
         </div>
 
-        <p>
-          次に <strong style="color:#fff">「Gameplay Effect」セクション</strong>の
-          <strong style="color:#fff">Components</strong> の <strong style="color:#fff">「+」</strong>をクリックします。
-          ドロップダウンから <strong style="color:#fff">「Grant Tags to Target Actor」</strong>を選択します。
-        </p>
-
-        <p>
-          <strong style="color:#fff">「Target Tags (Granted to Actor)」</strong>コンポーネントが追加されます。
-          <strong style="color:#fff">「Add Tags」</strong>の中の
-          <strong style="color:#fff">「Add to Inherited」</strong>の欄に
-          <code>Cooldown.Attack</code> という新しいタグを作成して追加します。
-        </p>
-
-        <div class="note-box">
-          <div class="note-label">Grant Tags to Target Actor とは</div>
-          <p>
-            「この GE が ASC に付与されている間、指定したタグを ASC に付与し続ける」設定です（UE 5.3 以降のコンポーネント方式）。
-            GE が有効な 3 秒間は <code>Cooldown.Attack</code> タグが ASC に存在し、
-            GE が切れると同時に自動で外れます。
-          </p>
-        </div>
-
-        <img class="ss" src="img/bp05-ge-details.png" alt="GE_AttackCooldown の詳細パネル。Duration Policy: Has Duration、Scalable Float Magnitude: 3.0、Components に Grant Tags to Target Actor を追加し Add to Inherited に Cooldown.Attack を設定した状態">
-        <span class="ss-caption">▲ UE 5.5 のスクリーンショット</span>
-
-        <p>
-          ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。
-        </p>
+        <p>ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。</p>
       </div>
     </div>
+
+    <h2>Block Abilities with Tag を設定する</h2>
+
+    <p>
+      このままでは攻撃モーション中に Q を連打すると攻撃が重なってしまいます。
+      <strong style="color:#fff">Block Abilities with Tag</strong> を設定して、
+      発動中は同じアビリティが再発動できないようにします。
+    </p>
 
     <div class="step-block">
       <div class="step-head">
         <div class="step-num">4</div>
-        <div class="step-title">GA_MyFirstAbility にクールダウンを設定する</div>
+        <div class="step-title">Ability.Attack タグを登録して GA_Attack に設定する</div>
       </div>
       <div class="step-body">
         <p>
-          <code>GA_MyFirstAbility</code> の <strong style="color:#fff">「Class Defaults（クラスのデフォルト）」</strong>を開き、
-          詳細パネルで <code>Cooldown</code> と検索します。
-          <strong style="color:#fff">「Cooldowns」セクション</strong>の
-          <strong style="color:#fff"><code>Cooldown Gameplay Effect Class</code></strong> に
-          <strong style="color:#fff"><code>GE_AttackCooldown</code></strong> を設定します。
+          <code>GA_Attack</code> の Class Defaults（クラスのデフォルト）を開き、
+          Tags セクション（詳細パネルで「Tags」と検索）の
+          <strong style="color:#fff">AssetTags (Default AbilityTags)</strong> の「+」をクリックします。
+          タグブラウザで <strong style="color:#fff"><code>Ability.Attack</code></strong> を新規作成して設定します（BP STEP 04 の手順と同じです）。
         </p>
-
-        <img class="ss" src="img/bp05-ga-cooldown-attack.png" alt="GA_MyFirstAbility の詳細パネルで Cooldown と検索した結果。Cooldowns セクションの Cooldown Gameplay Effect Class に GE_AttackCooldown が設定されている">
-        <span class="ss-caption">▲ UE 5.5 のスクリーンショット</span>
-
         <p>
-          ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。
+          同じく <strong style="color:#fff">Block Abilities with Tag</strong> にも <code>Ability.Attack</code> を設定します。
         </p>
+
+        <div class="code-wrap">
+          <div class="code-label">GA_Attack の Tags 設定まとめ</div>
+          <pre><code>AssetTags (Default AbilityTags) : Ability.Attack
+   → このアビリティ自身のタグ
+
+Block Abilities with Tag         : Ability.Attack
+   → 発動中は Ability.Attack タグを持つアビリティをブロックする
+   → 自分自身の AssetTag と一致するため、発動中は自分の再発動がブロックされる</code></pre>
+        </div>
 
         <div class="note-box">
-          <div class="note-label">クールダウンが機能する仕組み</div>
+          <div class="note-label">Block Abilities with Tag の動作</div>
           <p>
-            <code>Commit Ability</code> を呼ぶと <code>GE_AttackCooldown</code>（3 秒）が ASC に付与されます。
-            GE の「Grant Tags to Target Actor」コンポーネントが <code>Cooldown.Attack</code> タグを ASC に与え、
-            <code>TryActivateAbilityByClass</code> はその GE が付与している間、発動チェックで失敗します。
-            3 秒後に GE が切れるとタグも外れ、再び発動できるようになります。
+            「この GA_Attack が発動している間、<code>Ability.Attack</code> タグを持つアビリティをブロックする」という設定です。
+            GA_Attack の AssetTags に <code>Ability.Attack</code> があるため、
+            モンタージュが終わって End Ability が呼ばれるまで自分自身も発動できなくなります。
           </p>
         </div>
+
+        <p>ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。</p>
+      </div>
+    </div>
+
+    <h2>Q キーに割り当てる</h2>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">5</div>
+        <div class="step-title">BeginPlay で Give Ability、Q キーで TryActivate を設定する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          <code>BP_ThirdPersonCharacter</code> のイベントグラフを開き、
+          <code>Event BeginPlay</code> に
+          <strong style="color:#fff">Give Ability（Ability Class: <code>GA_Attack</code>）</strong>
+          を追加します。
+        </p>
+        <p>
+          Q キーの入力イベントに
+          <strong style="color:#fff">Try Activate Ability By Class（In Ability to Activate: <code>GA_Attack</code>）</strong>
+          を繋ぎます。
+        </p>
+        <div class="note-box">
+          <div class="note-label">以前の GA_MyFirstAbility について</div>
+          <p>
+            BP STEP 03 で作った <code>GA_MyFirstAbility</code> の Give Ability・Q キーの TryActivate は
+            削除するか、別のキーに変更してください。
+          </p>
+        </div>
+        <p>ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。</p>
       </div>
     </div>
 
@@ -547,111 +474,86 @@ Scalable Float Magnitude : 3.0</code></pre>
 
     <div class="step-block">
       <div class="step-head">
-        <div class="step-num">5</div>
-        <div class="step-title">排他とクールダウンを確認する</div>
+        <div class="step-num">6</div>
+        <div class="step-title">攻撃アニメーションと再発動防止を確認する</div>
       </div>
       <div class="step-body">
-        <p>プレイを開始して以下の順で操作します。</p>
         <ul class="check-list">
-          <li><strong style="color:#fff">Q キーを押す</strong> → 「Ability Activated!」が表示される</li>
+          <li>Q キーを押す → 攻撃アニメーションが再生される</li>
+          <li>アニメーション中に Q を連打 → アニメーション完了まで新しい攻撃が始まらない</li>
+          <li>アニメーション完了後に Q → 再び攻撃アニメーションが再生される</li>
         </ul>
-
-        <img class="ss" src="img/bp05-pie-print.jpg" alt="PIE 実行中に Q キーを押した直後の画面。左上に「Ability Activated!」と表示されている">
-        <span class="ss-caption">▲ UE 5.5 のスクリーンショット</span>
-
-        <ul class="check-list">
-          <li><strong style="color:#fff">1.5 秒以内に Q キーを押す</strong> → 何も表示されない（実行中・排他によるブロック）</li>
-          <li><strong style="color:#fff">1.5 秒後（Delay 終了）に Q キーを押す</strong> → 何も表示されない（クールダウン中・残り 1.5 秒）</li>
-          <li><strong style="color:#fff">最初の Q から 3 秒以上経ってから Q を押す</strong> → 再び「Ability Activated!」が表示される</li>
-        </ul>
-
         <div class="note-box">
-          <div class="note-label">Q を押した後の 3 秒間の内訳</div>
+          <div class="note-label">アニメーションが視覚的に再生されない場合</div>
           <p>
-            0〜1.5 秒：<code>Block Abilities with Tag</code> によるブロック（アビリティ実行中）<br>
-            1.5〜3 秒：<code>GE_AttackCooldown</code> によるブロック（アビリティ終了後もクールダウン GE が継続）<br>
-            3 秒以降：クールダウン GE が自動解除され、再び発動可能
+            AnimBP（<code>ABP_Manny</code> など）の AnimGraph に「DefaultSlot」という名前の Slot ノードが
+            Output Pose の手前に挿入されているか確認してください（Step 1 の note 参照）。
+          </p>
+        </div>
+        <div class="note-box">
+          <div class="note-label">Q を押してもアビリティが発動しない場合</div>
+          <p>
+            BeginPlay に <code>Give Ability（GA_Attack）</code> があるか・
+            Q キーから <code>Try Activate Ability By Class（GA_Attack）</code> が繋がっているかを確認してください。
           </p>
         </div>
       </div>
     </div>
 
-    <h2>Duration GameplayEffect とは</h2>
-
-    <p>
-      GameplayEffect は本来 C++ 編で本格的に扱うテーマですが、
-      <strong style="color:#fff">クールダウン管理に限っては Blueprint だけで使えます。</strong>
-      Attribute（HP など）の変更には C++ の AttributeSet が必要ですが、
-      今回のように「タグを一定時間付与する」用途であれば C++ 不要です。
-    </p>
-
-    <p>
-      GameplayEffect には3種類の <strong style="color:#fff">Duration Policy</strong> があります。
-    </p>
+    <h2>Play Montage and Wait の各ピン</h2>
 
     <table class="concept-table">
       <tr>
-        <th>Duration Policy</th>
-        <th>効果の持続</th>
-        <th>主な用途</th>
+        <th>出力ピン</th>
+        <th>発火するタイミング</th>
       </tr>
       <tr>
-        <td><strong style="color:#ffcb6b;">Instant</strong></td>
-        <td>一瞬で適用・即終了</td>
-        <td>ダメージ・即時回復（C++ 編で学ぶ AttributeSet が必要）</td>
+        <td><strong style="color:#ffcb6b;">On Completed</strong></td>
+        <td>モンタージュが最後のフレームまで正常に再生された</td>
       </tr>
       <tr>
-        <td><strong style="color:#ffcb6b;">Has Duration</strong></td>
-        <td>指定時間後に自動解除</td>
-        <td>クールダウン・時間制限のバフ・デバフ</td>
+        <td><strong style="color:#ffcb6b;">On Blend Out</strong></td>
+        <td>モンタージュが終了フェードに入った（Completed の直前）</td>
       </tr>
       <tr>
-        <td><strong style="color:#ffcb6b;">Infinite</strong></td>
-        <td>明示的に解除するまで持続</td>
-        <td>パッシブバフ・永続的な状態変化</td>
+        <td><strong style="color:#ffcb6b;">On Interrupted</strong></td>
+        <td>他のモンタージュや外部処理によって再生が中断された</td>
+      </tr>
+      <tr>
+        <td><strong style="color:#ffcb6b;">On Cancelled</strong></td>
+        <td>アビリティがキャンセルされてモンタージュが停止した</td>
       </tr>
     </table>
 
     <div class="note-box">
-      <div class="note-label">GameplayEffect でタグの自動付与もできる</div>
+      <div class="note-label">クールダウンを追加したい場合</div>
       <p>
-        BP STEP 04 では <code>Add Loose Gameplay Tags</code> でタグを手動管理しましたが、
-        GameplayEffect に「付与タグ」を設定すれば、GE が有効な間だけタグが自動付与され、
-        GE 解除と同時にタグも消えます。
-        Attribute（HP・ダメージなど）を変化させるには C++ 編で学ぶ AttributeSet が必要ですが、
-        タグの付与・解除と時間管理は Blueprint の GameplayEffect だけで行えます。
+        Duration Policy が「Has Duration」の GameplayEffect を 1 つ作り、
+        GA_Attack の Class Defaults で
+        <strong style="color:#fff">「Cooldown Gameplay Effect Class」</strong> にそれを設定するだけです。
+        設定した秒数が経過するまで TryActivate が失敗するようになります。
       </p>
-    </div>
-
-    <h2>うまくいかないときの確認ポイント</h2>
-
-    <ul class="check-list">
-      <li>排他が効かない → <code>Block Abilities with Tag</code> に <code>Ability.Attack</code> が設定されているか</li>
-      <li>排他が効かない → <code>AssetTags (Default AbilityTags)</code> に <code>Ability.Attack</code> が設定されているか（BP STEP 04 で設定済みのはず）</li>
-      <li>排他が効かない → <code>Delay</code> ノードが <code>Commit Ability</code> と <code>End Ability</code> の間に正しく繋がっているか</li>
-      <li>クールダウンが効かない → <code>Cooldown Gameplay Effect Class</code> に <code>GE_AttackCooldown</code> が設定されているか</li>
-      <li>クールダウンが効かない → <code>GE_AttackCooldown</code> の <code>Duration Policy</code> が <code>Has Duration</code> になっているか</li>
-      <li>すべてのブループリントをコンパイル・保存済みか</li>
-    </ul>
-
-    <div class="note-box">
-      <div class="note-label">チュートリアル通りにならない場合</div>
-      <p>このチュートリアルは UE 5.5 で動作確認しています。別バージョンをお使いの場合は UE 5.5 で試してみてください。</p>
     </div>
 
     <h2>まとめ</h2>
 
     <div class="point-box">
       <p>
-        <code>Block Abilities with Tag</code> と <strong style="color:#fff">Duration GameplayEffect</strong> を組み合わせることで、
-        「実行中の重複発動防止」と「発動後のクールダウン」の両方を、
-        <strong style="color:#fff">タグとアセットだけで制御</strong>できます。
+        <code>Play Montage and Wait</code> を使うと、アビリティがモンタージュの再生中に「待機」し、
+        アニメーションの完了・中断に合わせて自動で終了します。<br>
+        <code>Block Abilities with Tag</code> と組み合わせることで、
+        攻撃モーション中の再発動をタグだけで防ぐことができます。
       </p>
     </div>
 
+    <p>
+      次のステップでは、この攻撃アビリティをさらに拡張して、
+      アニメーションの特定のフレームでイベントを受け取る仕組みを作ります。
+    </p>
+
     <div class="page-nav">
       <a href="bp04.html">&#8592; BP STEP 04 GameplayTag で状態管理</a>
-      <a class="next" href="bp06.html">BP STEP 06 Duration GE でスタン自動解除 &#8594;</a>
+      <a class="next" href="bp06.html">BP STEP 06 攻撃フレームを制御する &#8594;</a>
     </div>
 
   </main>
