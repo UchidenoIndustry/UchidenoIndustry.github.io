@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BP 08 イベントで連携する | GameplayAbilities 入門</title>
+  <title>BP 08 コンボ攻撃（3連撃） | GameplayAbilities 入門</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -85,7 +85,10 @@
 
     h2 { font-size: 1.3rem; color: #7ec8e3; margin: 52px 0 16px; padding-bottom: 8px; border-bottom: 1px solid #2a2a4a; }
     h2:first-of-type { margin-top: 0; }
+    h3 { font-size: 1.05rem; color: #c8d0e0; margin: 28px 0 12px; }
     p { margin-bottom: 16px; color: #c8d0e0; }
+    ul, ol { padding-left: 1.5em; margin-bottom: 16px; color: #c8d0e0; }
+    li { margin-bottom: 6px; }
 
     .step-block { border: 1px solid #2a2a4a; border-radius: 8px; margin: 24px 0; overflow: hidden; }
     .step-block .step-head { background: #1a2a4a; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
@@ -107,8 +110,9 @@
     .note-box { background: #131c2e; border: 1px solid #2a2a4a; border-radius: 6px; padding: 16px 20px; margin: 16px 0; }
     .note-box .note-label { font-size: 0.75rem; color: #6070a0; font-weight: bold; letter-spacing: 0.1em; margin-bottom: 6px; }
     .note-box p { margin-bottom: 0; font-size: 0.9rem; color: #8090a8; }
+    .note-box p + p { margin-top: 8px; }
 
-    .check-list { list-style: none; margin: 16px 0; }
+    .check-list { list-style: none; margin: 16px 0; padding-left: 0; }
     .check-list li { padding: 8px 0 8px 32px; position: relative; color: #c8d0e0; border-bottom: 1px solid #1a2030; }
     .check-list li:last-child { border-bottom: none; }
     .check-list li::before { content: "✓"; position: absolute; left: 0; color: #a0e8a0; font-weight: bold; }
@@ -117,46 +121,39 @@
     .bp-node { display: inline-block; background: #1a2a4a; border: 1px solid #3a4a6a; border-radius: 4px; padding: 4px 12px; color: #a0c8e8; white-space: nowrap; }
     .bp-node.event { background: #2a1a2a; border-color: #6a3a6a; color: #c8a0e8; }
     .bp-node.green { background: #1a2a1a; border-color: #3a6a3a; color: #90e890; }
+    .bp-node.red { background: #2a1a1a; border-color: #6a3a3a; color: #e89090; }
+    .bp-node.orange { background: #2a1a00; border-color: #6a4a00; color: #e8c080; }
+    .bp-node.yellow { background: #1a1a00; border-color: #5a5a00; color: #e8e880; }
     .bp-arrow { color: #4a6a8a; margin: 0 6px; font-size: 1rem; }
     .bp-comment { color: #4a6060; font-size: 0.78rem; margin-top: 8px; font-family: "Hiragino Kaku Gothic ProN","Meiryo",sans-serif; }
-    .bp-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0; margin-bottom: 12px; }
+    .bp-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0; margin-bottom: 8px; }
     .bp-row:last-child { margin-bottom: 0; }
+    .bp-indent { padding-left: 2em; }
+    .bp-indent2 { padding-left: 4em; }
 
     .concept-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.88rem; }
     .concept-table th { background: #1a2a4a; color: #7ec8e3; padding: 10px 16px; text-align: left; border: 1px solid #2a2a4a; }
     .concept-table td { padding: 10px 16px; border: 1px solid #2a2a4a; color: #c8d0e0; vertical-align: top; }
     .concept-table tr:nth-child(even) td { background: #111828; }
 
-    .next-track-box {
-      background: #0f1e30;
-      border: 1px solid #2a4a6a;
-      border-radius: 8px;
-      padding: 22px 26px;
-      margin: 32px 0;
-    }
-    .next-track-box .next-track-label {
-      font-size: 0.75rem;
-      color: #4a8090;
-      font-weight: bold;
-      letter-spacing: 0.1em;
-      margin-bottom: 8px;
-    }
-    .next-track-box p { margin-bottom: 10px; color: #8090a8; font-size: 0.9rem; }
-    .next-track-box p:last-child { margin-bottom: 0; }
-    .next-track-box a {
-      display: inline-block;
-      color: #7ec8e3;
-      text-decoration: none;
-      border: 1px solid #2a5a7a;
-      border-radius: 4px;
-      padding: 8px 18px;
-      font-size: 0.88rem;
-      transition: border-color 0.2s;
-    }
-    .next-track-box a:hover { border-color: #7ec8e3; }
-
     .ss { max-width: 100%; height: auto; border-radius: 6px; margin: 16px auto 4px; display: block; }
     .ss-caption { font-size: 0.75rem; color: #4a5068; margin-bottom: 16px; display: block; text-align: center; }
+
+    .next-track-box {
+      background: #0f1a2a; border: 1px solid #2a4060; border-radius: 8px;
+      padding: 28px 32px; margin: 40px 0;
+    }
+    .next-track-label {
+      font-size: 0.75rem; font-weight: bold; color: #4a8090;
+      letter-spacing: 0.12em; margin-bottom: 12px;
+    }
+    .next-track-box p { color: #8090a8; font-size: 0.9rem; margin-bottom: 16px; }
+    .next-track-box a {
+      display: inline-block; color: #7ec8e3; text-decoration: none;
+      border: 1px solid #3a6a8a; padding: 10px 20px; border-radius: 4px;
+      font-size: 0.9rem; transition: border-color 0.2s, color 0.2s;
+    }
+    .next-track-box a:hover { border-color: #7ec8e3; color: #fff; }
 
     .page-nav { display: flex; justify-content: space-between; margin-top: 64px; padding-top: 24px; border-top: 1px solid #2a2a4a; }
     .page-nav a { color: #7ec8e3; text-decoration: none; font-size: 0.9rem; padding: 10px 20px; border: 1px solid #2a2a4a; border-radius: 4px; transition: border-color 0.2s; }
@@ -214,7 +211,7 @@
       <span class="nav-dot"></span>
       <span class="nav-text">
         <span class="nav-step">BP STEP 05</span>
-        <span class="nav-title">アビリティの排他とクールダウン</span>
+        <span class="nav-title">攻撃アビリティを作る</span>
       </span>
     </a>
 
@@ -222,7 +219,7 @@
       <span class="nav-dot"></span>
       <span class="nav-text">
         <span class="nav-step">BP STEP 06</span>
-        <span class="nav-title">Duration GE でスタン自動解除</span>
+        <span class="nav-title">攻撃フレームを制御する</span>
       </span>
     </a>
 
@@ -230,7 +227,7 @@
       <span class="nav-dot"></span>
       <span class="nav-text">
         <span class="nav-step">BP STEP 07</span>
-        <span class="nav-title">タグの変化を待つ</span>
+        <span class="nav-title">複数のアビリティとタグを組み合わせる</span>
       </span>
     </a>
 
@@ -238,7 +235,7 @@
       <span class="nav-dot"></span>
       <span class="nav-text">
         <span class="nav-step">BP STEP 08</span>
-        <span class="nav-title">イベントで連携する</span>
+        <span class="nav-title">コンボ攻撃（3連撃）</span>
       </span>
     </div>
 
@@ -263,10 +260,10 @@
       </div>
       <div class="step-label">BP STEP 08</div>
       <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px;">
-        <h1>イベントで連携する</h1>
+        <h1>コンボ攻撃（3連撃）</h1>
         <span style="background:#1a3a1a;border:1px solid #2a6a2a;color:#a0e8a0;font-size:0.75rem;padding:2px 8px;border-radius:4px;font-family:'Consolas','Courier New',monospace;white-space:nowrap;">UE 5.5 版</span>
       </div>
-      <p>C キーを押してチャージ開始、離したときにイベントで合図。<code>Wait Gameplay Event</code> によるアビリティの「途中で待機」を体験する。</p>
+      <p>Duration GE でコンボウィンドウを管理し、<code>Activation Required Tags</code> で 3 連撃のフローを制御する。</p>
     </div>
   </header>
 
@@ -277,403 +274,529 @@
     <h2>このステップのゴール</h2>
 
     <p>
-      BP STEP 07 では GE のタグ消滅を待つ方法を学びました。
-      このステップでは <strong style="color:#fff">Wait Gameplay Event</strong> を使い、
-      「外部から届いたイベント」を起点にアビリティの続きを動かす方法を学びます。
-    </p>
-
-    <p>
-      新しく <strong style="color:#fff">GA_ChargeAttack</strong> というアビリティを作ります。
-      C キーを押すと「チャージ中...」と表示されたままアビリティが一時停止し、
-      C キーを離すとイベントが届いて「発射！」と表示されます。
-      押し続ける時間に関係なく、「離した瞬間」が発射タイミングになります。
+      Q を押すたびに 1 段目 → 2 段目 → 3 段目と続くコンボ攻撃を実装します。
+      ただし「前の攻撃の当たり判定フレームで Q を押した場合のみ次段に進める」という
+      タイミング制限を加えます。
     </p>
 
     <ul class="check-list">
-      <li><code>Event.ChargeRelease</code> タグを登録する</li>
-      <li>GA_ChargeAttack Blueprint を作成し、<code>Wait Gameplay Event</code> でリリースを待つ</li>
-      <li>C キー押下でアビリティ起動、C キーリリースで <code>Send Gameplay Event to Actor</code> を呼ぶ</li>
-      <li>「チャージ中...」→ C を離す →「発射！」の流れを確認する</li>
+      <li>新概念 <code>Activation Required Tags</code> でコンボウィンドウを管理する</li>
+      <li><code>Cancel Abilities with Tag</code> で前段のアビリティを打ち切り、次段に切り替える</li>
+      <li>Q キーで高い番号から順に <code>TryActivateAbilityByClass</code> を試す cascading パターンを実装する</li>
+      <li>GA_Combo1 / GA_Combo2 / GA_Combo3 を作り、3 連撃が機能することを確認する</li>
     </ul>
 
     <div class="point-box">
       <p>
-        <code>Wait Gameplay Event</code> ノードに実行が届くと、指定タグのイベントが届くまでアビリティが一時停止します。
-        C キーを離したときに <code>Send Gameplay Event to Actor</code> でイベントを送ると、
-        待機中のアビリティが再開します。「いつ再開するか」をアビリティ側ではなく、
-        キー入力側が決められます。
+        このステップで登場する <strong style="color:#fff">Activation Required Tags</strong> は、
+        BP STEP 04 で学んだ <code>Activation Blocked Tags</code> の逆版です。
+        指定タグが ASC に<strong style="color:#fff">ある</strong>間だけアビリティを発動できます。
+        コンボウィンドウが開いている間だけ次段が発動できる、という制御に使います。
       </p>
     </div>
 
-    <h2>Event.ChargeRelease タグを登録する</h2>
+    <h2>仕組みを理解する</h2>
+
+    <p>
+      コンボの核心は <strong style="color:#fff">コンボウィンドウ</strong> という短い時間枠です。
+      攻撃の当たり判定フレームで Duration GE を付与し、
+      「この GE が ASC に存在する間（約 0.5 秒）だけ次の段が発動できる」という仕組みで
+      タイミングを要求します。
+    </p>
+
+    <div class="bp-flow">
+      <div class="bp-comment" style="color:#7ec8e3;margin-bottom:12px;">Q を 3 回タイミングよく押したときの全体の流れ</div>
+
+      <div class="bp-row">
+        <span class="bp-node event">① Q Pressed</span>
+        <span class="bp-arrow">→</span>
+        <span class="bp-node green">GA_Combo1 発動</span>
+        <span class="bp-arrow">→</span>
+        <span class="bp-node">AM_Combo1 再生</span>
+      </div>
+      <div class="bp-row bp-indent">
+        <span class="bp-arrow">↓ 当たり判定フレーム（AnimNotify）</span>
+      </div>
+      <div class="bp-row bp-indent">
+        <span class="bp-node orange">GE_ComboWindow 付与<br><span style="font-size:0.75em;">Status.ComboWindow を 0.5 秒間 ASC に付ける</span></span>
+      </div>
+
+      <div class="bp-row" style="margin-top:12px;">
+        <span class="bp-node event">② Q Pressed</span>
+        <span class="bp-arrow">→</span>
+        <span class="bp-node yellow">Combo3 → 失敗</span>
+        <span class="bp-arrow">→</span>
+        <span class="bp-node green">GA_Combo2 発動</span>
+        <span class="bp-arrow">→</span>
+        <span class="bp-node red">GA_Combo1 キャンセル</span>
+      </div>
+      <div class="bp-row bp-indent">
+        <span class="bp-arrow">↓ 当たり判定フレーム</span>
+      </div>
+      <div class="bp-row bp-indent">
+        <span class="bp-node orange">GE_ComboWindow 再付与</span>
+      </div>
+
+      <div class="bp-row" style="margin-top:12px;">
+        <span class="bp-node event">③ Q Pressed</span>
+        <span class="bp-arrow">→</span>
+        <span class="bp-node green">GA_Combo3 発動</span>
+        <span class="bp-arrow">→</span>
+        <span class="bp-node red">GA_Combo2 キャンセル</span>
+        <span class="bp-arrow">→</span>
+        <span class="bp-node">AM_Combo3 再生して終了</span>
+      </div>
+
+      <div class="bp-comment">ウィンドウ外で Q を押すと Combo2/3 は発動できないため、Combo1 から再スタートする。</div>
+    </div>
+
+    <h2>タグを設計する</h2>
+
+    <table class="concept-table">
+      <tr>
+        <th>タグ</th>
+        <th>用途</th>
+      </tr>
+      <tr>
+        <td><code>Ability.Combo.1</code></td>
+        <td>GA_Combo1 の識別タグ。GA_Combo2 の <code>Cancel Abilities with Tag</code> から参照される。</td>
+      </tr>
+      <tr>
+        <td><code>Ability.Combo.2</code></td>
+        <td>GA_Combo2 の識別タグ。GA_Combo3 の <code>Cancel Abilities with Tag</code> から参照される。</td>
+      </tr>
+      <tr>
+        <td><code>Ability.Combo.3</code></td>
+        <td>GA_Combo3 の識別タグ。自己ブロックに使う。</td>
+      </tr>
+      <tr>
+        <td><code>Status.ComboWindow</code></td>
+        <td>コンボウィンドウが開いている状態を表す。GE_ComboWindow が付与する Duration タグ。GA_Combo2 / GA_Combo3 の <code>Activation Required Tags</code> に設定する。</td>
+      </tr>
+    </table>
+
+    <div class="note-box">
+      <div class="note-label">タグの階層について</div>
+      <p><code>Ability.Combo.1</code> のように3階層にすると、<code>Ability.Combo</code> という親タグで「コンボ系アビリティ全体」をまとめて参照することもできます。今回は個別のタグのみ使います。</p>
+    </div>
+
+    <h2>GE_ComboWindow を作る</h2>
 
     <div class="step-block">
       <div class="step-head">
         <div class="step-num">1</div>
-        <div class="step-title">Event.ChargeRelease タグを追加する</div>
+        <div class="step-title">タグと GE_ComboWindow を作成する</div>
       </div>
       <div class="step-body">
         <p>
-          メニューバーの <strong style="color:#fff">Edit（編集） → Project Settings（プロジェクト設定）</strong> を開き、
-          左のリストから <strong style="color:#fff">「GameplayTags」</strong> を選択します。
-          <strong style="color:#fff">「Manage Gameplay Tags（ゲームプレイタグを管理）」</strong>をクリックし、
-          <strong style="color:#fff">「+」</strong> ボタンで新しいタグを追加します。
+          まず任意の GameplayAbility の Class Defaults → AssetTags の「+」からタグを4つ新規作成します。
         </p>
-        <div class="code-wrap">
-          <div class="code-label">追加するタグ</div>
-          <pre><code>Event.ChargeRelease</code></pre>
-        </div>
+        <ul>
+          <li><code>Ability.Combo.1</code></li>
+          <li><code>Ability.Combo.2</code></li>
+          <li><code>Ability.Combo.3</code></li>
+          <li><code>Status.ComboWindow</code></li>
+        </ul>
+        <p style="margin-top:12px;">
+          次に Content Browser（コンテンツブラウザ）で右クリック →
+          <strong style="color:#fff">Blueprint Class（ブループリントクラス）</strong> →
+          親クラスに <strong style="color:#fff"><code>GameplayEffect</code></strong> を指定し、
+          名前を <strong style="color:#fff"><code>GE_ComboWindow</code></strong> とします。
+        </p>
         <p>
-          Source のドロップダウンから ini ファイルを選択して
-          <strong style="color:#fff">「Add New Tag（新しいタグを追加）」</strong> をクリックします。
+          <code>GE_ComboWindow</code> を開き、Class Defaults を以下のように設定します。
         </p>
+        <table class="concept-table">
+          <tr>
+            <th>設定箇所</th>
+            <th>値</th>
+          </tr>
+          <tr>
+            <td>Duration Policy</td>
+            <td><code>Has Duration</code></td>
+          </tr>
+          <tr>
+            <td>Duration Magnitude（Scalable Float Value）</td>
+            <td><code>0.5</code></td>
+          </tr>
+          <tr>
+            <td>Components → 「+」→ Grant Tags to Target Actor<br>Target Tags (Granted to Actor) → Add Tags → Add to Inherited</td>
+            <td><code>Status.ComboWindow</code></td>
+          </tr>
+        </table>
         <div class="note-box">
-          <div class="note-label">タグの命名について</div>
-          <p>
-            <code>Event.</code> で始まるタグはイベント識別用の慣習的な名前付けです。
-            状態を表す <code>Status.Charging</code>（BP STEP 07）とは異なり、
-            「この瞬間に何かが起きた」という一時的な通知を識別するために使います。
-          </p>
+          <div class="note-label">補足</div>
+          <p>GE の Components へのタグ追加方法は BP STEP 04 の GE_Stun 作成と同じ手順です。</p>
         </div>
       </div>
     </div>
 
-    <h2>GA_ChargeAttack を作成する</h2>
+    <h2>GA_Combo1 を作る</h2>
 
     <div class="step-block">
       <div class="step-head">
         <div class="step-num">2</div>
-        <div class="step-title">GA_ChargeAttack Blueprint を作成する</div>
+        <div class="step-title">GA_Combo1 Blueprint を作成して Class Defaults を設定する</div>
       </div>
       <div class="step-body">
         <p>
-          Content Browser（コンテンツブラウザ）で右クリック →
-          <strong style="color:#fff">「Blueprint Class（ブループリントクラス）」</strong>を選択。
-          親クラスの検索欄に <strong style="color:#fff">「GameplayAbility」</strong> と入力して選択し、
-          名前を <strong style="color:#fff"><code>GA_ChargeAttack</code></strong> にして作成します。
+          Content Browser で右クリック → Blueprint Class → <strong style="color:#fff"><code>GameplayAbility</code></strong> を親クラスに指定し、
+          名前を <strong style="color:#fff"><code>GA_Combo1</code></strong> とします。
         </p>
-        <p>
-          <code>GA_ChargeAttack</code> を開くと、
-          <code>Event ActivateAbility</code> がすでに配置されています。
-        </p>
+        <p>Class Defaults → Tags セクションを以下のように設定します。</p>
+        <table class="concept-table">
+          <tr>
+            <th>フィールド</th>
+            <th>設定値</th>
+          </tr>
+          <tr>
+            <td><code>AssetTags (Default AbilityTags)</code></td>
+            <td><code>Ability.Combo.1</code></td>
+          </tr>
+          <tr>
+            <td><code>Block Abilities with Tag</code></td>
+            <td><code>Ability.Combo.1</code>（自己再発動防止）</td>
+          </tr>
+        </table>
+        <div class="note-box">
+          <div class="note-label">GA_Combo1 に Activation Required Tags は不要</div>
+          <p>1 段目はコンボウィンドウなしで発動できる必要があるため、<code>Activation Required Tags</code> は設定しません。</p>
+        </div>
       </div>
     </div>
-
-    <h2>アビリティのグラフを組む</h2>
-
-    <p>
-      GA_ChargeAttack は「チャージ中... → イベントを待つ → 発射！ → 終了」という一直線の流れです。
-      ループ構造は使わず、<strong style="color:#fff">C キーを 1 回押し離しするたびに 1 回の処理が完結</strong>します。
-    </p>
 
     <div class="step-block">
       <div class="step-head">
         <div class="step-num">3</div>
-        <div class="step-title">Wait Gameplay Event でリリースを待つ</div>
+        <div class="step-title">GA_Combo1 のグラフを組む</div>
       </div>
       <div class="step-body">
         <p>
-          イベントグラフの空白を右クリックして
-          <strong style="color:#fff">「Commit Ability」</strong> を配置し、
-          <code>Event ActivateAbility</code> の実行ピンに繋ぎます。
-        </p>
-        <p>
-          続けて <strong style="color:#fff">Print String</strong>（文字列: <code>"チャージ中..."</code>）を繋ぎます。
-        </p>
-        <p>
-          続けて空白を右クリックして
-          <strong style="color:#fff">「Wait Gameplay Event」</strong> を検索してノードを配置します。
-          <strong style="color:#fff">Tag ピン</strong>に <strong style="color:#fff"><code>Event.ChargeRelease</code></strong> を設定します。
-        </p>
-        <p>
-          <code>Wait Gameplay Event</code> の
-          <strong style="color:#fff">「EventReceived」出力ピン</strong>に
-          <strong style="color:#fff">Print String</strong>（文字列: <code>"発射！"</code>）を繋ぎます。
-        </p>
-        <p>
-          最後に Print String「発射！」の実行出力ピンに
-          <strong style="color:#fff">「End Ability」</strong> を繋ぎます。
+          BP STEP 06 と同じ <strong style="color:#fff">Sequence パターン</strong> を使います。
+          モンタージュを再生しながら、当たり判定フレームで <code>GE_ComboWindow</code> を付与します。
         </p>
 
         <div class="bp-flow">
-          <div class="bp-comment" style="color:#7ec8e3;margin-bottom:12px;">GA_ChargeAttack のグラフ全体</div>
           <div class="bp-row">
             <span class="bp-node event">Event ActivateAbility</span>
             <span class="bp-arrow">→</span>
-            <span class="bp-node">Commit Ability</span>
+            <span class="bp-node green">Commit Ability</span>
             <span class="bp-arrow">→</span>
-            <span class="bp-node">Print "チャージ中..."</span>
+            <span class="bp-node">Sequence</span>
           </div>
-          <div class="bp-row" style="margin-top:4px;">
-            <span class="bp-arrow" style="padding-left:1em;">→</span>
-            <span class="bp-node">Wait Gameplay Event<br><span style="color:#6a8a6a;font-size:0.75rem;">Tag: Event.ChargeRelease</span></span>
-            <span class="bp-arrow">[EventReceived] →</span>
-            <span class="bp-node">Print "発射！"</span>
-            <span class="bp-arrow">→</span>
+          <div class="bp-row bp-indent">
+            <span class="bp-arrow">Then 0 →</span>
+            <span class="bp-node">Play Montage and Wait<br><span style="color:#6a8a6a;font-size:0.75em;">Montage: AM_Combo1</span></span>
+          </div>
+          <div class="bp-row bp-indent" style="padding-left:8.5em;">
+            <span class="bp-arrow">On Completed →</span>
             <span class="bp-node green">End Ability</span>
           </div>
-          <div class="bp-comment">ループなし。C を押し離しするたびに 1 回の処理が完結する。</div>
+          <div class="bp-row bp-indent" style="padding-left:8.5em;">
+            <span class="bp-arrow">On Blend Out →</span>
+            <span class="bp-node green">End Ability</span>
+          </div>
+          <div class="bp-row bp-indent" style="padding-left:8.5em;">
+            <span class="bp-arrow">On Interrupted →</span>
+            <span class="bp-node green">End Ability</span>
+          </div>
+          <div class="bp-row bp-indent" style="padding-left:8.5em;">
+            <span class="bp-arrow">On Cancelled →</span>
+            <span class="bp-node green">End Ability</span>
+          </div>
+          <div class="bp-row bp-indent" style="margin-top:8px;">
+            <span class="bp-arrow">Then 1 →</span>
+            <span class="bp-node">Wait Gameplay Event<br><span style="color:#6a8a6a;font-size:0.75em;">Event.Attack.Hit / Only Trigger Once: true</span></span>
+          </div>
+          <div class="bp-row bp-indent" style="padding-left:8.5em;">
+            <span class="bp-arrow">Event Received →</span>
+            <span class="bp-node orange">Apply Gameplay Effect<br>to Owner<br><span style="color:#8a6a3a;font-size:0.75em;">GE_ComboWindow</span></span>
+          </div>
+          <div class="bp-comment">Wait Gameplay Event が発火すると GE_ComboWindow が付与され、0.5 秒間 Status.ComboWindow が ASC に付く。</div>
         </div>
 
-        <p>ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。</p>
+        <div class="note-box">
+          <div class="note-label">Apply Gameplay Effect to Owner の場所</div>
+          <p>GA Blueprint のイベントグラフで右クリック → <strong style="color:#c8d0e0;">「Apply Gameplay Effect to Owner」</strong> を検索します。見つからない場合は <strong style="color:#c8d0e0;">「Apply Gameplay Effect to Self」</strong> も試してみてください。Gameplay Effect Class に <code>GE_ComboWindow</code>、Level に <code>1.0</code> を設定します。</p>
+        </div>
+
+        <div class="note-box">
+          <div class="note-label">AnimNotify の設定（BP STEP 06 の応用）</div>
+          <p>AM_Combo1 の当たり判定フレームに <code>AN_AttackHit</code>（AnimNotify Blueprint）を配置します。<code>AN_AttackHit</code> が <code>Send Gameplay Event to Actor (Event.Attack.Hit)</code> を呼ぶ設定は BP STEP 06 で作成済みです。各モンタージュの当たり判定フレームに同じ Notify を置くだけです。</p>
+        </div>
       </div>
     </div>
 
-    <h2>キャラクターに C キーを設定する</h2>
+    <h2>GA_Combo2 を作る</h2>
 
     <div class="step-block">
       <div class="step-head">
         <div class="step-num">4</div>
-        <div class="step-title">BeginPlay・Pressed・Released を設定する</div>
+        <div class="step-title">GA_Combo2 Blueprint を作成して Class Defaults を設定する</div>
       </div>
       <div class="step-body">
         <p>
-          <code>BP_ThirdPersonCharacter</code>（使用中のキャラクター Blueprint）のイベントグラフを開きます。
+          Content Browser → Blueprint Class → <code>GameplayAbility</code> → 名前 <strong style="color:#fff"><code>GA_Combo2</code></strong>。
+          Class Defaults → Tags セクションを以下のように設定します。
         </p>
-        <p>
-          既存の <code>Event BeginPlay</code> の末尾に
-          <strong style="color:#fff"><code>Give Ability</code>（Ability Class: <code>GA_ChargeAttack</code>）</strong>
-          を追加します。
-        </p>
-        <p>
-          次に、グラフの空白を右クリックして <strong style="color:#fff">「C」</strong> で検索し、
-          <strong style="color:#fff">「C」キーの入力イベント</strong>を配置します。
-          1 つのノードに Pressed と Released の両方の実行ピンがあります。
-        </p>
-        <p>
-          <strong style="color:#fff">C（Pressed）</strong> の実行ピンに
-          <strong style="color:#fff"><code>Try Activate Ability By Class</code>（In Ability to Activate: <code>GA_ChargeAttack</code>）</strong>
-          を繋ぎます。
-        </p>
-        <p>
-          <strong style="color:#fff">C（Released）</strong> の実行ピンに
-          <strong style="color:#fff"><code>Send Gameplay Event to Actor</code></strong> を繋ぎます。
-        </p>
+        <table class="concept-table">
+          <tr>
+            <th>フィールド</th>
+            <th>設定値</th>
+            <th>意味</th>
+          </tr>
+          <tr>
+            <td><code>AssetTags</code></td>
+            <td><code>Ability.Combo.2</code></td>
+            <td>このアビリティのラベル。</td>
+          </tr>
+          <tr>
+            <td><code>Activation Required Tags</code></td>
+            <td><code>Status.ComboWindow</code></td>
+            <td><strong style="color:#fff">新概念：</strong>ASC に <code>Status.ComboWindow</code> がある間だけ発動できる。GE_ComboWindow が切れると発動できなくなる。</td>
+          </tr>
+          <tr>
+            <td><code>Cancel Abilities with Tag</code></td>
+            <td><code>Ability.Combo.1</code></td>
+            <td>発動時に <code>Ability.Combo.1</code> タグを持つアビリティ（GA_Combo1）を強制キャンセルする。</td>
+          </tr>
+          <tr>
+            <td><code>Block Abilities with Tag</code></td>
+            <td><code>Ability.Combo.2</code></td>
+            <td>自己再発動防止。</td>
+          </tr>
+        </table>
 
-        <div class="code-wrap">
-          <div class="code-label">Send Gameplay Event to Actor のピン設定</div>
-          <pre><code>Actor    : Self ノードを繋ぐ
-EventTag : Event.ChargeRelease
-Payload  : デフォルトのまま（空欄）</code></pre>
+        <div class="note-box">
+          <div class="note-label">Cancel Abilities with Tag のポイント</div>
+          <p>GA_Combo2 が発動した瞬間に GA_Combo1 は <code>On Cancelled</code> ピンから <code>End Ability</code> が呼ばれます。モンタージュも即座に停止し、GA_Combo1 の Activation Owned Tags などもすべてクリアされます。</p>
         </div>
+      </div>
+    </div>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">5</div>
+        <div class="step-title">GA_Combo2 のグラフを組む</div>
+      </div>
+      <div class="step-body">
+        <p>グラフは GA_Combo1 と同じ Sequence パターンです。モンタージュ名と Wait Gameplay Event の後の処理が同じです。</p>
+        <div class="bp-flow">
+          <div class="bp-row">
+            <span class="bp-node event">Event ActivateAbility</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node green">Commit Ability</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Sequence</span>
+          </div>
+          <div class="bp-row bp-indent">
+            <span class="bp-arrow">Then 0 →</span>
+            <span class="bp-node">Play Montage and Wait<br><span style="color:#6a8a6a;font-size:0.75em;">Montage: AM_Combo2</span></span>
+            <span class="bp-arrow">→ [各出力] →</span>
+            <span class="bp-node green">End Ability</span>
+          </div>
+          <div class="bp-row bp-indent" style="margin-top:4px;">
+            <span class="bp-arrow">Then 1 →</span>
+            <span class="bp-node">Wait Gameplay Event<br><span style="color:#6a8a6a;font-size:0.75em;">Event.Attack.Hit / Only Trigger Once: true</span></span>
+            <span class="bp-arrow">Event Received →</span>
+            <span class="bp-node orange">Apply Gameplay Effect<br>to Owner (GE_ComboWindow)</span>
+          </div>
+          <div class="bp-comment">GA_Combo2 の当たり判定フレームでも GE_ComboWindow を付与し、3 段目へのウィンドウを開く。</div>
+        </div>
+      </div>
+    </div>
+
+    <h2>GA_Combo3 を作る</h2>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">6</div>
+        <div class="step-title">GA_Combo3 Blueprint を作成して設定する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          Content Browser → Blueprint Class → <code>GameplayAbility</code> → 名前 <strong style="color:#fff"><code>GA_Combo3</code></strong>。
+          Class Defaults を以下のように設定します。
+        </p>
+        <table class="concept-table">
+          <tr>
+            <th>フィールド</th>
+            <th>設定値</th>
+          </tr>
+          <tr>
+            <td><code>AssetTags</code></td>
+            <td><code>Ability.Combo.3</code></td>
+          </tr>
+          <tr>
+            <td><code>Activation Required Tags</code></td>
+            <td><code>Status.ComboWindow</code></td>
+          </tr>
+          <tr>
+            <td><code>Cancel Abilities with Tag</code></td>
+            <td><code>Ability.Combo.2</code></td>
+          </tr>
+          <tr>
+            <td><code>Block Abilities with Tag</code></td>
+            <td><code>Ability.Combo.3</code></td>
+          </tr>
+        </table>
+        <p>
+          グラフは <strong style="color:#fff">シンプルな Play Montage and Wait のみ</strong> です。
+          3 段目は最後の攻撃なので、コンボウィンドウを開く必要はありません。
+          Wait Gameplay Event と GE_ComboWindow の適用は不要です。
+        </p>
+        <div class="bp-flow">
+          <div class="bp-row">
+            <span class="bp-node event">Event ActivateAbility</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node green">Commit Ability</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Play Montage and Wait<br><span style="color:#6a8a6a;font-size:0.75em;">Montage: AM_Combo3</span></span>
+          </div>
+          <div class="bp-row bp-indent" style="padding-left:12em;">
+            <span class="bp-arrow">On Completed →</span>
+            <span class="bp-node green">End Ability</span>
+          </div>
+          <div class="bp-row bp-indent" style="padding-left:12em;">
+            <span class="bp-arrow">On Blend Out →</span>
+            <span class="bp-node green">End Ability</span>
+          </div>
+          <div class="bp-row bp-indent" style="padding-left:12em;">
+            <span class="bp-arrow">On Interrupted →</span>
+            <span class="bp-node green">End Ability</span>
+          </div>
+          <div class="bp-row bp-indent" style="padding-left:12em;">
+            <span class="bp-arrow">On Cancelled →</span>
+            <span class="bp-node green">End Ability</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h2>キャラクター BP を更新する</h2>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">7</div>
+        <div class="step-title">BeginPlay に Give Ability を追加する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          キャラクター Blueprint の Event BeginPlay グラフを開きます。
+          既存の <code>Give Ability</code> ノードの続きに
+          <code>GA_Combo1</code>・<code>GA_Combo2</code>・<code>GA_Combo3</code> の 3 つを追加します。
+        </p>
+        <div class="bp-flow">
+          <div class="bp-row">
+            <span class="bp-node event">Event BeginPlay</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Give Ability<br><span style="color:#6a8a6a;font-size:0.75em;">GA_Combo1</span></span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Give Ability<br><span style="color:#6a8a6a;font-size:0.75em;">GA_Combo2</span></span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Give Ability<br><span style="color:#6a8a6a;font-size:0.75em;">GA_Combo3</span></span>
+          </div>
+          <div class="bp-comment">3 つとも Give しないと TryActivateAbilityByClass が動作しない。</div>
+        </div>
+        <div class="note-box">
+          <div class="note-label">既存の GA_Attack について</div>
+          <p>BP STEP 05〜07 で使っていた <code>GA_Attack</code> の <code>Give Ability</code> と Q キーのノードは、このステップでは使用しません。コンボ用の Q キーロジックに置き換えます。既存のノードはそのままにするか、削除してください。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">8</div>
+        <div class="step-title">Q キーのロジックを cascading TryActivate に更新する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          Q キーのイベントノードから、<strong style="color:#fff">高い番号から順に</strong> <code>TryActivateAbilityByClass</code> を呼びます。
+          戻り値（Return Value）を <code>Branch</code>（分岐）に繋ぎ、
+          <code>false</code>（発動失敗）のときだけ次の番号を試します。
+        </p>
 
         <div class="bp-flow">
           <div class="bp-row">
-            <span class="bp-node event">C（Pressed）</span>
+            <span class="bp-node event">Q Pressed</span>
             <span class="bp-arrow">→</span>
-            <span class="bp-node">Try Activate Ability By Class<br><span style="color:#6a8a6a;font-size:0.75rem;">GA_ChargeAttack</span></span>
+            <span class="bp-node">Try Activate Ability By Class<br><span style="color:#6a8a6a;font-size:0.75em;">GA_Combo3</span></span>
+            <span class="bp-arrow">→ Return Value →</span>
+            <span class="bp-node">Branch</span>
           </div>
-          <div class="bp-row" style="margin-top:8px;">
-            <span class="bp-node event">C（Released）</span>
-            <span class="bp-arrow">→</span>
-            <span class="bp-node">Send Gameplay Event to Actor<br><span style="color:#6a8a6a;font-size:0.75rem;">Actor: Self / EventTag: Event.ChargeRelease</span></span>
+          <div class="bp-row bp-indent">
+            <span style="color:#4a7860;font-size:0.85em;">True（発動成功）→ 何もしない</span>
           </div>
-          <div class="bp-comment">Pressed でアビリティを起動し、Released でイベントを送って続きを動かす。</div>
+          <div class="bp-row bp-indent">
+            <span class="bp-arrow">False →</span>
+            <span class="bp-node">Try Activate Ability By Class<br><span style="color:#6a8a6a;font-size:0.75em;">GA_Combo2</span></span>
+            <span class="bp-arrow">→ Return Value →</span>
+            <span class="bp-node">Branch</span>
+          </div>
+          <div class="bp-row bp-indent2">
+            <span style="color:#4a7860;font-size:0.85em;">True → 何もしない</span>
+          </div>
+          <div class="bp-row bp-indent2">
+            <span class="bp-arrow">False →</span>
+            <span class="bp-node">Try Activate Ability By Class<br><span style="color:#6a8a6a;font-size:0.75em;">GA_Combo1</span></span>
+          </div>
+          <div class="bp-comment">コンボウィンドウが開いていれば高い番号が優先される。ウィンドウがなければ Combo3/2 は Activation Required Tags で弾かれ、Combo1 から始まる。</div>
         </div>
 
         <div class="note-box">
-          <div class="note-label">Actor ピンへの Self の繋ぎ方</div>
-          <p>
-            グラフの空白を右クリックして <strong style="color:#fff">「Get a reference to self」</strong> を検索するか、
-            <strong style="color:#fff">「Self」</strong> ノードを配置して <code>Actor</code> ピンに繋ぎます。
-            未接続のままだと ASC が見つからずイベントが届きません。
-          </p>
+          <div class="note-label">なぜ高い番号から試すのか</div>
+          <p>3 段目を優先してチェックすることで、<code>Status.ComboWindow</code> がある状態では必ず次段が発動します。低い番号から試すと、Combo1 が常に発動してしまい順番に進みません。</p>
         </div>
-
-        <p>ブループリントを<strong style="color:#fff">コンパイルして保存</strong>してください。</p>
       </div>
     </div>
 
     <h2>動作確認</h2>
 
-    <div class="step-block">
-      <div class="step-head">
-        <div class="step-num">5</div>
-        <div class="step-title">チャージと発射を確認する</div>
-      </div>
-      <div class="step-body">
-        <p>プレイを開始して以下の操作で確認します。</p>
-        <ul class="check-list">
-          <li><strong style="color:#fff">C キーを押す</strong> → 「チャージ中...」が表示される（アビリティが待機中）</li>
-          <li><strong style="color:#fff">C キーを離す</strong> → 「発射！」が表示される（イベントが届いて再開）</li>
-          <li><strong style="color:#fff">長押しして離す</strong> → チャージ時間に関わらず、離した瞬間に「発射！」</li>
-          <li><strong style="color:#fff">C を再び押す</strong> → 同じ流れが繰り返される</li>
-        </ul>
-        <div class="note-box">
-          <div class="note-label">「チャージ中...」が表示されない場合</div>
-          <p>
-            BeginPlay に <code>Give Ability（GA_ChargeAttack）</code> があるか確認してください。
-            C（Pressed）から <code>Try Activate Ability By Class（GA_ChargeAttack）</code> が繋がっているかも確認してください。
-          </p>
-        </div>
-        <div class="note-box">
-          <div class="note-label">「発射！」が表示されない場合</div>
-          <p>
-            <code>Send Gameplay Event to Actor</code> の <code>Actor</code> ピンに <code>Self</code> が繋がっているか確認してください。
-            <code>EventTag</code> ピンが <code>Event.ChargeRelease</code> になっているかも確認してください。
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <h2>EventMagnitude でデータを渡す（発展）</h2>
-
-    <p>
-      Gameplay Event のもう一つの特徴は、イベントと一緒に <strong style="color:#fff">数値データ（EventMagnitude）</strong> を送れることです。
-      例えば「チャージ時間に応じたダメージ倍率」を渡す用途に使えます。
-    </p>
-
-    <div class="step-block">
-      <div class="step-head">
-        <div class="step-num">6</div>
-        <div class="step-title">EventMagnitude を送って受け取る</div>
-      </div>
-      <div class="step-body">
-        <p>
-          <strong style="color:#fff">送る側（キャラクター Blueprint）：</strong><br>
-          <code>Send Gameplay Event to Actor</code> の <code>Payload</code> ピンを
-          <strong style="color:#fff">右クリック → Split Struct Pin（構造体ピンを分割）</strong> します。
-          展開されたピンの中から <strong style="color:#fff"><code>Payload Event Magnitude</code></strong> に
-          <code>100.0</code> などの数値を設定します。
-        </p>
-        <p>
-          <strong style="color:#fff">受け取る側（GA_ChargeAttack）：</strong><br>
-          <code>Wait Gameplay Event</code> の <strong style="color:#fff"><code>Event Data</code></strong> 出力ピンから
-          ワイヤーを引き出し、<strong style="color:#fff">「Break GameplayEventData（構造体を分割）」</strong> ノードを配置します。
-          <strong style="color:#fff"><code>Event Magnitude</code></strong> ピンを Print String の文字列に繋ぎます。
-          （float を文字列に変換するために <strong style="color:#fff">「To String（Float）」</strong> ノードを間に挟みます。）
-        </p>
-
-        <div class="bp-flow">
-          <div class="bp-comment" style="color:#7ec8e3;margin-bottom:12px;">受け取り側の変更（EventReceived ピン以降）</div>
-          <div class="bp-row">
-            <span class="bp-node">[EventReceived]</span>
-            <span class="bp-arrow">→</span>
-            <span class="bp-node">Break GameplayEventData<br><span style="color:#6a8a6a;font-size:0.75rem;">Event Data ピンから</span></span>
-            <span class="bp-arrow">Event Magnitude →</span>
-            <span class="bp-node">To String (Float)</span>
-            <span class="bp-arrow">→</span>
-            <span class="bp-node">Print String<br><span style="color:#6a8a6a;font-size:0.75rem;">"発射！Magnitude: " + 値</span></span>
-          </div>
-          <div class="bp-comment">C キーを離すと「発射！Magnitude: 100.0」のように表示される。</div>
-        </div>
-
-        <div class="note-box">
-          <div class="note-label">Append ノードで文字列を結合する</div>
-          <p>
-            「発射！Magnitude: 」という固定文字列と変換した数値を繋げるには、
-            <strong style="color:#fff">「Append（文字列を追加）」</strong> ノードを使います。
-            右クリックして「Append」で検索してください。
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <h2>Wait Gameplay Event とは</h2>
-
-    <p>
-      <code>Wait Gameplay Event</code> は Ability Task の一種です。
-      指定したタグに一致する Gameplay Event が ASC オーナーに送られるまでアビリティが待機し、
-      受信した瞬間に <strong style="color:#fff">EventReceived</strong> ピンから実行が再開されます。
-    </p>
-
-    <table class="concept-table">
-      <tr>
-        <th>ピン</th>
-        <th>説明</th>
-      </tr>
-      <tr>
-        <td><strong style="color:#ffcb6b;">Tag</strong></td>
-        <td>待ち受けるイベントのタグ。送信側と同じタグを指定する。</td>
-      </tr>
-      <tr>
-        <td><strong style="color:#ffcb6b;">EventReceived（出力）</strong></td>
-        <td>指定タグのイベントを受信した瞬間に発火する実行ピン。</td>
-      </tr>
-      <tr>
-        <td><strong style="color:#ffcb6b;">Event Data（出力）</strong></td>
-        <td>受信した FGameplayEventData 構造体。EventMagnitude・Instigator などを取り出せる。</td>
-      </tr>
-    </table>
-
-    <h2>タグとイベントの使い分け</h2>
-
-    <p>
-      BP STEP 07（Wait Gameplay Tag Removed）と今回のイベントは、似て非なる仕組みです。
-    </p>
-
-    <table class="concept-table">
-      <tr>
-        <th>仕組み</th>
-        <th>性質</th>
-        <th>データ</th>
-        <th>向いている用途</th>
-      </tr>
-      <tr>
-        <td><strong style="color:#ffcb6b;">Gameplay Tag</strong><br>（Wait Tag Removed など）</td>
-        <td>状態（付いているか否か）</td>
-        <td>なし</td>
-        <td>スタン・チャージなどの「状態管理」</td>
-      </tr>
-      <tr>
-        <td><strong style="color:#ffcb6b;">Gameplay Event</strong><br>（Wait Gameplay Event）</td>
-        <td>一時的な通知（起きた瞬間だけ）</td>
-        <td>あり（EventMagnitude など）</td>
-        <td>キー離し・コンボ連携などの「瞬間通知」</td>
-      </tr>
-    </table>
-
-    <p>
-      「チャージ中かどうか」を管理するなら Tag、「この瞬間に離した」という通知なら Event が適切です。
-    </p>
-
-    <h2>うまくいかないときの確認ポイント</h2>
+    <p>Play（プレイ）して以下を確認します。</p>
 
     <ul class="check-list">
-      <li>「チャージ中...」が表示されない → BeginPlay に <code>Give Ability（GA_ChargeAttack）</code> があるか</li>
-      <li>「チャージ中...」が表示されない → C（Pressed）から <code>Try Activate Ability By Class（GA_ChargeAttack）</code> が繋がっているか</li>
-      <li>「発射！」が表示されない → <code>Send Gameplay Event to Actor</code> の Actor ピンに Self が繋がっているか</li>
-      <li>「発射！」が表示されない → <code>Send Gameplay Event to Actor</code> の EventTag が <code>Event.ChargeRelease</code> になっているか</li>
-      <li>「発射！」が表示されない → <code>Wait Gameplay Event</code> の Tag ピンが <code>Event.ChargeRelease</code> になっているか</li>
-      <li>EventMagnitude の値が 0 になる → Payload ピンを Split して <code>Payload Event Magnitude</code> に値を設定したか</li>
-      <li>すべてのブループリントをコンパイル・保存済みか</li>
+      <li>Q を押すと 1 段目（AM_Combo1）が再生される</li>
+      <li>当たり判定フレームのタイミングで Q を押すと 2 段目（AM_Combo2）に切り替わり、1 段目が即座に停止する</li>
+      <li>同様に 2 段目の当たり判定フレームで Q を押すと 3 段目（AM_Combo3）に切り替わる</li>
+      <li>ウィンドウを外れた（遅い）タイミングで Q を押すと 1 段目からやり直しになる</li>
+      <li>Q を連打しても 3 段目以降は発動しない（GA_Combo3 が Block Abilities with Tag で自己ブロック）</li>
     </ul>
 
     <div class="note-box">
-      <div class="note-label">チュートリアル通りにならない場合</div>
-      <p>このチュートリアルは UE 5.5 で動作確認しています。別バージョンをお使いの場合は UE 5.5 で試してみてください。</p>
+      <div class="note-label">GE_ComboWindow の持続時間の調整</div>
+      <p>0.5 秒では厳しすぎる・または緩すぎる場合は <code>GE_ComboWindow</code> の Duration Magnitude を変更してください。ウィンドウの長さはアニメーションのテンポに合わせて調整します。</p>
     </div>
 
     <h2>まとめ</h2>
 
-    <div class="point-box">
-      <p>
-        <code>Wait Gameplay Event</code> を使うと、アビリティが「外部からイベントが届くまで」一時停止できます。<br>
-        キー離しのタイミングをイベントとして送るだけで、「押している間チャージ・離したら発射」が自然に実装できます。
-        タグ（状態）・GE（時間管理）・イベント（瞬間通知）の 3 つを使い分けることで、GAS らしい設計が Blueprint だけで実現できます。
-      </p>
-    </div>
+    <p>
+      このステップで Blueprint 編の全ての要素が揃いました。
+    </p>
+
+    <ul>
+      <li><strong style="color:#fff">Activation Required Tags</strong>：ASC に指定タグがある間だけ発動できる。コンボウィンドウ制御のように「条件が揃ったときだけ」という発動制限に使う。</li>
+      <li><strong style="color:#fff">Cancel Abilities with Tag</strong>：発動時に、指定タグを持つ他のアビリティを強制終了する。コンボの段切り替えに使う。</li>
+      <li><strong style="color:#fff">cascading TryActivate</strong>：高い番号から順に TryActivate を試すパターン。Activation Required Tags と組み合わせることで、条件が揃った最大段数に自動的に飛ぶ。</li>
+    </ul>
 
     <p>
-      BP STEP 01〜08 を通じて、GAS の主要要素である
-      <strong style="color:#fff">AbilitySystemComponent・GameplayAbility・GameplayTag・GameplayEffect・Ability Tasks</strong>
-      を Blueprint だけで動かし、Wait* パターンによるリアクティブな設計まで体験できました。
+      Blueprint 編ではここまで、ASC・GameplayAbility・GameplayTag・GameplayEffect・Ability Task の5要素をすべて使ってきました。
+      ダメージの数値管理（AttributeSet）や、より複雑なゲームプレイ効果の実装には C++ が必要です。
     </p>
 
     <div class="next-track-box">
       <div class="next-track-label">次のステップへ — C++ 編</div>
       <p>
-        BP 編では C++ を一切使わずに GAS の主要機能を動かすことができました。<br>
-        C++ 編では、これに <strong style="color:#fff">AttributeSet</strong>（HP・ダメージなどのステータス管理）と
-        <strong style="color:#fff">GameplayEffect の Modifier</strong>（Attribute を変化させる効果）が加わり、
-        GAS 本来の全機能を活用した構成を学べます。
-        Lyra などの本格的なサンプルプロジェクトを読む準備が整います。
+        AttributeSet で HP やスタミナなどの数値を GAS で管理し、
+        GameplayEffect でダメージ・回復を実装する。
+        GAS のフル機能を活用したい場合はこちら。
       </p>
       <a href="step01.html">C++ 編 STEP 01 から始める →</a>
     </div>
 
     <div class="page-nav">
-      <a href="bp07.html">&#8592; BP STEP 07 タグの変化を待つ</a>
+      <a href="bp07.html">&#8592; BP STEP 07 複数のアビリティとタグを組み合わせる</a>
       <a class="next" href="./">チュートリアル一覧へ &#8594;</a>
     </div>
 
