@@ -104,6 +104,7 @@
 
     .ss { max-width: 100%; border-radius: 6px; margin: 16px 0 4px; display: block; }
     .ss-caption { font-size: 0.75rem; color: #4a5068; margin-bottom: 16px; display: block; }
+    .ss-node { max-width: 100%; display: block; margin-top: 6px; border-radius: 3px; }
 
     /* ===== Reference table ===== */
     .ctx-label {
@@ -332,7 +333,7 @@
       </thead>
       <tbody>
         <tr>
-          <td>Give Ability</td>
+          <td>Give Ability<img class="ss-node" src="img/bpRef-node-give-ability.png" alt="Give Ability ノード"></td>
           <td>アビリティを ASC に登録する。</td>
           <td>BeginPlay で呼ぶのが最もシンプル。登録なしで TryActivate するとサイレント失敗する。<span class="ref-tag used">bp03</span></td>
         </tr>
