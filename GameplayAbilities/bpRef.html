@@ -291,6 +291,7 @@
         <div>
           <div class="ref-toc-section">Character BP から呼べるノード</div>
           <ul>
+            <li><a href="#char-picks">▶ まず知っておくべきノード</a></li>
             <li><a href="#char-abilities">Gameplay Abilities（アビリティ管理）</a></li>
             <li><a href="#char-gameplay-cue">Gameplay Cue（エフェクト発火）</a></li>
             <li><a href="#char-gameplay-effects">Gameplay Effects（GE 適用・管理）</a></li>
@@ -302,6 +303,7 @@
         <div>
           <div class="ref-toc-section">GameplayAbility BP から呼べるノード</div>
           <ul>
+            <li><a href="#ga-picks">▶ まず知っておくべきノード</a></li>
             <li><a href="#ga-events">デフォルトイベント</a></li>
             <li><a href="#ga-abilities">アビリティ制御</a></li>
             <li><a href="#ga-montage">Montage 制御</a></li>
@@ -317,6 +319,154 @@
         </div>
       </div>
     </div>
+
+    <!-- ================================================================ -->
+    <h2 id="char-picks">Character BP — まず知っておくべきノード</h2>
+    <span class="ctx-label char">Character BP / 任意の Actor BP</span>
+
+    <p>Character BP（またはプレイヤーの入力処理が書かれた Actor）から呼ぶ機会が多い主要ノード。GAS を使い始めたら最初に覚えたいものを優先度順に並べた。詳細はカテゴリ別セクションを参照。</p>
+
+    <table class="ref-table">
+      <thead>
+        <tr><th>ノード名</th><th>用途</th><th>注意・補足</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Give Ability</td>
+          <td>アビリティを ASC に登録する。</td>
+          <td>BeginPlay で呼ぶのが最もシンプル。登録なしで TryActivate するとサイレント失敗する。<span class="ref-tag used">bp03</span></td>
+        </tr>
+        <tr>
+          <td>Try Activate Ability by Class</td>
+          <td>クラス指定でアビリティを発動する。</td>
+          <td>Give 済みが前提。Return Value（bool）で成否確認。<code>In Ability to Activate</code> ピンにクラスを指定。<span class="ref-tag used">bp03</span> <span class="ref-tag used">bp08</span></td>
+        </tr>
+        <tr>
+          <td>Clear Ability</td>
+          <td>アビリティを ASC から削除する。</td>
+          <td><code>Give Ability</code> の戻り値（Spec Handle）を保持しておき、それを渡す。</td>
+        </tr>
+        <tr>
+          <td>Give Ability and Activate Once</td>
+          <td>登録と同時に一度だけ発動する。使い捨てアビリティに便利。</td>
+          <td>ループで呼ぶとスロットが増え続けるため、繰り返し使うアビリティには不向き。</td>
+        </tr>
+        <tr>
+          <td>Set User Ability Activation Inhibited</td>
+          <td>フラグ 1 つで全アビリティをまとめてロック／アンロックする。</td>
+          <td>カットシーン・会話中に全入力を止めたいときに使う。タグ設計が不要なシンプルな全停止手段。</td>
+        </tr>
+        <tr>
+          <td>Apply Gameplay Effect to Self</td>
+          <td>自分の ASC に GE を付与する。</td>
+          <td>AbilitySystem コンポーネント参照から呼ぶ（<code>ApplyGameplayEffectToSelf</code>）。<span class="ref-tag used">bp04</span></td>
+        </tr>
+        <tr>
+          <td>Apply Gameplay Effect to Target</td>
+          <td>別の Actor（相手）の ASC に GE を付与する。</td>
+          <td>Target ピンに相手の ASC コンポーネント参照を渡す。ダメージ・デバフに使う。<span class="ref-tag pair">bpEx2</span></td>
+        </tr>
+        <tr>
+          <td>Add Loose Gameplay Tags</td>
+          <td>GE なしで ASC に直接タグを付与する。</td>
+          <td>Actor ピンに Self を必ず繋ぐ（未接続でサイレント失敗）。単一タグは <code>Make Literal Gameplay Tag Container</code> を経由する。<span class="ref-tag used">bp04</span></td>
+        </tr>
+        <tr>
+          <td>Remove Loose Gameplay Tags</td>
+          <td>ASC から Loose タグを削除する。</td>
+          <td>Add とペアで使う。<span class="ref-tag used">bp04</span></td>
+        </tr>
+        <tr>
+          <td>Has Matching Gameplay Tag</td>
+          <td>ASC が指定タグを持つか確認する（bool）。</td>
+          <td>Target は AbilitySystem コンポーネント参照（関数ノードではない）。<span class="ref-tag used">bp04</span></td>
+        </tr>
+        <tr>
+          <td>Send Gameplay Event to Actor</td>
+          <td>Actor に向けて Gameplay Event を送信する。</td>
+          <td>AnimNotify → GA 内 <code>Wait Gameplay Event</code> への橋渡し。Actor ピン未接続でサイレント失敗。<span class="ref-tag used">bp06</span></td>
+        </tr>
+        <tr>
+          <td>Execute GameplayCue On Actor (Burst)</td>
+          <td>一度だけ GameplayCue を発火させる。ヒットエフェクト・SE など。</td>
+          <td>GameplayCueNotify_Static の <code>On Execute</code> が呼ばれる。<span class="ref-tag pair">bpEx2</span></td>
+        </tr>
+        <tr>
+          <td>Wait Gameplay Tag Add to Actor</td>
+          <td>指定タグが ASC に追加されたタイミングを検知する。</td>
+          <td>登録時点でタグが既にある場合は即発火。ループで使う場合は <code>Only Trigger Once: true</code> 必須。<span class="ref-tag used">bp04</span></td>
+        </tr>
+        <tr>
+          <td>Wait Gameplay Tag Remove from Actor</td>
+          <td>指定タグが ASC から削除されたタイミングを検知する。</td>
+          <td>同上。<span class="ref-tag used">bp04</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ================================================================ -->
+    <h2 id="ga-picks">GameplayAbility BP — まず知っておくべきノード</h2>
+    <span class="ctx-label ga">GameplayAbility BP</span>
+
+    <p>GameplayAbility Blueprint のグラフ内で使う基本ノード。アビリティの起動から終了まで、最低限これだけ知っていれば実用的なアビリティが組める。詳細はカテゴリ別セクションを参照。</p>
+
+    <table class="ref-table">
+      <thead>
+        <tr><th>ノード名</th><th>用途</th><th>注意・補足</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Event ActivateAbility</td>
+          <td>アビリティのエントリポイント。ここから処理を組む。</td>
+          <td>新規 GA Blueprint 作成時にグレーアウト状態で配置済み。Override メニューからの追加は不要。<span class="ref-tag used">bp03</span></td>
+        </tr>
+        <tr>
+          <td>Commit Ability</td>
+          <td>コスト・クールダウンを消費する。</td>
+          <td>UE 5.5 のピンは <code>Target</code>（self）と <code>Return Value</code>（bool）のみ。コスト未設定なら必ず成功する。<span class="ref-tag used">bp03</span></td>
+        </tr>
+        <tr>
+          <td>End Ability</td>
+          <td>アビリティを終了する。</td>
+          <td>UE 5.5 のピンは <code>Target</code>（self）のみ。<code>Was Cancelled</code> ピンは <code>Event OnEndAbility</code> 側にある。<span class="ref-tag used">bp03</span></td>
+        </tr>
+        <tr>
+          <td>Event OnEndAbility</td>
+          <td>アビリティが終了したときに発火するイベント。後処理に使う。</td>
+          <td><code>Was Cancelled</code>（bool）出力ピンあり。<code>End Ability</code> 関数ノードとは別物。</td>
+        </tr>
+        <tr>
+          <td>Play Montage and Wait</td>
+          <td>モンタージュを再生し、完了・割り込み・キャンセルの各タイミングで出力ピンが発火する。</td>
+          <td>出力: <code>On Completed</code> / <code>On Blend Out</code> / <code>On Interrupted</code> / <code>On Cancelled</code>。<span class="ref-tag used">bp05</span> <span class="ref-tag used">bp06</span></td>
+        </tr>
+        <tr>
+          <td>Wait Gameplay Event</td>
+          <td>指定タグの Gameplay Event を受け取るまで待機する。</td>
+          <td><code>Only Trigger Once</code> と <code>Only Match Exact</code> あり。AnimNotify → GA 通信の受け取り側。<span class="ref-tag used">bp06</span> <span class="ref-tag used">bp08</span></td>
+        </tr>
+        <tr>
+          <td>Wait Gameplay Tag Added</td>
+          <td>ASC に指定タグが追加されるまで待機する。</td>
+          <td><code>Only Trigger Once: true</code> 推奨。登録時点でタグが既にある場合は即発火。<span class="ref-tag used">bp04</span></td>
+        </tr>
+        <tr>
+          <td>Wait Gameplay Tag Removed</td>
+          <td>ASC から指定タグが削除されるまで待機する。</td>
+          <td>同上。<span class="ref-tag used">bp04</span></td>
+        </tr>
+        <tr>
+          <td>Apply Gameplay Effect to Owner</td>
+          <td>GA が付与されているキャラクター自身の ASC に GE を適用する。</td>
+          <td><code>Gameplay Effect Class</code> と <code>Level</code>（1.0）を設定する。<span class="ref-tag used">bp08</span></td>
+        </tr>
+        <tr>
+          <td>Execute GameplayCue On Actor (Burst)</td>
+          <td>一度だけ GameplayCue を発火させる。</td>
+          <td>GA 内から完結させたい場合はこちら。Character BP 版と機能は同じ。<span class="ref-tag pair">bpEx2</span></td>
+        </tr>
+      </tbody>
+    </table>
 
     <!-- ================================================================ -->
     <h2 id="char-abilities">Gameplay Abilities — アビリティ管理</h2>
@@ -347,17 +497,7 @@
         <tr>
           <td>Clear Ability</td>
           <td>特定のアビリティを ASC から削除する。</td>
-          <td><code>Find Ability Handle</code> で取得した Spec Handle を渡す。</td>
-        </tr>
-        <tr>
-          <td>Find Ability Handle</td>
-          <td>登録済みアビリティのクラスを指定して Spec Handle を取得する。</td>
-          <td><code>Clear Ability</code> や動的制御のために Handle が必要なときに使う。</td>
-        </tr>
-        <tr>
-          <td>Block Abilities with Tag</td>
-          <td>外部 Actor から、指定タグを持つアビリティをブロックする。</td>
-          <td>GA 詳細パネルの同名設定（自己申告）とは別物。Character BP 側から任意のタイミングでブロックをかけられる。</td>
+          <td><code>Give Ability</code> の戻り値（Spec Handle）を保持しておき、それを渡す。</td>
         </tr>
         <tr>
           <td>Set User Ability Activation Inhibited</td>
