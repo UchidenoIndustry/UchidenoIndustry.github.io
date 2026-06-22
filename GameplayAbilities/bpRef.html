@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
@@ -135,9 +135,11 @@
       background: #141e2e; border: 1px solid #2a3860;
       color: #4060a0; padding: 1px 7px; border-radius: 10px;
       white-space: nowrap; margin-right: 3px; font-family: "Consolas","Courier New",monospace;
+      text-decoration: none;
     }
     .ref-tag.warn { border-color: #5a3a1a; color: #a06030; background: #1a1208; }
     .ref-tag.used { border-color: #1a4030; color: #3a8060; background: #0a1410; }
+    .ref-tag.used:hover { border-color: #2a6050; color: #50c090; }
     .ref-tag.pair { border-color: #3a2a5a; color: #6050a0; background: #120e1a; }
 
     /* ===== TOC ===== */
@@ -335,12 +337,12 @@
         <tr>
           <td>Give Ability<img class="ss-node" src="img/bpRef-node-give-ability.png" alt="Give Ability ノード"></td>
           <td>アビリティを ASC に登録する。</td>
-          <td>BeginPlay で呼ぶのが最もシンプル。登録なしで TryActivate するとサイレント失敗する。<span class="ref-tag used">bp03</span></td>
+          <td>BeginPlay で呼ぶのが最もシンプル。登録なしで TryActivate するとサイレント失敗する。<a class="ref-tag used" href="bp03.html">BP 03</a></td>
         </tr>
         <tr>
           <td>Try Activate Ability by Class</td>
           <td>クラス指定でアビリティを発動する。</td>
-          <td>Give 済みが前提。Return Value（bool）で成否確認。<code>In Ability to Activate</code> ピンにクラスを指定。<span class="ref-tag used">bp03</span> <span class="ref-tag used">bp08</span></td>
+          <td>Give 済みが前提。Return Value（bool）で成否確認。<code>In Ability to Activate</code> ピンにクラスを指定。<a class="ref-tag used" href="bp03.html">BP 03</a> <a class="ref-tag used" href="bp08.html">BP 08</a></td>
         </tr>
         <tr>
           <td>Clear Ability</td>
@@ -360,47 +362,47 @@
         <tr>
           <td>Apply Gameplay Effect to Self</td>
           <td>自分の ASC に GE を付与する。</td>
-          <td>AbilitySystem コンポーネント参照から呼ぶ（<code>ApplyGameplayEffectToSelf</code>）。<span class="ref-tag used">bp04</span></td>
+          <td>AbilitySystem コンポーネント参照から呼ぶ（<code>ApplyGameplayEffectToSelf</code>）。<a class="ref-tag used" href="bp04.html">BP 04</a></td>
         </tr>
         <tr>
           <td>Apply Gameplay Effect to Target</td>
           <td>別の Actor（相手）の ASC に GE を付与する。</td>
-          <td>Target ピンに相手の ASC コンポーネント参照を渡す。ダメージ・デバフに使う。<span class="ref-tag pair">bpEx2</span></td>
+          <td>Target ピンに相手の ASC コンポーネント参照を渡す。ダメージ・デバフに使う。<span class="ref-tag pair">BP EX 02</span></td>
         </tr>
         <tr>
           <td>Add Loose Gameplay Tags</td>
           <td>GE なしで ASC に直接タグを付与する。</td>
-          <td>Actor ピンに Self を必ず繋ぐ（未接続でサイレント失敗）。単一タグは <code>Make Literal Gameplay Tag Container</code> を経由する。<span class="ref-tag used">bp04</span></td>
+          <td>Actor ピンに Self を必ず繋ぐ（未接続でサイレント失敗）。単一タグは <code>Make Literal Gameplay Tag Container</code> を経由する。<a class="ref-tag used" href="bp04.html">BP 04</a></td>
         </tr>
         <tr>
           <td>Remove Loose Gameplay Tags</td>
           <td>ASC から Loose タグを削除する。</td>
-          <td>Add とペアで使う。<span class="ref-tag used">bp04</span></td>
+          <td>Add とペアで使う。<a class="ref-tag used" href="bp04.html">BP 04</a></td>
         </tr>
         <tr>
           <td>Has Matching Gameplay Tag</td>
           <td>ASC が指定タグを持つか確認する（bool）。</td>
-          <td>Target は AbilitySystem コンポーネント参照（関数ノードではない）。<span class="ref-tag used">bp04</span></td>
+          <td>Target は AbilitySystem コンポーネント参照（関数ノードではない）。<a class="ref-tag used" href="bp04.html">BP 04</a></td>
         </tr>
         <tr>
           <td>Send Gameplay Event to Actor</td>
           <td>Actor に向けて Gameplay Event を送信する。</td>
-          <td>AnimNotify → GA 内 <code>Wait Gameplay Event</code> への橋渡し。Actor ピン未接続でサイレント失敗。<span class="ref-tag used">bp06</span></td>
+          <td>AnimNotify → GA 内 <code>Wait Gameplay Event</code> への橋渡し。Actor ピン未接続でサイレント失敗。<a class="ref-tag used" href="bp06.html">BP 06</a></td>
         </tr>
         <tr>
           <td>Execute GameplayCue On Actor (Burst)</td>
           <td>一度だけ GameplayCue を発火させる。ヒットエフェクト・SE など。</td>
-          <td>GameplayCueNotify_Static の <code>On Execute</code> が呼ばれる。<span class="ref-tag pair">bpEx2</span></td>
+          <td>GameplayCueNotify_Static の <code>On Execute</code> が呼ばれる。<span class="ref-tag pair">BP EX 02</span></td>
         </tr>
         <tr>
           <td>Wait Gameplay Tag Add to Actor</td>
           <td>指定タグが ASC に追加されたタイミングを検知する。</td>
-          <td>登録時点でタグが既にある場合は即発火。ループで使う場合は <code>Only Trigger Once: true</code> 必須。<span class="ref-tag used">bp04</span></td>
+          <td>登録時点でタグが既にある場合は即発火。ループで使う場合は <code>Only Trigger Once: true</code> 必須。<a class="ref-tag used" href="bp04.html">BP 04</a></td>
         </tr>
         <tr>
           <td>Wait Gameplay Tag Remove from Actor</td>
           <td>指定タグが ASC から削除されたタイミングを検知する。</td>
-          <td>同上。<span class="ref-tag used">bp04</span></td>
+          <td>同上。<a class="ref-tag used" href="bp04.html">BP 04</a></td>
         </tr>
       </tbody>
     </table>
@@ -419,17 +421,17 @@
         <tr>
           <td>Event ActivateAbility</td>
           <td>アビリティのエントリポイント。ここから処理を組む。</td>
-          <td>新規 GA Blueprint 作成時にグレーアウト状態で配置済み。Override メニューからの追加は不要。<span class="ref-tag used">bp03</span></td>
+          <td>新規 GA Blueprint 作成時にグレーアウト状態で配置済み。Override メニューからの追加は不要。<a class="ref-tag used" href="bp03.html">BP 03</a></td>
         </tr>
         <tr>
           <td>Commit Ability</td>
           <td>コスト・クールダウンを消費する。</td>
-          <td>UE 5.5 のピンは <code>Target</code>（self）と <code>Return Value</code>（bool）のみ。コスト未設定なら必ず成功する。<span class="ref-tag used">bp03</span></td>
+          <td>UE 5.5 のピンは <code>Target</code>（self）と <code>Return Value</code>（bool）のみ。コスト未設定なら必ず成功する。<a class="ref-tag used" href="bp03.html">BP 03</a></td>
         </tr>
         <tr>
           <td>End Ability</td>
           <td>アビリティを終了する。</td>
-          <td>UE 5.5 のピンは <code>Target</code>（self）のみ。<code>Was Cancelled</code> ピンは <code>Event OnEndAbility</code> 側にある。<span class="ref-tag used">bp03</span></td>
+          <td>UE 5.5 のピンは <code>Target</code>（self）のみ。<code>Was Cancelled</code> ピンは <code>Event OnEndAbility</code> 側にある。<a class="ref-tag used" href="bp03.html">BP 03</a></td>
         </tr>
         <tr>
           <td>Event OnEndAbility</td>
@@ -439,32 +441,32 @@
         <tr>
           <td>Play Montage and Wait</td>
           <td>モンタージュを再生し、完了・割り込み・キャンセルの各タイミングで出力ピンが発火する。</td>
-          <td>出力: <code>On Completed</code> / <code>On Blend Out</code> / <code>On Interrupted</code> / <code>On Cancelled</code>。<span class="ref-tag used">bp05</span> <span class="ref-tag used">bp06</span></td>
+          <td>出力: <code>On Completed</code> / <code>On Blend Out</code> / <code>On Interrupted</code> / <code>On Cancelled</code>。<a class="ref-tag used" href="bp05.html">BP 05</a> <a class="ref-tag used" href="bp06.html">BP 06</a></td>
         </tr>
         <tr>
           <td>Wait Gameplay Event</td>
           <td>指定タグの Gameplay Event を受け取るまで待機する。</td>
-          <td><code>Only Trigger Once</code> と <code>Only Match Exact</code> あり。AnimNotify → GA 通信の受け取り側。<span class="ref-tag used">bp06</span> <span class="ref-tag used">bp08</span></td>
+          <td><code>Only Trigger Once</code> と <code>Only Match Exact</code> あり。AnimNotify → GA 通信の受け取り側。<a class="ref-tag used" href="bp06.html">BP 06</a> <a class="ref-tag used" href="bp08.html">BP 08</a></td>
         </tr>
         <tr>
           <td>Wait Gameplay Tag Added</td>
           <td>ASC に指定タグが追加されるまで待機する。</td>
-          <td><code>Only Trigger Once: true</code> 推奨。登録時点でタグが既にある場合は即発火。<span class="ref-tag used">bp04</span></td>
+          <td><code>Only Trigger Once: true</code> 推奨。登録時点でタグが既にある場合は即発火。<a class="ref-tag used" href="bp04.html">BP 04</a></td>
         </tr>
         <tr>
           <td>Wait Gameplay Tag Removed</td>
           <td>ASC から指定タグが削除されるまで待機する。</td>
-          <td>同上。<span class="ref-tag used">bp04</span></td>
+          <td>同上。<a class="ref-tag used" href="bp04.html">BP 04</a></td>
         </tr>
         <tr>
           <td>Apply Gameplay Effect to Owner</td>
           <td>GA が付与されているキャラクター自身の ASC に GE を適用する。</td>
-          <td><code>Gameplay Effect Class</code> と <code>Level</code>（1.0）を設定する。<span class="ref-tag used">bp08</span></td>
+          <td><code>Gameplay Effect Class</code> と <code>Level</code>（1.0）を設定する。<a class="ref-tag used" href="bp08.html">BP 08</a></td>
         </tr>
         <tr>
           <td>Execute GameplayCue On Actor (Burst)</td>
           <td>一度だけ GameplayCue を発火させる。</td>
-          <td>GA 内から完結させたい場合はこちら。Character BP 版と機能は同じ。<span class="ref-tag pair">bpEx2</span></td>
+          <td>GA 内から完結させたい場合はこちら。Character BP 版と機能は同じ。<span class="ref-tag pair">BP EX 02</span></td>
         </tr>
       </tbody>
     </table>
@@ -488,7 +490,7 @@
         <tr>
           <td>Give Ability</td>
           <td>アビリティを ASC に登録する。登録済みでないと <code>TryActivateAbilityByClass</code> が無音で失敗する。</td>
-          <td>BeginPlay が最もシンプルな呼び出しタイミング。アイテム取得・レベルアップ時など動的付与も可能。<span class="ref-tag used">bp03</span></td>
+          <td>BeginPlay が最もシンプルな呼び出しタイミング。アイテム取得・レベルアップ時など動的付与も可能。<a class="ref-tag used" href="bp03.html">BP 03</a></td>
         </tr>
         <tr>
           <td>Give Ability and Activate Once</td>
@@ -529,7 +531,7 @@
         <tr>
           <td>Execute GameplayCue On Actor (Burst)</td>
           <td>一度だけ Cue を発火させる。ヒットエフェクト・着地 SE など瞬間的なエフェクトに使う。</td>
-          <td>GameplayCueNotify_Static の <code>On Execute</code> が呼ばれる。<span class="ref-tag pair">bpEx2</span></td>
+          <td>GameplayCueNotify_Static の <code>On Execute</code> が呼ばれる。<span class="ref-tag pair">BP EX 02</span></td>
         </tr>
         <tr>
           <td>Add GameplayCue On Actor (Looping)</td>
@@ -549,7 +551,7 @@
         <tr>
           <td>Make Gameplay Cue Parameters from Hit Result</td>
           <td>ライントレースの Hit Result を Gameplay Cue パラメータに変換する。</td>
-          <td>ヒット位置・法線・対象 Actor を Cue に渡せる。Cue Blueprint 内で <code>Get Hit Result</code> して取り出す。<span class="ref-tag pair">bpEx2</span></td>
+          <td>ヒット位置・法線・対象 Actor を Cue に渡せる。Cue Blueprint 内で <code>Get Hit Result</code> して取り出す。<span class="ref-tag pair">BP EX 02</span></td>
         </tr>
       </tbody>
     </table>
@@ -569,12 +571,12 @@
         <tr>
           <td>Apply Gameplay Effect to Self</td>
           <td>自分自身の ASC に GE を付与する。</td>
-          <td>AbilitySystem コンポーネント参照から呼ぶ（<code>ApplyGameplayEffectToSelf</code>）。<span class="ref-tag used">bp04</span></td>
+          <td>AbilitySystem コンポーネント参照から呼ぶ（<code>ApplyGameplayEffectToSelf</code>）。<a class="ref-tag used" href="bp04.html">BP 04</a></td>
         </tr>
         <tr>
           <td>Apply Gameplay Effect to Target</td>
           <td>別の Actor（相手）の ASC に GE を付与する。</td>
-          <td>Target ピンに相手の ASC コンポーネント参照を渡す。ダメージ・デバフに使う。<span class="ref-tag pair">bpEx2</span></td>
+          <td>Target ピンに相手の ASC コンポーネント参照を渡す。ダメージ・デバフに使う。<span class="ref-tag pair">BP EX 02</span></td>
         </tr>
         <tr>
           <td>Remove Active Effects with Tags</td>
@@ -609,17 +611,17 @@
         <tr>
           <td>Add Loose Gameplay Tags</td>
           <td>GE なしで Actor の ASC に直接タグを付与する。</td>
-          <td>ノード名は複数形。<code>Gameplay Tags</code> ピンはコンテナ型。単一タグを渡すには <code>Make Literal Gameplay Tag Container</code> を挟む。<code>Actor</code> ピンに Self を必ず繋ぐこと（未接続でサイレント失敗）。<span class="ref-tag used">bp04</span></td>
+          <td>ノード名は複数形。<code>Gameplay Tags</code> ピンはコンテナ型。単一タグを渡すには <code>Make Literal Gameplay Tag Container</code> を挟む。<code>Actor</code> ピンに Self を必ず繋ぐこと（未接続でサイレント失敗）。<a class="ref-tag used" href="bp04.html">BP 04</a></td>
         </tr>
         <tr>
           <td>Remove Loose Gameplay Tags</td>
           <td>ASC から Loose タグを削除する。</td>
-          <td>Add とペアで使う。<span class="ref-tag used">bp04</span></td>
+          <td>Add とペアで使う。<a class="ref-tag used" href="bp04.html">BP 04</a></td>
         </tr>
         <tr>
           <td>Has Matching Gameplay Tag</td>
           <td>ASC が指定タグを持つか確認する（bool）。</td>
-          <td>Target は AbilitySystem コンポーネント参照（関数ノードではない）。<span class="ref-tag used">bp04</span></td>
+          <td>Target は AbilitySystem コンポーネント参照（関数ノードではない）。<a class="ref-tag used" href="bp04.html">BP 04</a></td>
         </tr>
         <tr>
           <td>Has All Matching Gameplay Tags</td>
@@ -651,7 +653,7 @@
 
     <div class="note-box">
       <div class="note-label">Only Trigger Once に注意</div>
-      <p><code>Wait Gameplay Tag Add / Remove to Actor</code> はデフォルトで <code>Only Trigger Once: false</code>。ループ構造で使うときは <strong style="color:#c8d0e0">必ず true に変更する</strong>こと。false のまま何度もループすると古いタスクが蓄積し、発火回数が倍増していく。<span class="ref-tag used">bp04</span></p>
+      <p><code>Wait Gameplay Tag Add / Remove to Actor</code> はデフォルトで <code>Only Trigger Once: false</code>。ループ構造で使うときは <strong style="color:#c8d0e0">必ず true に変更する</strong>こと。false のまま何度もループすると古いタスクが蓄積し、発火回数が倍増していく。<a class="ref-tag used" href="bp04.html">BP 04</a></p>
     </div>
 
     <table class="ref-table">
@@ -662,12 +664,12 @@
         <tr>
           <td>Wait Gameplay Tag Add to Actor</td>
           <td>指定タグが Actor の ASC に追加されたタイミングを検知する。</td>
-          <td>登録時点でタグが既に付いている場合は即座に発火する。<code>Only Trigger Once: true</code> 推奨。<span class="ref-tag used">bp04</span></td>
+          <td>登録時点でタグが既に付いている場合は即座に発火する。<code>Only Trigger Once: true</code> 推奨。<a class="ref-tag used" href="bp04.html">BP 04</a></td>
         </tr>
         <tr>
           <td>Wait Gameplay Tag Remove from Actor</td>
           <td>指定タグが ASC から削除されたタイミングを検知する。</td>
-          <td>同上。ループで使うときは <code>Only Trigger Once: true</code>。<span class="ref-tag used">bp04</span></td>
+          <td>同上。ループで使うときは <code>Only Trigger Once: true</code>。<a class="ref-tag used" href="bp04.html">BP 04</a></td>
         </tr>
         <tr>
           <td>Wait Gameplay Tag Count Changed on Actor</td>
@@ -712,7 +714,7 @@
         <tr>
           <td>Send Gameplay Event to Actor</td>
           <td>Actor に向けて Gameplay Event を送信する。</td>
-          <td>AnimNotify Blueprint → GA 内の <code>Wait Gameplay Event</code> への橋渡しに使う（Lyra スタイルパターン）。<code>Actor</code> ピンが未接続だと ASC が見つからずサイレント失敗する。<span class="ref-tag used">bp06</span></td>
+          <td>AnimNotify Blueprint → GA 内の <code>Wait Gameplay Event</code> への橋渡しに使う（Lyra スタイルパターン）。<code>Actor</code> ピンが未接続だと ASC が見つからずサイレント失敗する。<a class="ref-tag used" href="bp06.html">BP 06</a></td>
         </tr>
       </tbody>
     </table>
@@ -732,7 +734,7 @@
         <tr>
           <td>Event ActivateAbility</td>
           <td>アビリティが発動したときのエントリポイント。ここから処理を組む。</td>
-          <td>新規 GA Blueprint 作成時にグレーアウト状態で配置済み。Override メニューから追加する操作は不要。<span class="ref-tag used">bp03</span></td>
+          <td>新規 GA Blueprint 作成時にグレーアウト状態で配置済み。Override メニューから追加する操作は不要。<a class="ref-tag used" href="bp03.html">BP 03</a></td>
         </tr>
         <tr>
           <td>Event OnEndAbility</td>
@@ -757,7 +759,7 @@
         <tr>
           <td>Try Activate Ability by Class</td>
           <td>クラス指定でアビリティを発動する。</td>
-          <td>事前に <code>Give Ability</code> 済みであること。<code>In Ability to Activate</code> ピンにクラスを設定。Return Value（bool）で発動成否を確認できる。<span class="ref-tag used">bp03</span> <span class="ref-tag used">bp08</span></td>
+          <td>事前に <code>Give Ability</code> 済みであること。<code>In Ability to Activate</code> ピンにクラスを設定。Return Value（bool）で発動成否を確認できる。<a class="ref-tag used" href="bp03.html">BP 03</a> <a class="ref-tag used" href="bp08.html">BP 08</a></td>
         </tr>
         <tr>
           <td>Try Activate Abilities by Tag</td>
@@ -827,12 +829,12 @@
         <tr>
           <td>Apply Gameplay Effect to Owner</td>
           <td>GA が付与されているキャラクター自身の ASC に GE を適用する。</td>
-          <td>Character BP 側の <code>ApplyGameplayEffectToSelf</code> と同等だが、GA 内から直接呼べる。<code>Gameplay Effect Class</code> と <code>Level</code>（1.0）を設定する。<span class="ref-tag used">bp08</span></td>
+          <td>Character BP 側の <code>ApplyGameplayEffectToSelf</code> と同等だが、GA 内から直接呼べる。<code>Gameplay Effect Class</code> と <code>Level</code>（1.0）を設定する。<a class="ref-tag used" href="bp08.html">BP 08</a></td>
         </tr>
         <tr>
           <td>Apply Gameplay Effect to Target</td>
           <td>別の Actor（相手）の ASC に GE を適用する。</td>
-          <td>ヒット検出後に相手へダメージ GE を付与するときに使う。<span class="ref-tag pair">bpEx2</span></td>
+          <td>ヒット検出後に相手へダメージ GE を付与するときに使う。<span class="ref-tag pair">BP EX 02</span></td>
         </tr>
         <tr>
           <td>Remove Active Gameplay Effect</td>
@@ -851,7 +853,7 @@
 
     <div class="note-box">
       <div class="note-label">Character BP 版との違い</div>
-      <p>ノード名・機能は Character BP 版と同じ。GA 内で完結させたい場合はこちらを使う。ヒット検出から Cue 発火まで GA 内で完結させるパターンで活用する。<span class="ref-tag pair">bpEx2</span></p>
+      <p>ノード名・機能は Character BP 版と同じ。GA 内で完結させたい場合はこちらを使う。ヒット検出から Cue 発火まで GA 内で完結させるパターンで活用する。<span class="ref-tag pair">BP EX 02</span></p>
     </div>
 
     <table class="ref-table">
@@ -886,7 +888,7 @@
 
     <div class="note-box">
       <div class="note-label">Effect Context とは</div>
-      <p>GE を適用する際に一緒に運ばれるコンテキスト情報のコンテナ。ヒット位置・発生源・インスティゲーター（攻撃者）などを格納でき、GE の Execution や GameplayCue 側で取り出せる。<span class="ref-tag pair">bpEx2</span> でヒット位置を Cue に渡すために使う。</p>
+      <p>GE を適用する際に一緒に運ばれるコンテキスト情報のコンテナ。ヒット位置・発生源・インスティゲーター（攻撃者）などを格納でき、GE の Execution や GameplayCue 側で取り出せる。<span class="ref-tag pair">BP EX 02</span> でヒット位置を Cue に渡すために使う。</p>
     </div>
 
     <table class="ref-table">
@@ -947,7 +949,7 @@
 
     <div class="note-box">
       <div class="note-label">Ability Task とは</div>
-      <p>GameplayAbility 内で使える非同期処理ノード。プロキシ関数を呼ぶだけでタスクが登録され、即座に次の処理へ進む（通常の Latent ノードとは異なる）。<code>Sequence</code> ノードで複数 Task を並行起動できる。<span class="ref-tag used">bp06</span></p>
+      <p>GameplayAbility 内で使える非同期処理ノード。プロキシ関数を呼ぶだけでタスクが登録され、即座に次の処理へ進む（通常の Latent ノードとは異なる）。<code>Sequence</code> ノードで複数 Task を並行起動できる。<a class="ref-tag used" href="bp06.html">BP 06</a></p>
     </div>
 
     <table class="ref-table">
@@ -958,17 +960,17 @@
         <tr>
           <td>Play Montage and Wait</td>
           <td>モンタージュを再生し、完了・割り込み・キャンセルの各タイミングで出力ピンが発火する。</td>
-          <td>出力: <code>On Completed</code> / <code>On Blend Out</code> / <code>On Interrupted</code> / <code>On Cancelled</code>。<span class="ref-tag used">bp05</span> <span class="ref-tag used">bp06</span></td>
+          <td>出力: <code>On Completed</code> / <code>On Blend Out</code> / <code>On Interrupted</code> / <code>On Cancelled</code>。<a class="ref-tag used" href="bp05.html">BP 05</a> <a class="ref-tag used" href="bp06.html">BP 06</a></td>
         </tr>
         <tr>
           <td>Wait Gameplay Event</td>
           <td>指定タグの Gameplay Event を受け取るまで待機する。</td>
-          <td><code>Only Trigger Once</code> と <code>Only Match Exact</code> あり。AnimNotify → GA 通信の受け取り側。<span class="ref-tag used">bp06</span> <span class="ref-tag used">bp08</span></td>
+          <td><code>Only Trigger Once</code> と <code>Only Match Exact</code> あり。AnimNotify → GA 通信の受け取り側。<a class="ref-tag used" href="bp06.html">BP 06</a> <a class="ref-tag used" href="bp08.html">BP 08</a></td>
         </tr>
         <tr>
           <td>Wait Gameplay Tag Added</td>
           <td>ASC に指定タグが追加されるまで待機する。</td>
-          <td><code>Only Trigger Once: true</code> 推奨。登録時点でタグが既にある場合は即発火。<span class="ref-tag used">bp04</span></td>
+          <td><code>Only Trigger Once: true</code> 推奨。登録時点でタグが既にある場合は即発火。<a class="ref-tag used" href="bp04.html">BP 04</a></td>
         </tr>
         <tr>
           <td>Wait Gameplay Tag Removed</td>
@@ -1033,7 +1035,7 @@
         <tr>
           <td>On Execute</td>
           <td>Burst Cue（Execute）が発火したとき。</td>
-          <td>GameplayCueNotify_Static でオーバーライドする。ヒットスパーク・SE の再生はここに組む。<span class="ref-tag pair">bpEx2</span></td>
+          <td>GameplayCueNotify_Static でオーバーライドする。ヒットスパーク・SE の再生はここに組む。<span class="ref-tag pair">BP EX 02</span></td>
         </tr>
         <tr>
           <td>On Active</td>
