@@ -104,7 +104,10 @@
 
     .ss { max-width: 100%; border-radius: 6px; margin: 16px 0 4px; display: block; }
     .ss-caption { font-size: 0.75rem; color: #4a5068; margin-bottom: 16px; display: block; }
-    .ss-node { max-width: 100%; display: block; margin-top: 6px; border-radius: 3px; }
+    .ss-node { max-width: 100%; display: block; margin-top: 6px; border-radius: 3px; cursor: zoom-in; }
+    #node-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.82); z-index: 200; align-items: center; justify-content: center; cursor: zoom-out; }
+    #node-modal.open { display: flex; }
+    #node-modal img { max-width: 90vw; max-height: 90vh; border-radius: 6px; box-shadow: 0 8px 40px rgba(0,0,0,0.7); }
 
     /* ===== Reference table ===== */
     .ctx-label {
@@ -169,6 +172,7 @@
 <body>
 
 <div class="overlay" id="overlay"></div>
+<div id="node-modal"><img id="node-modal-img" src="" alt=""></div>
 
 <div class="layout">
 
@@ -1078,6 +1082,17 @@
 </footer>
 
 <script>
+  const modal = document.getElementById('node-modal');
+  const modalImg = document.getElementById('node-modal-img');
+  document.querySelectorAll('.ss-node').forEach(img => {
+    img.addEventListener('click', () => {
+      modalImg.src = img.src;
+      modalImg.alt = img.alt;
+      modal.classList.add('open');
+    });
+  });
+  modal.addEventListener('click', () => modal.classList.remove('open'));
+
   const toggle = document.getElementById('menuToggle');
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('overlay');
