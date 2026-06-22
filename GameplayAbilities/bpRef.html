@@ -127,10 +127,14 @@
     .ref-table td { padding: 10px 14px; border: 1px solid #1a2230; color: #c0c8d8; vertical-align: top; }
     .ref-table tr:nth-child(even) td { background: #0d1220; }
     .ref-table tr:hover td { background: #111828; }
-    .ref-table td:first-child {
+    .ref-table td:first-child, .ref-table th:first-child {
+      width: 150px; min-width: 150px; max-width: 150px; padding: 6px; vertical-align: top;
+    }
+    .ref-table td:first-child .ss-node { width: 100%; margin-top: 0; }
+    .ref-table td:nth-child(2), .ref-table th:nth-child(2) {
       font-family: "Consolas","Courier New",monospace;
       color: #90c8e0; white-space: nowrap; font-size: 0.82rem;
-      min-width: 200px; vertical-align: top;
+      min-width: 160px; vertical-align: top;
     }
     .ref-usage { margin-bottom: 10px; }
     .ref-note { font-size: 0.82rem; color: #8090a8; padding-top: 8px; border-top: 1px solid #1a2230; }
