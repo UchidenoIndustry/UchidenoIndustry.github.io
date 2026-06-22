@@ -352,7 +352,7 @@
           <td><div class="ref-usage">アビリティを ASC から削除する。</div><div class="ref-note"><code>Give Ability</code> の戻り値（Spec Handle）を保持しておき、それを渡す。</div></td>
         </tr>
         <tr>
-          <td></td>
+          <td><img class="ss-node" src="img/bpRef-node-give-ability-and-activate-once.png" alt="Give Ability And Activate Once ノード"></td>
           <td>Give Ability and Activate Once</td>
           <td><div class="ref-usage">登録と同時に一度だけ発動する。使い捨てアビリティに便利。</div><div class="ref-note">ループで呼ぶとスロットが増え続けるため、繰り返し使うアビリティには不向き。</div></td>
         </tr>
@@ -495,7 +495,7 @@
           <td><div class="ref-usage">アビリティを ASC に登録する。登録済みでないと <code>TryActivateAbilityByClass</code> が無音で失敗する。</div><div class="ref-note">BeginPlay が最もシンプルな呼び出しタイミング。戻り値の <code>Spec Handle</code> を変数に保存しておくと後から <code>Clear Ability</code> で削除できる。同じクラスを複数回 Give するとスロットが増え続けるため 1 クラスにつき 1 回が原則。アイテム取得・スキル解放など任意のタイミングで動的に付与することも可能。<a class="ref-tag used" href="bp03.html">BP 03</a></div></td>
         </tr>
         <tr>
-          <td></td>
+          <td><img class="ss-node" src="img/bpRef-node-give-ability-and-activate-once.png" alt="Give Ability And Activate Once ノード"></td>
           <td>Give Ability and Activate Once</td>
           <td><div class="ref-usage">登録と同時に一度だけ発動する。使い捨てアビリティに便利。</div><div class="ref-note">ループで呼ぶと Give のたびにスロットが増えるため、繰り返し使うアビリティには向かない。</div></td>
         </tr>
