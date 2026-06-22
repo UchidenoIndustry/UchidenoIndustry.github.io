@@ -306,10 +306,10 @@
           <ul>
             <li><a href="#char-picks">▶ まず知っておくべきノード</a></li>
             <li><a href="#char-abilities">Gameplay Abilities（アビリティ管理）</a></li>
-            <li><a href="#char-gameplay-cue">Gameplay Cue（エフェクト発火）</a></li>
-            <li><a href="#char-gameplay-effects">Gameplay Effects（GE 適用・管理）</a></li>
             <li><a href="#char-gameplay-tags">Gameplay Tags（タグ操作）</a></li>
+            <li><a href="#char-gameplay-effects">Gameplay Effects（GE 適用・管理）</a></li>
             <li><a href="#char-monitor">タグ・属性の変化を監視</a></li>
+            <li><a href="#char-gameplay-cue">Gameplay Cue（エフェクト発火）</a></li>
             <li><a href="#char-utility">ユーティリティ</a></li>
           </ul>
         </div>
@@ -521,92 +521,6 @@
     </table>
 
     <!-- ================================================================ -->
-    <h2 id="char-gameplay-cue">Gameplay Cue — エフェクト発火</h2>
-    <span class="ctx-label char">Character BP / 任意の Actor BP</span>
-
-    <img class="ss" src="img/bpRef-char-gameplay-cue.png" alt="Gameplay Cue カテゴリのノード一覧">
-    <span class="ss-caption">▲ Character BP のコンテキストメニュー → Gameplay Cue カテゴリ</span>
-
-    <div class="note-box">
-      <div class="note-label">Burst と Looping の使い分け</div>
-      <p><strong style="color:#c8d0e0">Burst</strong>（Execute）は一度だけ発火するエフェクト。ヒットスパーク・SE など。<br>
-      <strong style="color:#c8d0e0">Looping</strong>（Add / Remove）は持続するエフェクト。炎・オーラ・バフ表示など。必ず Add と Remove をペアで呼ぶこと。</p>
-    </div>
-
-    <table class="ref-table">
-      <thead>
-        <tr><th></th><th>ノード名</th><th>用途 / 注意・補足</th></tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><img class="ss-node" src="img/bpRef-node-execute-gameplay-cue-on-actor-burst.png" alt="Execute GameplayCue On Actor (Burst) ノード"></td>
-          <td>Execute GameplayCue On Actor (Burst)</td>
-          <td><div class="ref-usage">一度だけ Cue を発火させる。ヒットエフェクト・着地 SE など瞬間的なエフェクトに使う。</div><div class="ref-note">GameplayCueNotify_Static の <code>On Execute</code> が呼ばれる。<span class="ref-tag pair">BP EX 02</span></div></td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>Add GameplayCue On Actor (Looping)</td>
-          <td><div class="ref-usage">持続エフェクトを開始する。<code>Remove</code> で明示的に止めるまで継続する。</div><div class="ref-note">GameplayCueNotify_Static の <code>On Active</code> → <code>While Active</code> が呼ばれる。<span class="ref-tag warn">Remove 必須</span></div></td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>Remove GameplayCue On Actor (Looping)</td>
-          <td><div class="ref-usage">持続エフェクトを停止する。</div><div class="ref-note">Add したときと同じ <code>Gameplay Cue Tag</code> を渡すこと。</div></td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>Is Gameplay Cue Active</td>
-          <td><div class="ref-usage">指定タグの Looping Cue が現在発火中かどうかを確認する。</div><div class="ref-note">Target は AbilitySystem コンポーネント参照。</div></td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>Make Gameplay Cue Parameters from Hit Result</td>
-          <td><div class="ref-usage">ライントレースの Hit Result を Gameplay Cue パラメータに変換する。</div><div class="ref-note">ヒット位置・法線・対象 Actor を Cue に渡せる。Cue Blueprint 内で <code>Get Hit Result</code> して取り出す。<span class="ref-tag pair">BP EX 02</span></div></td>
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- ================================================================ -->
-    <h2 id="char-gameplay-effects">Gameplay Effects — GE 適用・管理</h2>
-    <span class="ctx-label char">Character BP / 任意の Actor BP</span>
-
-    <img class="ss" src="img/bpRef-char-gameplay-effects.png" alt="Gameplay Effects カテゴリのノード一覧">
-    <span class="ss-caption">▲ Character BP のコンテキストメニュー → Gameplay Effects カテゴリ</span>
-
-    <table class="ref-table">
-      <thead>
-        <tr><th></th><th>ノード名</th><th>用途 / 注意・補足</th></tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><img class="ss-node" src="img/bpRef-node-apply-gameplay-effect-to-self.png" alt="Apply Gameplay Effect to Self ノード"></td>
-          <td>Apply Gameplay Effect to Self</td>
-          <td><div class="ref-usage">自分自身の ASC に GE を付与する。</div><div class="ref-note">AbilitySystem コンポーネント参照から呼ぶ（<code>ApplyGameplayEffectToSelf</code>）。<a class="ref-tag used" href="bp04.html">BP 04</a></div></td>
-        </tr>
-        <tr>
-          <td><img class="ss-node" src="img/bpRef-node-apply-gameplay-effect-to-target.png" alt="Apply Gameplay Effect to Target ノード"></td>
-          <td>Apply Gameplay Effect to Target</td>
-          <td><div class="ref-usage">別の Actor（相手）の ASC に GE を付与する。</div><div class="ref-note">Target ピンに相手の ASC コンポーネント参照を渡す。ダメージ・デバフに使う。<span class="ref-tag pair">BP EX 02</span></div></td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>Remove Active Effects with Tags</td>
-          <td><div class="ref-usage">指定タグを持つアクティブな GE をすべて解除する。</div><div class="ref-note">Duration / Infinite GE を途中でキャンセルしたいときに使う。</div></td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>Get Gameplay Effect Count</td>
-          <td><div class="ref-usage">指定の GE が何スタックかかっているか取得する。</div><div class="ref-note">Infinite GE のスタック数管理や UI 表示に使う。</div></td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>Get Active Gameplay Effect Remaining Duration</td>
-          <td><div class="ref-usage">アクティブな GE の残り秒数を取得する。</div><div class="ref-note">クールダウン・バフの残り時間を UI に表示するときに使う。</div></td>
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- ================================================================ -->
     <h2 id="char-gameplay-tags">Gameplay Tags — タグ操作</h2>
     <span class="ctx-label char">Character BP / 任意の Actor BP</span>
 
@@ -647,6 +561,46 @@
           <td></td>
           <td>Make Literal Gameplay Tag Container</td>
           <td><div class="ref-usage">コード上でタグコンテナを作る。</div><div class="ref-note"><code>Value</code> ピンに単一タグを設定して Add / Remove Loose Tags に渡すときに使う。</div></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ================================================================ -->
+    <h2 id="char-gameplay-effects">Gameplay Effects — GE 適用・管理</h2>
+    <span class="ctx-label char">Character BP / 任意の Actor BP</span>
+
+    <img class="ss" src="img/bpRef-char-gameplay-effects.png" alt="Gameplay Effects カテゴリのノード一覧">
+    <span class="ss-caption">▲ Character BP のコンテキストメニュー → Gameplay Effects カテゴリ</span>
+
+    <table class="ref-table">
+      <thead>
+        <tr><th></th><th>ノード名</th><th>用途 / 注意・補足</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><img class="ss-node" src="img/bpRef-node-apply-gameplay-effect-to-self.png" alt="Apply Gameplay Effect to Self ノード"></td>
+          <td>Apply Gameplay Effect to Self</td>
+          <td><div class="ref-usage">自分自身の ASC に GE を付与する。</div><div class="ref-note">AbilitySystem コンポーネント参照から呼ぶ（<code>ApplyGameplayEffectToSelf</code>）。<a class="ref-tag used" href="bp04.html">BP 04</a></div></td>
+        </tr>
+        <tr>
+          <td><img class="ss-node" src="img/bpRef-node-apply-gameplay-effect-to-target.png" alt="Apply Gameplay Effect to Target ノード"></td>
+          <td>Apply Gameplay Effect to Target</td>
+          <td><div class="ref-usage">別の Actor（相手）の ASC に GE を付与する。</div><div class="ref-note">Target ピンに相手の ASC コンポーネント参照を渡す。ダメージ・デバフに使う。<span class="ref-tag pair">BP EX 02</span></div></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>Remove Active Effects with Tags</td>
+          <td><div class="ref-usage">指定タグを持つアクティブな GE をすべて解除する。</div><div class="ref-note">Duration / Infinite GE を途中でキャンセルしたいときに使う。</div></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>Get Gameplay Effect Count</td>
+          <td><div class="ref-usage">指定の GE が何スタックかかっているか取得する。</div><div class="ref-note">Infinite GE のスタック数管理や UI 表示に使う。</div></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>Get Active Gameplay Effect Remaining Duration</td>
+          <td><div class="ref-usage">アクティブな GE の残り秒数を取得する。</div><div class="ref-note">クールダウン・バフの残り時間を UI に表示するときに使う。</div></td>
         </tr>
       </tbody>
     </table>
@@ -700,6 +654,52 @@
           <td></td>
           <td>Wait for Attribute Changed</td>
           <td><div class="ref-usage">Attribute の値が変化したタイミングを検知する。</div><div class="ref-note">C++ の AttributeSet が必要。Blueprint-only では利用できないケースが多い。</div></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ================================================================ -->
+    <h2 id="char-gameplay-cue">Gameplay Cue — エフェクト発火</h2>
+    <span class="ctx-label char">Character BP / 任意の Actor BP</span>
+
+    <img class="ss" src="img/bpRef-char-gameplay-cue.png" alt="Gameplay Cue カテゴリのノード一覧">
+    <span class="ss-caption">▲ Character BP のコンテキストメニュー → Gameplay Cue カテゴリ</span>
+
+    <div class="note-box">
+      <div class="note-label">Burst と Looping の使い分け</div>
+      <p><strong style="color:#c8d0e0">Burst</strong>（Execute）は一度だけ発火するエフェクト。ヒットスパーク・SE など。<br>
+      <strong style="color:#c8d0e0">Looping</strong>（Add / Remove）は持続するエフェクト。炎・オーラ・バフ表示など。必ず Add と Remove をペアで呼ぶこと。</p>
+    </div>
+
+    <table class="ref-table">
+      <thead>
+        <tr><th></th><th>ノード名</th><th>用途 / 注意・補足</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><img class="ss-node" src="img/bpRef-node-execute-gameplay-cue-on-actor-burst.png" alt="Execute GameplayCue On Actor (Burst) ノード"></td>
+          <td>Execute GameplayCue On Actor (Burst)</td>
+          <td><div class="ref-usage">一度だけ Cue を発火させる。ヒットエフェクト・着地 SE など瞬間的なエフェクトに使う。</div><div class="ref-note">GameplayCueNotify_Static の <code>On Execute</code> が呼ばれる。<span class="ref-tag pair">BP EX 02</span></div></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>Add GameplayCue On Actor (Looping)</td>
+          <td><div class="ref-usage">持続エフェクトを開始する。<code>Remove</code> で明示的に止めるまで継続する。</div><div class="ref-note">GameplayCueNotify_Static の <code>On Active</code> → <code>While Active</code> が呼ばれる。<span class="ref-tag warn">Remove 必須</span></div></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>Remove GameplayCue On Actor (Looping)</td>
+          <td><div class="ref-usage">持続エフェクトを停止する。</div><div class="ref-note">Add したときと同じ <code>Gameplay Cue Tag</code> を渡すこと。</div></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>Is Gameplay Cue Active</td>
+          <td><div class="ref-usage">指定タグの Looping Cue が現在発火中かどうかを確認する。</div><div class="ref-note">Target は AbilitySystem コンポーネント参照。</div></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>Make Gameplay Cue Parameters from Hit Result</td>
+          <td><div class="ref-usage">ライントレースの Hit Result を Gameplay Cue パラメータに変換する。</div><div class="ref-note">ヒット位置・法線・対象 Actor を Cue に渡せる。Cue Blueprint 内で <code>Get Hit Result</code> して取り出す。<span class="ref-tag pair">BP EX 02</span></div></td>
         </tr>
       </tbody>
     </table>
