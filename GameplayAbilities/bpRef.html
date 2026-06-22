@@ -436,7 +436,22 @@
         <tr>
           <td><img class="ss-node" src="img/bpRef-node-commit-ability.png" alt="Commit Ability ノード"></td>
           <td>Commit Ability</td>
-          <td><div class="ref-usage">コスト・クールダウンを消費する。</div><div class="ref-note">UE 5.5 のピンは <code>Target</code>（self）と <code>Return Value</code>（bool）のみ。コスト未設定なら必ず成功する。<a class="ref-tag used" href="bp03.html">BP 03</a></div></td>
+          <td><div class="ref-usage">コスト・クールダウンを同時に消費する。</div><div class="ref-note">UE 5.5 のピンは <code>Target</code>（self）と <code>Return Value</code>（bool）のみ。コスト未設定なら必ず成功する。<a class="ref-tag used" href="bp03.html">BP 03</a></div></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>Commit Ability Cooldown</td>
+          <td><div class="ref-usage">クールダウンのみを消費する（コストは消費しない）。</div><div class="ref-note"><code>Commit Ability</code> をコストとクールダウンで分けて呼びたいときに使う。例：アビリティ開始時に <code>Commit Ability Cost</code>、アニメーション終了後に <code>Commit Ability Cooldown</code>。</div></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>Commit Ability Cost</td>
+          <td><div class="ref-usage">コストのみを消費する（クールダウンは開始しない）。</div><div class="ref-note"><code>Commit Ability Cooldown</code> と対になるノード。マナや体力などのコストを先に引き落とし、クールダウン開始は後から制御したい場合に使う。</div></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>Event CommitExecute</td>
+          <td><div class="ref-usage"><code>Commit Ability</code> が呼ばれたときに発火するオーバーライドイベント。</div><div class="ref-note">コミット処理をサーバー側でカスタマイズする目的が主。通常の BP 開発では Override しない。</div></td>
         </tr>
         <tr>
           <td><img class="ss-node" src="img/bpRef-node-end-ability.png" alt="End Ability ノード"></td>
@@ -986,6 +1001,11 @@
           <td><img class="ss-node" src="img/bpRef-node-wait-gameplay-tag-remove.png" alt="Wait Gameplay Tag Remove ノード"></td>
           <td>Wait Gameplay Tag Remove</td>
           <td><div class="ref-usage">オーナーの ASC から指定タグが削除されるまで待機する。GA BP 専用。</div><div class="ref-note">Actor ピンなしでオーナーを暗黙参照する点が <code>Wait Gameplay Tag Remove from Actor</code> との違い。<code>Only Trigger Once: true</code> 推奨。</div></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>Wait For New Ability Commit</td>
+          <td><div class="ref-usage">アビリティのコミット（コスト・クールダウン消費）を待機する Ability Task。</div><div class="ref-note">マルチプレイヤーの Prediction（予測）まわりで使う。シングルプレイや通常の BP 開発ではほぼ登場しない。<code>Wait For New Ability Commit Query</code> はクエリ条件付き版。</div></td>
         </tr>
         <tr>
           <td></td>
