@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BP Ref GAS Blueprint ノード リファレンス | GameplayAbilities 入門</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      background: #0f0f1a;
+      color: #e0e0e0;
+      line-height: 1.9;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      padding: 18px 20px;
+      border-bottom: 2px solid #e94560;
+    }
+
+    .header-inner { max-width: 1000px; margin: 0 auto; padding: 0 40px; }
+    .breadcrumb { font-size: 0.8rem; color: #6070a0; margin-bottom: 6px; }
+    .breadcrumb a { color: #7ec8e3; text-decoration: none; }
+    .breadcrumb a:hover { color: #e94560; }
+    .step-label { font-size: 0.8rem; color: #50d890; font-weight: bold; letter-spacing: 0.15em; margin-bottom: 4px; }
+    header h1 { font-size: 1.4rem; color: #fff; margin-bottom: 4px; }
+    header p { color: #a0a8c0; font-size: 0.88rem; }
+
+    .layout { display: grid; grid-template-columns: 240px 1fr; align-items: start; }
+
+    .sidebar {
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
+      background: #111120; border-right: 1px solid #2a2a4a;
+      padding: 24px 0; scrollbar-width: thin; scrollbar-color: #2a2a4a transparent;
+    }
+
+    .sidebar-heading { font-size: 0.72rem; color: #4a5068; letter-spacing: 0.12em; padding: 0 20px 14px; border-bottom: 1px solid #1a1a2e; margin-bottom: 8px; }
+    .sidebar-heading a { color: #4a5068; text-decoration: none; }
+    .sidebar-heading a:hover { color: #7ec8e3; }
+    .sidebar-track { font-size: 0.65rem; color: #50a870; letter-spacing: 0.1em; margin-top: 3px; }
+
+    .nav-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 20px; text-decoration: none; transition: background 0.15s; cursor: pointer; }
+    .nav-item.current { background: #1a2040; }
+    .nav-item.done:hover { background: #161830; }
+
+    .nav-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+    .nav-item.done    .nav-dot { background: #a0e8a0; }
+    .nav-item.current .nav-dot { background: #e94560; box-shadow: 0 0 7px #e94560aa; }
+    .nav-item.coming  .nav-dot { background: transparent; border: 1px solid #2a2a4a; }
+
+    .nav-text { display: flex; flex-direction: column; }
+    .nav-step { font-size: 0.7rem; letter-spacing: 0.08em; display: block; }
+    .nav-item.done    .nav-step { color: #4a7860; }
+    .nav-item.current .nav-step { color: #e94560; }
+    .nav-item.coming  .nav-step { color: #282840; }
+    .nav-title { font-size: 0.83rem; display: block; line-height: 1.45; margin-top: 2px; }
+    .nav-item.done    .nav-title { color: #90a8a0; }
+    .nav-item.current .nav-title { color: #e0e8f8; }
+    .nav-item.coming  .nav-title { color: #282840; }
+
+    .nav-divider { border-top: 1px solid #1a1a2e; margin: 12px 0 6px; }
+    .nav-next-track .nav-dot { background: #3a6a8a; }
+    .nav-next-track .nav-step { color: #4a8090; }
+    .nav-next-track .nav-title { color: #506878; }
+    .nav-next-track:hover { background: #141828; }
+
+    main { padding: 48px 40px 80px; max-width: 1000px; margin: 0 auto; }
+
+    .menu-toggle {
+      display: none; align-items: center; gap: 8px;
+      background: #16213e; border: 1px solid #2a2a4a; color: #7ec8e3;
+      padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; margin-bottom: 24px;
+    }
+
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 99; }
+    .overlay.open { display: block; }
+
+    @media (max-width: 860px) {
+      .header-inner { padding: 0 20px; }
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: fixed; left: -260px; top: 0; height: 100%; width: 240px; z-index: 100; transition: left 0.25s ease; }
+      .sidebar.open { left: 0; box-shadow: 4px 0 24px rgba(0,0,0,0.6); }
+      main { padding: 32px 20px 60px; max-width: 100%; }
+      .menu-toggle { display: flex; }
+    }
+
+    h2 { font-size: 1.25rem; color: #7ec8e3; margin: 56px 0 8px; padding-bottom: 8px; border-bottom: 1px solid #2a2a4a; }
+    h2:first-of-type { margin-top: 0; }
+    h3 { font-size: 1.0rem; color: #a0b8d0; margin: 32px 0 10px; }
+    p { margin-bottom: 16px; color: #c8d0e0; }
+    ul, ol { padding-left: 1.5em; margin-bottom: 16px; color: #c8d0e0; }
+    li { margin-bottom: 6px; }
+    p code, li code { background: #1a2a3a; color: #7ec8e3; padding: 2px 6px; border-radius: 3px; font-size: 0.85em; font-family: "Consolas","Courier New",monospace; }
+
+    .point-box { background: #16213e; border-left: 4px solid #e94560; padding: 18px 22px; border-radius: 4px; margin: 20px 0; }
+    .point-box p { margin-bottom: 0; }
+
+    .note-box { background: #131c2e; border: 1px solid #2a2a4a; border-radius: 6px; padding: 16px 20px; margin: 16px 0; }
+    .note-box .note-label { font-size: 0.75rem; color: #6070a0; font-weight: bold; letter-spacing: 0.1em; margin-bottom: 6px; }
+    .note-box p { margin-bottom: 0; font-size: 0.9rem; color: #8090a8; }
+    .note-box p + p { margin-top: 8px; }
+
+    .ss { width: 100%; border-radius: 6px; margin: 16px 0 4px; display: block; }
+    .ss-caption { font-size: 0.75rem; color: #4a5068; margin-bottom: 16px; display: block; }
+
+    /* ===== Reference table ===== */
+    .ctx-label {
+      display: inline-block; font-size: 0.7rem; font-weight: bold;
+      padding: 2px 10px; border-radius: 10px; margin-bottom: 16px; letter-spacing: 0.06em;
+    }
+    .ctx-label.char { background: #0f1e30; color: #7ec8e3; border: 1px solid #2a4a6a; }
+    .ctx-label.ga   { background: #1e0f2e; color: #c8a0e8; border: 1px solid #5a3a7a; }
+    .ctx-label.cue  { background: #1a1a0a; color: #e8d870; border: 1px solid #5a5a1a; }
+
+    .ref-table { width: 100%; border-collapse: collapse; margin: 12px 0 32px; font-size: 0.86rem; }
+    .ref-table th {
+      background: #141e30; color: #6888a8; padding: 8px 14px;
+      text-align: left; border: 1px solid #1e2a3a; font-weight: normal;
+      font-size: 0.75rem; letter-spacing: 0.08em;
+    }
+    .ref-table td { padding: 10px 14px; border: 1px solid #1a2230; color: #c0c8d8; vertical-align: top; }
+    .ref-table tr:nth-child(even) td { background: #0d1220; }
+    .ref-table tr:hover td { background: #111828; }
+    .ref-table td:first-child {
+      font-family: "Consolas","Courier New",monospace;
+      color: #90c8e0; white-space: nowrap; font-size: 0.82rem;
+      min-width: 200px;
+    }
+
+    .ref-tag {
+      display: inline-block; font-size: 0.68rem;
+      background: #141e2e; border: 1px solid #2a3860;
+      color: #4060a0; padding: 1px 7px; border-radius: 10px;
+      white-space: nowrap; margin-right: 3px; font-family: "Consolas","Courier New",monospace;
+    }
+    .ref-tag.warn { border-color: #5a3a1a; color: #a06030; background: #1a1208; }
+    .ref-tag.used { border-color: #1a4030; color: #3a8060; background: #0a1410; }
+    .ref-tag.pair { border-color: #3a2a5a; color: #6050a0; background: #120e1a; }
+
+    /* ===== TOC ===== */
+    .ref-toc {
+      background: #111828; border: 1px solid #2a2a4a; border-radius: 8px;
+      padding: 20px 24px; margin-bottom: 48px;
+    }
+    .ref-toc-title { font-size: 0.78rem; color: #4a5068; letter-spacing: 0.1em; margin-bottom: 14px; }
+    .ref-toc-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .ref-toc-section { font-size: 0.78rem; color: #6878a0; margin-bottom: 8px; }
+    .ref-toc ul { list-style: none; padding: 0; margin: 0; }
+    .ref-toc li { margin-bottom: 4px; }
+    .ref-toc a { color: #6888a8; text-decoration: none; font-size: 0.84rem; }
+    .ref-toc a:hover { color: #7ec8e3; }
+    @media (max-width: 600px) { .ref-toc-cols { grid-template-columns: 1fr; } }
+
+    .page-nav { display: flex; justify-content: space-between; margin-top: 64px; padding-top: 24px; border-top: 1px solid #2a2a4a; }
+    .page-nav a { color: #7ec8e3; text-decoration: none; font-size: 0.9rem; padding: 10px 20px; border: 1px solid #2a2a4a; border-radius: 4px; transition: border-color 0.2s; }
+    .page-nav a:hover { border-color: #7ec8e3; }
+    .page-nav .next { margin-left: auto; }
+
+    footer { text-align: center; padding: 28px; color: #4a5068; font-size: 0.82rem; border-top: 1px solid #2a2a4a; }
+  </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay"></div>
+
+<div class="layout">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-heading">
+      <a href="./">GameplayAbilities 入門</a>
+      <div class="sidebar-track">Blueprint 編</div>
+    </div>
+
+    <a class="nav-item done" href="bp01.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 01</span>
+        <span class="nav-title">GAS とは何か</span>
+      </span>
+    </a>
+    <a class="nav-item done" href="bp02.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 02</span>
+        <span class="nav-title">Blueprint で始める</span>
+      </span>
+    </a>
+    <a class="nav-item done" href="bp03.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 03</span>
+        <span class="nav-title">最初の Ability を作る</span>
+      </span>
+    </a>
+    <a class="nav-item done" href="bp04.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 04</span>
+        <span class="nav-title">GameplayTag で状態管理</span>
+      </span>
+    </a>
+    <a class="nav-item done" href="bp05.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 05</span>
+        <span class="nav-title">攻撃アビリティを作る</span>
+      </span>
+    </a>
+    <a class="nav-item done" href="bp06.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 06</span>
+        <span class="nav-title">攻撃フレームを制御する</span>
+      </span>
+    </a>
+    <a class="nav-item done" href="bp07.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 07</span>
+        <span class="nav-title">複数のアビリティとタグを組み合わせる</span>
+      </span>
+    </a>
+    <a class="nav-item done" href="bp08.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 08</span>
+        <span class="nav-title">コンボ攻撃（3連撃）</span>
+      </span>
+    </a>
+
+    <div class="nav-item current">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP REF</span>
+        <span class="nav-title">ノード リファレンス</span>
+      </span>
+    </div>
+
+    <div class="nav-item coming">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP EX 01</span>
+        <span class="nav-title">コンボ先行入力</span>
+      </span>
+    </div>
+    <div class="nav-item coming">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP EX 02</span>
+        <span class="nav-title">ヒット検出・ダメージ・GameplayCue</span>
+      </span>
+    </div>
+
+    <div class="nav-divider"></div>
+    <a class="nav-item nav-next-track" href="step01.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">→ C++ 編へ</span>
+        <span class="nav-title">AttributeSet まで学ぶ</span>
+      </span>
+    </a>
+  </aside>
+
+  <div class="content-col">
+
+  <header>
+    <div class="header-inner">
+      <div class="breadcrumb">
+        <a href="../">UchidenoIndustry</a> &rsaquo;
+        <a href="./">GameplayAbilities 入門</a> &rsaquo;
+        BP Ref
+      </div>
+      <div class="step-label">BP REF</div>
+      <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px;">
+        <h1>GAS Blueprint ノード リファレンス</h1>
+        <span style="background:#1a3a1a;border:1px solid #2a6a2a;color:#a0e8a0;font-size:0.75rem;padding:2px 8px;border-radius:4px;font-family:'Consolas','Courier New',monospace;white-space:nowrap;">UE 5.5 版</span>
+      </div>
+      <p>Character BP と GameplayAbility BP から呼び出せる GAS 関連ノードの用途・ピン・注意点をまとめた参照ページ。</p>
+    </div>
+  </header>
+
+  <main>
+
+    <button class="menu-toggle" id="menuToggle">&#9776; 目次</button>
+
+    <div class="ref-toc">
+      <div class="ref-toc-title">このページの内容</div>
+      <div class="ref-toc-cols">
+        <div>
+          <div class="ref-toc-section">Character BP から呼べるノード</div>
+          <ul>
+            <li><a href="#char-abilities">Gameplay Abilities（アビリティ管理）</a></li>
+            <li><a href="#char-gameplay-cue">Gameplay Cue（エフェクト発火）</a></li>
+            <li><a href="#char-gameplay-effects">Gameplay Effects（GE 適用・管理）</a></li>
+            <li><a href="#char-gameplay-tags">Gameplay Tags（タグ操作）</a></li>
+            <li><a href="#char-monitor">タグ・属性の変化を監視</a></li>
+            <li><a href="#char-utility">ユーティリティ</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="ref-toc-section">GameplayAbility BP から呼べるノード</div>
+          <ul>
+            <li><a href="#ga-events">デフォルトイベント</a></li>
+            <li><a href="#ga-abilities">アビリティ制御</a></li>
+            <li><a href="#ga-montage">Montage 制御</a></li>
+            <li><a href="#ga-effect-context">Effect Context</a></li>
+            <li><a href="#ga-tasks">Ability Tasks（主要）</a></li>
+          </ul>
+          <div class="ref-toc-section" style="margin-top:14px;">GameplayCueNotify Blueprint 内の関数</div>
+          <ul>
+            <li><a href="#cue-notify">On Execute / On Active / On Remove …</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <h2 id="char-abilities">Gameplay Abilities — アビリティ管理</h2>
+    <span class="ctx-label char">Character BP / 任意の Actor BP</span>
+
+    <img class="ss" src="img/bpRef-char-gameplay-abilities.png" alt="Gameplay Abilities カテゴリのノード一覧">
+    <span class="ss-caption">▲ Character BP のコンテキストメニュー → Gameplay Abilities カテゴリ</span>
+
+    <table class="ref-table">
+      <thead>
+        <tr>
+          <th>ノード名</th>
+          <th>用途</th>
+          <th>注意・補足</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Give Ability</td>
+          <td>アビリティを ASC に登録する。登録済みでないと <code>TryActivateAbilityByClass</code> が無音で失敗する。</td>
+          <td>BeginPlay が最もシンプルな呼び出しタイミング。アイテム取得・レベルアップ時など動的付与も可能。<span class="ref-tag used">bp03</span></td>
+        </tr>
+        <tr>
+          <td>Give Ability and Activate Once</td>
+          <td>登録と同時に一度だけ発動する。使い捨てアビリティに便利。</td>
+          <td>ループで呼ぶと Give のたびにスロットが増えるため、繰り返し使うアビリティには向かない。</td>
+        </tr>
+        <tr>
+          <td>Clear Ability</td>
+          <td>特定のアビリティを ASC から削除する。</td>
+          <td><code>Find Ability Handle</code> で取得した Spec Handle を渡す。</td>
+        </tr>
+        <tr>
+          <td>Find Ability Handle</td>
+          <td>登録済みアビリティのクラスを指定して Spec Handle を取得する。</td>
+          <td><code>Clear Ability</code> や動的制御のために Handle が必要なときに使う。</td>
+        </tr>
+        <tr>
+          <td>Block Abilities with Tag</td>
+          <td>外部 Actor から、指定タグを持つアビリティをブロックする。</td>
+          <td>GA 詳細パネルの同名設定（自己申告）とは別物。Character BP 側から任意のタイミングでブロックをかけられる。</td>
+        </tr>
+        <tr>
+          <td>Set User Ability Activation Inhibited</td>
+          <td>フラグ 1 つで全アビリティをまとめてロック／アンロックする。</td>
+          <td>カットシーン・会話中に全入力を止めたいときに使う。タグ設計が不要なシンプルな全停止手段。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ================================================================ -->
+    <h2 id="char-gameplay-cue">Gameplay Cue — エフェクト発火</h2>
+    <span class="ctx-label char">Character BP / 任意の Actor BP</span>
+
+    <img class="ss" src="img/bpRef-char-gameplay-cue.png" alt="Gameplay Cue カテゴリのノード一覧">
+    <span class="ss-caption">▲ Character BP のコンテキストメニュー → Gameplay Cue カテゴリ</span>
+
+    <div class="note-box">
+      <div class="note-label">Burst と Looping の使い分け</div>
+      <p><strong style="color:#c8d0e0">Burst</strong>（Execute）は一度だけ発火するエフェクト。ヒットスパーク・SE など。<br>
+      <strong style="color:#c8d0e0">Looping</strong>（Add / Remove）は持続するエフェクト。炎・オーラ・バフ表示など。必ず Add と Remove をペアで呼ぶこと。</p>
+    </div>
+
+    <table class="ref-table">
+      <thead>
+        <tr><th>ノード名</th><th>用途</th><th>注意・補足</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Execute GameplayCue On Actor (Burst)</td>
+          <td>一度だけ Cue を発火させる。ヒットエフェクト・着地 SE など瞬間的なエフェクトに使う。</td>
+          <td>GameplayCueNotify_Static の <code>On Execute</code> が呼ばれる。<span class="ref-tag pair">bpEx2</span></td>
+        </tr>
+        <tr>
+          <td>Add GameplayCue On Actor (Looping)</td>
+          <td>持続エフェクトを開始する。<code>Remove</code> で明示的に止めるまで継続する。</td>
+          <td>GameplayCueNotify_Static の <code>On Active</code> → <code>While Active</code> が呼ばれる。<span class="ref-tag warn">Remove 必須</span></td>
+        </tr>
+        <tr>
+          <td>Remove GameplayCue On Actor (Looping)</td>
+          <td>持続エフェクトを停止する。</td>
+          <td>Add したときと同じ <code>Gameplay Cue Tag</code> を渡すこと。</td>
+        </tr>
+        <tr>
+          <td>Is Gameplay Cue Active</td>
+          <td>指定タグの Looping Cue が現在発火中かどうかを確認する。</td>
+          <td>Target は AbilitySystem コンポーネント参照。</td>
+        </tr>
+        <tr>
+          <td>Make Gameplay Cue Parameters from Hit Result</td>
+          <td>ライントレースの Hit Result を Gameplay Cue パラメータに変換する。</td>
+          <td>ヒット位置・法線・対象 Actor を Cue に渡せる。Cue Blueprint 内で <code>Get Hit Result</code> して取り出す。<span class="ref-tag pair">bpEx2</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ================================================================ -->
+    <h2 id="char-gameplay-effects">Gameplay Effects — GE 適用・管理</h2>
+    <span class="ctx-label char">Character BP / 任意の Actor BP</span>
+
+    <img class="ss" src="img/bpRef-char-gameplay-effects.png" alt="Gameplay Effects カテゴリのノード一覧">
+    <span class="ss-caption">▲ Character BP のコンテキストメニュー → Gameplay Effects カテゴリ</span>
+
+    <table class="ref-table">
+      <thead>
+        <tr><th>ノード名</th><th>用途</th><th>注意・補足</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Apply Gameplay Effect to Self</td>
+          <td>自分自身の ASC に GE を付与する。</td>
+          <td>AbilitySystem コンポーネント参照から呼ぶ（<code>ApplyGameplayEffectToSelf</code>）。<span class="ref-tag used">bp04</span></td>
+        </tr>
+        <tr>
+          <td>Apply Gameplay Effect to Target</td>
+          <td>別の Actor（相手）の ASC に GE を付与する。</td>
+          <td>Target ピンに相手の ASC コンポーネント参照を渡す。ダメージ・デバフに使う。<span class="ref-tag pair">bpEx2</span></td>
+        </tr>
+        <tr>
+          <td>Remove Active Effects with Tags</td>
+          <td>指定タグを持つアクティブな GE をすべて解除する。</td>
+          <td>Duration / Infinite GE を途中でキャンセルしたいときに使う。</td>
+        </tr>
+        <tr>
+          <td>Get Gameplay Effect Count</td>
+          <td>指定の GE が何スタックかかっているか取得する。</td>
+          <td>Infinite GE のスタック数管理や UI 表示に使う。</td>
+        </tr>
+        <tr>
+          <td>Get Active Gameplay Effect Remaining Duration</td>
+          <td>アクティブな GE の残り秒数を取得する。</td>
+          <td>クールダウン・バフの残り時間を UI に表示するときに使う。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ================================================================ -->
+    <h2 id="char-gameplay-tags">Gameplay Tags — タグ操作</h2>
+    <span class="ctx-label char">Character BP / 任意の Actor BP</span>
+
+    <img class="ss" src="img/bpRef-char-gameplay-tags.png" alt="Gameplay Tags カテゴリのノード一覧">
+    <span class="ss-caption">▲ Character BP のコンテキストメニュー → Gameplay Tags カテゴリ</span>
+
+    <table class="ref-table">
+      <thead>
+        <tr><th>ノード名</th><th>用途</th><th>注意・補足</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Add Loose Gameplay Tags</td>
+          <td>GE なしで Actor の ASC に直接タグを付与する。</td>
+          <td>ノード名は複数形。<code>Gameplay Tags</code> ピンはコンテナ型。単一タグを渡すには <code>Make Literal Gameplay Tag Container</code> を挟む。<code>Actor</code> ピンに Self を必ず繋ぐこと（未接続でサイレント失敗）。<span class="ref-tag used">bp04</span></td>
+        </tr>
+        <tr>
+          <td>Remove Loose Gameplay Tags</td>
+          <td>ASC から Loose タグを削除する。</td>
+          <td>Add とペアで使う。<span class="ref-tag used">bp04</span></td>
+        </tr>
+        <tr>
+          <td>Has Matching Gameplay Tag</td>
+          <td>ASC が指定タグを持つか確認する（bool）。</td>
+          <td>Target は AbilitySystem コンポーネント参照（関数ノードではない）。<span class="ref-tag used">bp04</span></td>
+        </tr>
+        <tr>
+          <td>Has All Matching Gameplay Tags</td>
+          <td>指定タグをすべて持つか確認する。AND 条件。</td>
+          <td><code>Tag Container</code> ピンに複数タグを渡す。</td>
+        </tr>
+        <tr>
+          <td>Has Any Matching Gameplay Tags</td>
+          <td>指定タグのうちいずれかを持つか確認する。OR 条件。</td>
+          <td>同上。</td>
+        </tr>
+        <tr>
+          <td>Make Literal Gameplay Tag Container</td>
+          <td>コード上でタグコンテナを作る。</td>
+          <td><code>Value</code> ピンに単一タグを設定して Add / Remove Loose Tags に渡すときに使う。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ================================================================ -->
+    <h2 id="char-monitor">タグ・属性の変化を監視する</h2>
+    <span class="ctx-label char">Character BP / 任意の Actor BP</span>
+
+    <img class="ss" src="img/bpRef-char-tasks-tag-wait.png" alt="タグ・属性監視ノードの一覧">
+    <span class="ss-caption">▲ Character BP → Ability / Tasks カテゴリ</span>
+
+    <div class="note-box">
+      <div class="note-label">Only Trigger Once に注意</div>
+      <p><code>Wait Gameplay Tag Add / Remove to Actor</code> はデフォルトで <code>Only Trigger Once: false</code>。ループ構造で使うときは <strong style="color:#c8d0e0">必ず true に変更する</strong>こと。false のまま何度もループすると古いタスクが蓄積し、発火回数が倍増していく。<span class="ref-tag used">bp04</span></p>
+    </div>
+
+    <table class="ref-table">
+      <thead>
+        <tr><th>ノード名</th><th>用途</th><th>注意・補足</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Wait Gameplay Tag Add to Actor</td>
+          <td>指定タグが Actor の ASC に追加されたタイミングを検知する。</td>
+          <td>登録時点でタグが既に付いている場合は即座に発火する。<code>Only Trigger Once: true</code> 推奨。<span class="ref-tag used">bp04</span></td>
+        </tr>
+        <tr>
+          <td>Wait Gameplay Tag Remove from Actor</td>
+          <td>指定タグが ASC から削除されたタイミングを検知する。</td>
+          <td>同上。ループで使うときは <code>Only Trigger Once: true</code>。<span class="ref-tag used">bp04</span></td>
+        </tr>
+        <tr>
+          <td>Wait Gameplay Tag Count Changed on Actor</td>
+          <td>タグのスタック数が変化したタイミングを検知する。</td>
+          <td>同一タグを複数スタックできる GE を使っているときに便利。</td>
+        </tr>
+        <tr>
+          <td>Wait Gameplay Tag Query on Actor</td>
+          <td>複雑なタグクエリ条件（AND / OR など）の真偽が変化したタイミングを検知する。</td>
+          <td><code>Trigger Condition</code>（When True / When False）でどちら向きの変化で発火するかを選べる。</td>
+        </tr>
+        <tr>
+          <td>Wait Gameplay Effect Applied to Actor</td>
+          <td>指定条件の GE が適用されたタイミングを検知する。</td>
+          <td><code>Source Tag Requirements</code> や <code>Target Tag Requirements</code> でフィルタリング可能。</td>
+        </tr>
+        <tr>
+          <td>Wait for Attribute Changed</td>
+          <td>Attribute の値が変化したタイミングを検知する。</td>
+          <td>C++ の AttributeSet が必要。Blueprint-only では利用できないケースが多い。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ================================================================ -->
+    <h2 id="char-utility">ユーティリティ</h2>
+    <span class="ctx-label char">Character BP / 任意の Actor BP</span>
+
+    <img class="ss" src="img/bpRef-char-ability-utility.png" alt="Ability ユーティリティノードの一覧">
+    <span class="ss-caption">▲ Character BP → Ability カテゴリ</span>
+
+    <table class="ref-table">
+      <thead>
+        <tr><th>ノード名</th><th>用途</th><th>注意・補足</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Get Ability System Component</td>
+          <td>Actor から ASC を取得する。</td>
+          <td><code>Actor</code> ピンに Self または他の Actor を渡す。</td>
+        </tr>
+        <tr>
+          <td>Send Gameplay Event to Actor</td>
+          <td>Actor に向けて Gameplay Event を送信する。</td>
+          <td>AnimNotify Blueprint → GA 内の <code>Wait Gameplay Event</code> への橋渡しに使う（Lyra スタイルパターン）。<code>Actor</code> ピンが未接続だと ASC が見つからずサイレント失敗する。<span class="ref-tag used">bp06</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ================================================================ -->
+    <h2 id="ga-events">デフォルトイベント</h2>
+    <span class="ctx-label ga">GameplayAbility BP</span>
+
+    <img class="ss" src="img/bpRef-ga-default-events.png" alt="GameplayAbility のデフォルトイベントノード">
+    <span class="ss-caption">▲ GameplayAbility BP に最初から配置されているイベントノード</span>
+
+    <table class="ref-table">
+      <thead>
+        <tr><th>ノード名</th><th>用途</th><th>注意・補足</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Event ActivateAbility</td>
+          <td>アビリティが発動したときのエントリポイント。ここから処理を組む。</td>
+          <td>新規 GA Blueprint 作成時にグレーアウト状態で配置済み。Override メニューから追加する操作は不要。<span class="ref-tag used">bp03</span></td>
+        </tr>
+        <tr>
+          <td>Event OnEndAbility</td>
+          <td>アビリティが終了したときに発火するイベント。後処理に使う。</td>
+          <td><code>Was Cancelled</code>（bool）出力ピンあり。<code>End Ability</code> 関数ノード（ピンなし）とは別物。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ================================================================ -->
+    <h2 id="ga-abilities">アビリティ制御</h2>
+    <span class="ctx-label ga">GameplayAbility BP</span>
+
+    <img class="ss" src="img/bpRef-ga-abilities.png" alt="GA Abilities カテゴリのノード一覧">
+    <span class="ss-caption">▲ GameplayAbility BP → GA Abilities カテゴリ</span>
+
+    <table class="ref-table">
+      <thead>
+        <tr><th>ノード名</th><th>用途</th><th>注意・補足</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Try Activate Ability by Class</td>
+          <td>クラス指定でアビリティを発動する。</td>
+          <td>事前に <code>Give Ability</code> 済みであること。<code>In Ability to Activate</code> ピンにクラスを設定。Return Value（bool）で発動成否を確認できる。<span class="ref-tag used">bp03</span> <span class="ref-tag used">bp08</span></td>
+        </tr>
+        <tr>
+          <td>Try Activate Abilities by Tag</td>
+          <td>タグコンテナで一致するアビリティを一括発動する。</td>
+          <td>複数アビリティをまとめて起動したいときに。</td>
+        </tr>
+        <tr>
+          <td>Target Confirm</td>
+          <td>ターゲティング選択を確定する。</td>
+          <td><code>Wait Target Data</code> Ability Task と組み合わせる高度な使い方。</td>
+        </tr>
+        <tr>
+          <td>Target Cancel</td>
+          <td>ターゲティング選択をキャンセルする。</td>
+          <td>同上。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ================================================================ -->
+    <h2 id="ga-montage">Montage 制御</h2>
+    <span class="ctx-label ga">GameplayAbility BP</span>
+
+    <img class="ss" src="img/bpRef-ga-ability-animation.png" alt="GA Ability Animation カテゴリのノード一覧">
+    <span class="ss-caption">▲ GameplayAbility BP → GA Ability Animation カテゴリ</span>
+
+    <div class="note-box">
+      <div class="note-label">Play Montage and Wait との違い</div>
+      <p>このカテゴリのノードは Ability Task を使わずモンタージュを直接操作する関数群。<code>Play Montage and Wait</code> で再生中のモンタージュを動的に制御するために使う。</p>
+    </div>
+
+    <table class="ref-table">
+      <thead>
+        <tr><th>ノード名</th><th>用途</th><th>注意・補足</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Montage Jump to Section</td>
+          <td>再生中のモンタージュを指定セクションへ即座にジャンプする。</td>
+          <td><code>Section Name</code> ピンにセクション名（Name 型）を渡す。</td>
+        </tr>
+        <tr>
+          <td>Montage Set Next Section Name</td>
+          <td>現在のセクションが終わった後に再生するセクションを差し替える。</td>
+          <td><code>From Section Name</code> → <code>To Section Name</code> の組み合わせ。1 モンタージュ内でコンボ分岐を表現するときに使う。</td>
+        </tr>
+        <tr>
+          <td>Montage Stop</td>
+          <td>再生中のモンタージュを停止する。</td>
+          <td>ブレンドアウト時間を指定できる（<code>Override Blend Out Time</code>）。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ================================================================ -->
+    <h2 id="ga-effect-context">Effect Context</h2>
+    <span class="ctx-label ga">GameplayAbility BP</span>
+
+    <img class="ss" src="img/bpRef-ga-ability-effect-context.png" alt="GA Ability Effect Context カテゴリのノード一覧">
+    <span class="ss-caption">▲ GameplayAbility BP → GA Ability Effect Context カテゴリ</span>
+
+    <div class="note-box">
+      <div class="note-label">Effect Context とは</div>
+      <p>GE を適用する際に一緒に運ばれるコンテキスト情報のコンテナ。ヒット位置・発生源・インスティゲーター（攻撃者）などを格納でき、GE の Execution や GameplayCue 側で取り出せる。<span class="ref-tag pair">bpEx2</span> でヒット位置を Cue に渡すために使う。</p>
+    </div>
+
+    <table class="ref-table">
+      <thead>
+        <tr><th>ノード名</th><th>用途</th><th>注意・補足</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Add Hit Result</td>
+          <td>Effect Context にライントレースの Hit Result を追加する。</td>
+          <td><code>Reset</code> ピンを true にすると既存の Hit Result を上書きする。</td>
+        </tr>
+        <tr>
+          <td>Get Hit Result</td>
+          <td>Effect Context から Hit Result を取り出す。</td>
+          <td>Cue Blueprint 内でヒット位置・法線・ヒット対象 Actor を取り出すのに使う。</td>
+        </tr>
+        <tr>
+          <td>Has Hit Result</td>
+          <td>Effect Context に Hit Result が含まれているか確認する。</td>
+          <td>Branch で分岐して Cue の挙動を切り替えるときに使う。</td>
+        </tr>
+        <tr>
+          <td>Get Instigator Actor</td>
+          <td>ダメージ・GE を発生させた Actor（攻撃者）を取得する。</td>
+          <td>「誰が攻撃したか」を Cue 側や GE Execution で知りたいときに。</td>
+        </tr>
+        <tr>
+          <td>Get Effect Causer</td>
+          <td>GE を実際に適用した Actor を取得する。</td>
+          <td>Instigator（プレイヤー）と異なる場合がある（武器・弾丸 Actor など）。</td>
+        </tr>
+        <tr>
+          <td>Get Origin / Set Origin</td>
+          <td>エフェクトの発生座標を取得・設定する。</td>
+          <td>Cue の発生位置としてパーティクルの Spawn 位置に使える。</td>
+        </tr>
+        <tr>
+          <td>Is Instigator Locally Controlled</td>
+          <td>ローカルプレイヤーが発動したかどうかを確認する。</td>
+          <td>マルチプレイで「自分の攻撃にだけカメラシェイクを出す」処理などに。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ================================================================ -->
+    <h2 id="ga-tasks">Ability Tasks（主要抜粋）</h2>
+    <span class="ctx-label ga">GameplayAbility BP</span>
+
+    <img class="ss" src="img/bpRef-ga-ability-tasks-1.png" alt="GA Ability Tasks カテゴリのノード一覧（1/3）">
+    <span class="ss-caption">▲ GameplayAbility BP → GA Ability Tasks カテゴリ（1/3）</span>
+
+    <img class="ss" src="img/bpRef-ga-ability-tasks-2.png" alt="GA Ability Tasks カテゴリのノード一覧（2/3）">
+    <span class="ss-caption">▲ GA Ability Tasks（2/3）</span>
+
+    <img class="ss" src="img/bpRef-ga-ability-tasks-3.png" alt="GA Ability Tasks カテゴリのノード一覧（3/3）">
+    <span class="ss-caption">▲ GA Ability Tasks（3/3）</span>
+
+    <div class="note-box">
+      <div class="note-label">Ability Task とは</div>
+      <p>GameplayAbility 内で使える非同期処理ノード。プロキシ関数を呼ぶだけでタスクが登録され、即座に次の処理へ進む（通常の Latent ノードとは異なる）。<code>Sequence</code> ノードで複数 Task を並行起動できる。<span class="ref-tag used">bp06</span></p>
+    </div>
+
+    <table class="ref-table">
+      <thead>
+        <tr><th>ノード名</th><th>用途</th><th>注意・補足</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Play Montage and Wait</td>
+          <td>モンタージュを再生し、完了・割り込み・キャンセルの各タイミングで出力ピンが発火する。</td>
+          <td>出力: <code>On Completed</code> / <code>On Blend Out</code> / <code>On Interrupted</code> / <code>On Cancelled</code>。<span class="ref-tag used">bp05</span> <span class="ref-tag used">bp06</span></td>
+        </tr>
+        <tr>
+          <td>Wait Gameplay Event</td>
+          <td>指定タグの Gameplay Event を受け取るまで待機する。</td>
+          <td><code>Only Trigger Once</code> と <code>Only Match Exact</code> あり。AnimNotify → GA 通信の受け取り側。<span class="ref-tag used">bp06</span> <span class="ref-tag used">bp08</span></td>
+        </tr>
+        <tr>
+          <td>Wait Gameplay Tag Added</td>
+          <td>ASC に指定タグが追加されるまで待機する。</td>
+          <td><code>Only Trigger Once: true</code> 推奨。登録時点でタグが既にある場合は即発火。<span class="ref-tag used">bp04</span></td>
+        </tr>
+        <tr>
+          <td>Wait Gameplay Tag Removed</td>
+          <td>ASC から指定タグが削除されるまで待機する。</td>
+          <td>同上。</td>
+        </tr>
+        <tr>
+          <td>Wait for Attribute Changed</td>
+          <td>Attribute の値が変化するまで待機する。</td>
+          <td>C++ AttributeSet が必要。</td>
+        </tr>
+        <tr>
+          <td>Wait Input Press</td>
+          <td>指定入力が押されるまで待機する。</td>
+          <td>チャージ攻撃・ターゲティング確定のトリガーに使う。</td>
+        </tr>
+        <tr>
+          <td>Wait Input Release</td>
+          <td>指定入力が離されるまで待機する。</td>
+          <td>チャージ完了の検知に使う。<code>Wait Input Press</code> とセットで使うことが多い。</td>
+        </tr>
+        <tr>
+          <td>Wait Delay</td>
+          <td>指定秒後に発火する Ability Task 版の Delay。</td>
+          <td>通常の <code>Delay</code> ノードも GA 内で使えるが、こちらは Ability Task として動く。</td>
+        </tr>
+        <tr>
+          <td>Wait Ability Activate</td>
+          <td>別のアビリティが発動したタイミングを検知する。</td>
+          <td>アビリティ間の連携・連鎖処理に。</td>
+        </tr>
+        <tr>
+          <td>Wait Ability End</td>
+          <td>別のアビリティが終了したタイミングを検知する。</td>
+          <td>先行アビリティの完了を待ってから次の処理を始めるときに。</td>
+        </tr>
+        <tr>
+          <td>Wait Move Input</td>
+          <td>移動入力が入るまで待機する。</td>
+          <td>「方向キー + ボタン」でロールやステップを発動するパターンに。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ================================================================ -->
+    <h2 id="cue-notify">GameplayCueNotify Blueprint 内のオーバーライド関数</h2>
+    <span class="ctx-label cue">GameplayCueNotify_Static / Actor BP</span>
+
+    <img class="ss" src="img/bpRef-ga-gameplay-cue-notify.png" alt="GameplayCueNotify のオーバーライド関数一覧">
+    <span class="ss-caption">▲ GameplayCueNotify_Static の Blueprint 内で Override できる関数</span>
+
+    <div class="note-box">
+      <div class="note-label">GameplayCueNotify の作り方</div>
+      <p>Content Browser → Blueprint Class → 親クラス <code>GameplayCueNotify_Static</code>（即時エフェクト用）または <code>GameplayCueNotify_Actor</code>（持続エフェクト用）。クラスデフォルトの <strong style="color:#c8d0e0">Gameplay Cue Tag</strong> に <code>GameplayCue.Attack.Hit</code> 等を設定（<code>GameplayCue.</code> プレフィックス必須）。</p>
+    </div>
+
+    <table class="ref-table">
+      <thead>
+        <tr><th>関数名</th><th>いつ呼ばれるか</th><th>注意・補足</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>On Execute</td>
+          <td>Burst Cue（Execute）が発火したとき。</td>
+          <td>GameplayCueNotify_Static でオーバーライドする。ヒットスパーク・SE の再生はここに組む。<span class="ref-tag pair">bpEx2</span></td>
+        </tr>
+        <tr>
+          <td>On Active</td>
+          <td>Looping Cue（Add）が開始したとき。</td>
+          <td>パーティクルシステムの生成・開始処理に使う。</td>
+        </tr>
+        <tr>
+          <td>While Active</td>
+          <td>Looping Cue が持続中、ティックごとに呼ばれる。</td>
+          <td>毎フレームの更新処理が必要なエフェクトに。</td>
+        </tr>
+        <tr>
+          <td>On Remove</td>
+          <td>Looping Cue（Remove）が停止したとき。</td>
+          <td>パーティクルの停止・Actor のデストロイなど後片付けに使う。</td>
+        </tr>
+        <tr>
+          <td>End (Recycle) GameplayCue</td>
+          <td>GameplayCueNotify_Actor をオブジェクトプールに返す。</td>
+          <td>GameplayCueNotify_Actor 専用。プールから取り出した Actor を再利用できる。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="page-nav">
+      <a href="bp08.html">← BP STEP 08 コンボ攻撃（3連撃）</a>
+      <a class="next" href="bpEx1.html">BP EX 01 コンボ先行入力 →</a>
+    </div>
+
+  </main>
+
+  </div><!-- /.content-col -->
+
+</div><!-- /.layout -->
+
+<footer>
+  <p>GameplayAbilities 入門 &mdash; UchidenoIndustry</p>
+</footer>
+
+<script>
+  const toggle = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  toggle.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+  });
+  overlay.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+  });
+</script>
+
+</body>
+</html>
