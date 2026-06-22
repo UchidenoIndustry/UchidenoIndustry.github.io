@@ -305,6 +305,8 @@
             <li><a href="#ga-events">デフォルトイベント</a></li>
             <li><a href="#ga-abilities">アビリティ制御</a></li>
             <li><a href="#ga-montage">Montage 制御</a></li>
+            <li><a href="#ga-gameplay-effect">Gameplay Effect（GA 内から付与）</a></li>
+            <li><a href="#ga-gameplay-cue">Gameplay Cue（GA 内から発火）</a></li>
             <li><a href="#ga-effect-context">Effect Context</a></li>
             <li><a href="#ga-tasks">Ability Tasks（主要）</a></li>
           </ul>
@@ -501,7 +503,10 @@
     <span class="ctx-label char">Character BP / 任意の Actor BP</span>
 
     <img class="ss" src="img/bpRef-char-tasks-tag-wait.png" alt="タグ・属性監視ノードの一覧">
-    <span class="ss-caption">▲ Character BP → Ability / Tasks カテゴリ</span>
+    <span class="ss-caption">▲ Character BP → Ability / Tasks カテゴリ（Wait Tag Add/Remove/Count/Query, Wait for Attribute Changed）</span>
+
+    <img class="ss" src="img/bpRef-char-async-wait.png" alt="Wait Gameplay Effect Applied / Wait Gameplay Event ノードの一覧">
+    <span class="ss-caption">▲ Character BP → Ability / Async カテゴリ（Wait GE Applied, Wait Gameplay Event）</span>
 
     <div class="note-box">
       <div class="note-label">Only Trigger Once に注意</div>
@@ -662,6 +667,71 @@
           <td>Montage Stop</td>
           <td>再生中のモンタージュを停止する。</td>
           <td>ブレンドアウト時間を指定できる（<code>Override Blend Out Time</code>）。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ================================================================ -->
+    <h2 id="ga-gameplay-effect">Gameplay Effect — GA 内から付与</h2>
+    <span class="ctx-label ga">GameplayAbility BP</span>
+
+    <img class="ss" src="img/bpRef-ga-ability-gameplay-effect.png" alt="GA 内から GE を付与するノード一覧">
+    <span class="ss-caption">▲ GameplayAbility BP → GA Ability / Gameplay Effect カテゴリ</span>
+
+    <table class="ref-table">
+      <thead>
+        <tr><th>ノード名</th><th>用途</th><th>注意・補足</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Apply Gameplay Effect to Owner</td>
+          <td>GA が付与されているキャラクター自身の ASC に GE を適用する。</td>
+          <td>Character BP 側の <code>ApplyGameplayEffectToSelf</code> と同等だが、GA 内から直接呼べる。<code>Gameplay Effect Class</code> と <code>Level</code>（1.0）を設定する。<span class="ref-tag used">bp08</span></td>
+        </tr>
+        <tr>
+          <td>Apply Gameplay Effect to Target</td>
+          <td>別の Actor（相手）の ASC に GE を適用する。</td>
+          <td>ヒット検出後に相手へダメージ GE を付与するときに使う。<span class="ref-tag pair">bpEx2</span></td>
+        </tr>
+        <tr>
+          <td>Remove Active Gameplay Effect</td>
+          <td>指定の Active GE Handle を持つ GE を解除する。</td>
+          <td>Apply 系が返す <code>FActiveGameplayEffectHandle</code> を保持しておいて解除するときに。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ================================================================ -->
+    <h2 id="ga-gameplay-cue">Gameplay Cue — GA 内から発火</h2>
+    <span class="ctx-label ga">GameplayAbility BP</span>
+
+    <img class="ss" src="img/bpRef-ga-ability-gameplay-cue.png" alt="GA 内から Gameplay Cue を発火するノード一覧">
+    <span class="ss-caption">▲ GameplayAbility BP → GA Ability / Gameplay Cue カテゴリ</span>
+
+    <div class="note-box">
+      <div class="note-label">Character BP 版との違い</div>
+      <p>ノード名・機能は Character BP 版と同じ。GA 内で完結させたい場合はこちらを使う。ヒット検出から Cue 発火まで GA 内で完結させるパターンで活用する。<span class="ref-tag pair">bpEx2</span></p>
+    </div>
+
+    <table class="ref-table">
+      <thead>
+        <tr><th>ノード名</th><th>用途</th><th>注意・補足</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Execute GameplayCue On Actor (Burst)</td>
+          <td>一度だけ Cue を発火させる。ヒットエフェクト・SE など瞬間的なエフェクトに使う。</td>
+          <td>GameplayCueNotify_Static の <code>On Execute</code> が呼ばれる。</td>
+        </tr>
+        <tr>
+          <td>Add GameplayCue On Actor (Looping)</td>
+          <td>持続エフェクトを開始する。</td>
+          <td><span class="ref-tag warn">Remove 必須</span></td>
+        </tr>
+        <tr>
+          <td>Remove GameplayCue On Actor (Looping)</td>
+          <td>持続エフェクトを停止する。</td>
+          <td>Add したときと同じタグを渡す。</td>
         </tr>
       </tbody>
     </table>
