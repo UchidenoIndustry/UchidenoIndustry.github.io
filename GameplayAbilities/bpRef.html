@@ -439,21 +439,6 @@
           <td><div class="ref-usage">コスト・クールダウンを同時に消費する。</div><div class="ref-note">UE 5.5 のピンは <code>Target</code>（self）と <code>Return Value</code>（bool）のみ。コスト未設定なら必ず成功する。<a class="ref-tag used" href="bp03.html">BP 03</a></div></td>
         </tr>
         <tr>
-          <td></td>
-          <td>Commit Ability Cooldown</td>
-          <td><div class="ref-usage">クールダウンのみを消費する（コストは消費しない）。</div><div class="ref-note"><code>Commit Ability</code> をコストとクールダウンで分けて呼びたいときに使う。例：アビリティ開始時に <code>Commit Ability Cost</code>、アニメーション終了後に <code>Commit Ability Cooldown</code>。</div></td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>Commit Ability Cost</td>
-          <td><div class="ref-usage">コストのみを消費する（クールダウンは開始しない）。</div><div class="ref-note"><code>Commit Ability Cooldown</code> と対になるノード。マナや体力などのコストを先に引き落とし、クールダウン開始は後から制御したい場合に使う。</div></td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>Event CommitExecute</td>
-          <td><div class="ref-usage"><code>Commit Ability</code> が呼ばれたときに発火するオーバーライドイベント。</div><div class="ref-note">コミット処理をサーバー側でカスタマイズする目的が主。通常の BP 開発では Override しない。</div></td>
-        </tr>
-        <tr>
           <td><img class="ss-node" src="img/bpRef-node-end-ability.png" alt="End Ability ノード"></td>
           <td>End Ability</td>
           <td><div class="ref-usage">アビリティを終了する。</div><div class="ref-note">UE 5.5 のピンは <code>Target</code>（self）のみ。<code>Was Cancelled</code> ピンは <code>Event OnEndAbility</code> 側にある。<a class="ref-tag used" href="bp03.html">BP 03</a></div></td>
@@ -765,6 +750,21 @@
           <td><img class="ss-node" src="img/bpRef-node-event-on-end-ability.png" alt="Event OnEndAbility ノード"></td>
           <td>Event OnEndAbility</td>
           <td><div class="ref-usage">アビリティが終了したときに発火するイベント。後処理に使う。</div><div class="ref-note"><code>Was Cancelled</code>（bool）出力ピンあり。<code>End Ability</code> 関数ノード（ピンなし）とは別物。</div></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>Commit Ability Cooldown</td>
+          <td><div class="ref-usage">クールダウンのみを消費する（コストは消費しない）。</div><div class="ref-note"><code>Commit Ability</code> をコストとクールダウンで分けて呼びたいときに使う。例：アビリティ開始時に <code>Commit Ability Cost</code>、アニメーション終了後に <code>Commit Ability Cooldown</code>。</div></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>Commit Ability Cost</td>
+          <td><div class="ref-usage">コストのみを消費する（クールダウンは開始しない）。</div><div class="ref-note"><code>Commit Ability Cooldown</code> と対になるノード。マナや体力などのコストを先に引き落とし、クールダウン開始は後から制御したい場合に使う。</div></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>Event CommitExecute</td>
+          <td><div class="ref-usage"><code>Commit Ability</code> が呼ばれたときに発火するオーバーライドイベント。</div><div class="ref-note">コミット処理をサーバー側でカスタマイズする目的が主。通常の BP 開発では Override しない。</div></td>
         </tr>
       </tbody>
     </table>
