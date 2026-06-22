@@ -347,7 +347,7 @@
         <tr>
           <td><img class="ss-node" src="img/bpRef-node-give-ability.png" alt="Give Ability ノード"></td>
           <td>Give Ability</td>
-          <td><div class="ref-usage">アビリティを ASC に登録する。</div><div class="ref-note">BeginPlay で呼ぶのが最もシンプル。戻り値の <code>Spec Handle</code> を変数に保存しておくと、後から <code>Clear Ability</code> で削除できる。同じクラスを複数回 Give するとスロットが増え続けるため、1 クラスにつき 1 回が原則。登録なしで TryActivate するとエラーも出ずサイレントに失敗する。アイテム取得・スキル解放など BeginPlay 以外のタイミングで動的に付与することも可能。<a class="ref-tag used" href="bp03.html">BP 03</a></div></td>
+          <td><div class="ref-usage">アビリティを ASC に登録する。</div><div class="ref-note">BeginPlay で呼ぶのが基本。戻り値の <code>Spec Handle</code> を保存すると <code>Clear Ability</code> で後から削除できる。同一クラスを複数回 Give するとスロットが増え続けるため 1 クラス 1 回が原則。<a class="ref-tag used" href="bp03.html">BP 03</a></div></td>
         </tr>
         <tr>
           <td><img class="ss-node" src="img/bpRef-node-try-activate-ability-by-class.png" alt="Try Activate Ability by Class ノード"></td>
@@ -500,7 +500,7 @@
         <tr>
           <td></td>
           <td>Give Ability</td>
-          <td><div class="ref-usage">アビリティを ASC に登録する。登録済みでないと <code>TryActivateAbilityByClass</code> が無音で失敗する。</div><div class="ref-note">BeginPlay が最もシンプルな呼び出しタイミング。戻り値の <code>Spec Handle</code> を変数に保存しておくと後から <code>Clear Ability</code> で削除できる。同じクラスを複数回 Give するとスロットが増え続けるため 1 クラスにつき 1 回が原則。アイテム取得・スキル解放など任意のタイミングで動的に付与することも可能。<a class="ref-tag used" href="bp03.html">BP 03</a></div></td>
+          <td><div class="ref-usage">アビリティを ASC に登録する。未登録のまま TryActivate を呼ぶとサイレントに失敗する。</div><div class="ref-note">BeginPlay が基本。戻り値の <code>Spec Handle</code> を保存すると <code>Clear Ability</code> で削除できる。同一クラスを複数回 Give するとスロットが増えるため 1 クラス 1 回が原則。<a class="ref-tag used" href="bp03.html">BP 03</a></div></td>
         </tr>
         <tr>
           <td><img class="ss-node" src="img/bpRef-node-give-ability-and-activate-once.png" alt="Give Ability And Activate Once ノード"></td>
