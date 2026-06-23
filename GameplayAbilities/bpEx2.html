@@ -415,6 +415,11 @@
       この出力に Sphere Trace → Apply Damage → Execute GameplayCue の処理を追加します。
     </p>
 
+    <div class="note-box">
+      <div class="note-label">BP STEP 08 まで進んでいる場合</div>
+      <p>BP STEP 08 のコンボ構成では Q キーが <code>GA_Combo1</code> に割り当てられています。このページの STEP 3 の処理は <code>GA_Attack</code> の代わりに <code>GA_Combo1</code>（および各コンボ段の GA）の <code>Wait Gameplay Event（Event.Attack.Hit）</code> に追加してください。</p>
+    </div>
+
     <div class="step-block">
       <div class="step-head">
         <div class="step-num">5</div>
