@@ -495,7 +495,13 @@
 
         <div class="note-box">
           <div class="note-label">GA から TryActivateAbilityByClass を呼ぶ</div>
-          <p>GA のグラフで右クリック → <strong style="color:#c8d0e0;">「Try Activate Ability By Class」</strong> を検索します。<code>In Ability to Activate</code> ピンに <code>GA_Combo2</code> を指定します。Target（AbilitySystem コンポーネント）は自動的に接続されます。</p>
+          <p>GA のグラフ内では、右クリック検索で <code>Try Activate Ability By Class</code> を直接配置することはできません（Character BP とは異なり、Target が自動接続されない）。親キャラクターの AbilitySystemComponent 参照を先に取得し、そこからノードを引き出します。</p>
+          <ol style="margin-top:8px;padding-left:1.5em;">
+            <li>グラフ空白を右クリック → <strong style="color:#c8d0e0;">「Get Avatar Actor from Actor Info」</strong> を検索・配置</li>
+            <li>戻り値から右ドラッグ → <strong style="color:#c8d0e0;">「Get Ability System Component」</strong> を検索・配置</li>
+            <li>戻り値（AbilitySystemComponent）から右ドラッグ → <strong style="color:#c8d0e0;">「Try Activate Ability By Class」</strong> を検索・配置</li>
+            <li><code>In Ability to Activate</code> ピンに <code>GA_Combo2</code> を指定</li>
+          </ol>
         </div>
       </div>
     </div>
