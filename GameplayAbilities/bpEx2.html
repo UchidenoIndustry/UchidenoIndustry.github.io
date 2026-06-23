@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BP EX 02 ヒット検出・ダメージ・GameplayCue | GameplayAbilities 入門</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      background: #0f0f1a;
+      color: #e0e0e0;
+      line-height: 1.9;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      padding: 18px 20px;
+      border-bottom: 2px solid #e94560;
+    }
+
+    .header-inner { max-width: 1000px; margin: 0 auto; padding: 0 40px; }
+    .breadcrumb { font-size: 0.8rem; color: #6070a0; margin-bottom: 6px; }
+    .breadcrumb a { color: #7ec8e3; text-decoration: none; }
+    .breadcrumb a:hover { color: #e94560; }
+    .step-label { font-size: 0.8rem; color: #e94560; font-weight: bold; letter-spacing: 0.15em; margin-bottom: 4px; }
+    header h1 { font-size: 1.4rem; color: #fff; margin-bottom: 4px; }
+    header p { color: #a0a8c0; font-size: 0.88rem; }
+
+    .layout { display: grid; grid-template-columns: 240px 1fr; align-items: start; }
+
+    .sidebar {
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
+      background: #111120; border-right: 1px solid #2a2a4a;
+      padding: 24px 0; scrollbar-width: thin; scrollbar-color: #2a2a4a transparent;
+    }
+
+    .sidebar-heading { font-size: 0.72rem; color: #4a5068; letter-spacing: 0.12em; padding: 0 20px 14px; border-bottom: 1px solid #1a1a2e; margin-bottom: 8px; }
+    .sidebar-heading a { color: #4a5068; text-decoration: none; }
+    .sidebar-heading a:hover { color: #7ec8e3; }
+    .sidebar-track { font-size: 0.65rem; color: #50a870; letter-spacing: 0.1em; margin-top: 3px; }
+
+    .nav-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 20px; text-decoration: none; transition: background 0.15s; cursor: pointer; }
+    .nav-item.current { background: #1a2040; }
+    .nav-item.done:hover { background: #161830; }
+
+    .nav-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+    .nav-item.done    .nav-dot { background: #a0e8a0; }
+    .nav-item.current .nav-dot { background: #e94560; box-shadow: 0 0 7px #e94560aa; }
+
+    .nav-text { display: flex; flex-direction: column; }
+    .nav-step { font-size: 0.7rem; letter-spacing: 0.08em; display: block; }
+    .nav-item.done    .nav-step { color: #4a7860; }
+    .nav-item.current .nav-step { color: #e94560; }
+    .nav-title { font-size: 0.83rem; display: block; line-height: 1.45; margin-top: 2px; }
+    .nav-item.done    .nav-title { color: #90a8a0; }
+    .nav-item.current .nav-title { color: #e0e8f8; }
+
+    .nav-divider { border-top: 1px solid #1a1a2e; margin: 12px 0 6px; }
+    .nav-next-track .nav-dot { background: #3a6a8a; }
+    .nav-next-track .nav-step { color: #4a8090; }
+    .nav-next-track .nav-title { color: #506878; }
+    .nav-next-track:hover { background: #141828; }
+
+    main { padding: 48px 40px 80px; max-width: 1000px; margin: 0 auto; }
+
+    .menu-toggle {
+      display: none; align-items: center; gap: 8px;
+      background: #16213e; border: 1px solid #2a2a4a; color: #7ec8e3;
+      padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; margin-bottom: 24px;
+    }
+
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 99; }
+    .overlay.open { display: block; }
+
+    @media (max-width: 860px) {
+      .header-inner { padding: 0 20px; }
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: fixed; left: -260px; top: 0; height: 100%; width: 240px; z-index: 100; transition: left 0.25s ease; }
+      .sidebar.open { left: 0; box-shadow: 4px 0 24px rgba(0,0,0,0.6); }
+      main { padding: 32px 20px 60px; max-width: 100%; }
+      .menu-toggle { display: flex; }
+    }
+
+    h2 { font-size: 1.3rem; color: #7ec8e3; margin: 52px 0 16px; padding-bottom: 8px; border-bottom: 1px solid #2a2a4a; }
+    h2:first-of-type { margin-top: 0; }
+    h3 { font-size: 1.05rem; color: #c8d0e0; margin: 28px 0 12px; }
+    p { margin-bottom: 16px; color: #c8d0e0; }
+    ul, ol { padding-left: 1.5em; margin-bottom: 16px; color: #c8d0e0; }
+    li { margin-bottom: 6px; }
+
+    .step-block { border: 1px solid #2a2a4a; border-radius: 8px; margin: 24px 0; overflow: hidden; }
+    .step-block .step-head { background: #1a2a4a; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+    .step-block .step-num { background: #e94560; color: #fff; font-size: 0.75rem; font-weight: bold; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .step-block .step-title { color: #fff; font-size: 0.95rem; font-weight: bold; }
+    .step-block .step-body { padding: 20px 24px; }
+    .step-block .step-body p { margin-bottom: 12px; }
+    .step-block .step-body p:last-child { margin-bottom: 0; }
+
+    .code-wrap { margin: 16px 0; }
+    .code-label { background: #2a2a4a; color: #8090a8; font-size: 0.75rem; padding: 5px 14px; border-radius: 4px 4px 0 0; font-family: "Consolas","Courier New",monospace; display: inline-block; }
+    pre { background: #0a0a14; border: 1px solid #2a2a4a; border-radius: 0 4px 4px 4px; padding: 20px; overflow-x: auto; margin: 0; }
+    code { font-family: "Consolas","Courier New",monospace; font-size: 0.85rem; line-height: 1.8; }
+    p code, li code { background: #1a2a3a; color: #7ec8e3; padding: 2px 6px; border-radius: 3px; font-size: 0.85em; }
+
+    .point-box { background: #16213e; border-left: 4px solid #e94560; padding: 18px 22px; border-radius: 4px; margin: 20px 0; }
+    .point-box p { margin-bottom: 0; }
+
+    .note-box { background: #131c2e; border: 1px solid #2a2a4a; border-radius: 6px; padding: 16px 20px; margin: 16px 0; }
+    .note-box .note-label { font-size: 0.75rem; color: #6070a0; font-weight: bold; letter-spacing: 0.1em; margin-bottom: 6px; }
+    .note-box p { margin-bottom: 0; font-size: 0.9rem; color: #8090a8; }
+    .note-box p + p { margin-top: 8px; }
+    .note-box ol, .note-box ul { font-size: 0.9rem; color: #8090a8; }
+
+    .check-list { list-style: none; margin: 16px 0; padding-left: 0; }
+    .check-list li { padding: 8px 0 8px 32px; position: relative; color: #c8d0e0; border-bottom: 1px solid #1a2030; }
+    .check-list li:last-child { border-bottom: none; }
+    .check-list li::before { content: "✓"; position: absolute; left: 0; color: #a0e8a0; font-weight: bold; }
+
+    .bp-flow { background: #0d1a2e; border: 1px solid #2a3a5a; border-radius: 8px; padding: 20px 24px; margin: 16px 0; font-family: "Consolas","Courier New",monospace; font-size: 0.82rem; overflow-x: auto; }
+    .bp-node { display: inline-block; background: #1a2a4a; border: 1px solid #3a4a6a; border-radius: 4px; padding: 4px 12px; color: #a0c8e8; white-space: nowrap; }
+    .bp-node.event { background: #2a1a2a; border-color: #6a3a6a; color: #c8a0e8; }
+    .bp-node.green { background: #1a2a1a; border-color: #3a6a3a; color: #90e890; }
+    .bp-node.red { background: #2a1a1a; border-color: #6a3a3a; color: #e89090; }
+    .bp-node.orange { background: #2a1a00; border-color: #6a4a00; color: #e8c080; }
+    .bp-node.new { background: #102010; border-color: #2a5a20; color: #80d060; }
+    .bp-arrow { color: #4a6a8a; margin: 0 6px; font-size: 1rem; }
+    .bp-comment { color: #4a6060; font-size: 0.78rem; margin-top: 8px; font-family: "Hiragino Kaku Gothic ProN","Meiryo",sans-serif; }
+    .bp-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0; margin-bottom: 8px; }
+    .bp-row:last-child { margin-bottom: 0; }
+    .bp-indent  { padding-left: 2em; }
+    .bp-indent2 { padding-left: 4em; }
+    .bp-indent3 { padding-left: 6em; }
+
+    .concept-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.88rem; }
+    .concept-table th { background: #1a2a4a; color: #7ec8e3; padding: 10px 16px; text-align: left; border: 1px solid #2a2a4a; }
+    .concept-table td { padding: 10px 16px; border: 1px solid #2a2a4a; color: #c8d0e0; vertical-align: top; }
+    .concept-table tr:nth-child(even) td { background: #111828; }
+
+    .ss { max-width: 100%; height: auto; border-radius: 6px; margin: 16px auto 4px; display: block; }
+    .ss-caption { font-size: 0.75rem; color: #4a5068; margin-bottom: 16px; display: block; text-align: center; }
+
+    .page-nav { display: flex; justify-content: space-between; margin-top: 64px; padding-top: 24px; border-top: 1px solid #2a2a4a; }
+    .page-nav a { color: #7ec8e3; text-decoration: none; font-size: 0.9rem; padding: 10px 20px; border: 1px solid #2a2a4a; border-radius: 4px; transition: border-color 0.2s; }
+    .page-nav a:hover { border-color: #7ec8e3; }
+    .page-nav .next { margin-left: auto; }
+
+    .next-track-box { background: #0f1a2e; border: 1px solid #2a3a6a; border-radius: 8px; padding: 24px 28px; margin: 40px 0 0; }
+    .next-track-box .next-track-label { font-size: 0.8rem; color: #3a6a8a; font-weight: bold; letter-spacing: 0.12em; margin-bottom: 10px; }
+    .next-track-box p { color: #6878a0; margin-bottom: 14px; }
+    .next-track-box a { color: #7ec8e3; text-decoration: none; font-size: 0.9rem; }
+    .next-track-box a:hover { color: #e94560; }
+
+    footer { text-align: center; padding: 28px; color: #4a5068; font-size: 0.82rem; border-top: 1px solid #2a2a4a; }
+  </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay"></div>
+
+<div class="layout">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-heading">
+      <a href="./">GameplayAbilities 入門</a>
+      <div class="sidebar-track">Blueprint 編</div>
+    </div>
+
+    <a class="nav-item done" href="bp01.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 01</span>
+        <span class="nav-title">GAS とは何か</span>
+      </span>
+    </a>
+    <a class="nav-item done" href="bp02.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 02</span>
+        <span class="nav-title">Blueprint で始める</span>
+      </span>
+    </a>
+    <a class="nav-item done" href="bp03.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 03</span>
+        <span class="nav-title">最初の Ability を作る</span>
+      </span>
+    </a>
+    <a class="nav-item done" href="bp04.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 04</span>
+        <span class="nav-title">GameplayTag で状態管理</span>
+      </span>
+    </a>
+    <a class="nav-item done" href="bp05.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 05</span>
+        <span class="nav-title">攻撃アビリティを作る</span>
+      </span>
+    </a>
+    <a class="nav-item done" href="bp06.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 06</span>
+        <span class="nav-title">攻撃フレームを制御する</span>
+      </span>
+    </a>
+    <a class="nav-item done" href="bp07.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 07</span>
+        <span class="nav-title">複数のアビリティとタグを組み合わせる</span>
+      </span>
+    </a>
+    <a class="nav-item done" href="bp08.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP STEP 08</span>
+        <span class="nav-title">コンボ攻撃（3連撃）</span>
+      </span>
+    </a>
+    <a class="nav-item done" href="bpRef.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP REF</span>
+        <span class="nav-title">ノード リファレンス</span>
+      </span>
+    </a>
+    <a class="nav-item done" href="bpEx1.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP EX 01</span>
+        <span class="nav-title">コンボ先行入力</span>
+      </span>
+    </a>
+    <div class="nav-item current">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">BP EX 02</span>
+        <span class="nav-title">ヒット検出・ダメージ・GameplayCue</span>
+      </span>
+    </div>
+
+    <div class="nav-divider"></div>
+    <a class="nav-item nav-next-track" href="step01.html">
+      <span class="nav-dot"></span>
+      <span class="nav-text">
+        <span class="nav-step">→ C++ 編へ</span>
+        <span class="nav-title">AttributeSet まで学ぶ</span>
+      </span>
+    </a>
+  </aside>
+
+  <div class="content-col">
+
+  <header>
+    <div class="header-inner">
+      <div class="breadcrumb">
+        <a href="../">UchidenoIndustry</a> &rsaquo;
+        <a href="./">GameplayAbilities 入門</a> &rsaquo;
+        BP EX 02
+      </div>
+      <div class="step-label">BP EX 02</div>
+      <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px;">
+        <h1>ヒット検出・ダメージ・GameplayCue</h1>
+        <span style="background:#1a3a1a;border:1px solid #2a6a2a;color:#a0e8a0;font-size:0.75rem;padding:2px 8px;border-radius:4px;font-family:'Consolas','Courier New',monospace;white-space:nowrap;">UE 5.5 版</span>
+      </div>
+      <p>攻撃 GA にヒット検出・ダメージ・GameplayCue を追加する。C++ なしで「当たったら HP が減り、エフェクトが出る」を実装する。</p>
+    </div>
+  </header>
+
+  <main>
+
+    <button class="menu-toggle" id="menuToggle">&#9776; 目次</button>
+
+    <h2>このページのゴール</h2>
+
+    <ul class="check-list">
+      <li>GA 内で <strong style="color:#fff">Sphere Trace</strong> を実行し、攻撃フレームのタイミングで相手キャラクターを検出する。</li>
+      <li>UE 標準の <strong style="color:#fff">Apply Damage</strong> で相手の HP float 変数を減らす。</li>
+      <li><strong style="color:#fff">GameplayCueNotify_Static</strong> Blueprint でヒットエフェクト（パーティクル・サウンド）を再生する。</li>
+      <li>ヒット検出・ダメージ・エフェクトのすべてを Blueprint のみで実装する。</li>
+    </ul>
+
+    <div class="note-box">
+      <div class="note-label">前提</div>
+      <p>BP STEP 06 の <code>GA_Attack</code>（Play Montage and Wait + AnimNotify + Wait Gameplay Event のパターン）が完成していることが前提です。</p>
+    </div>
+
+    <h2>仕組みを理解する</h2>
+
+    <h3>3 つのシステムの役割</h3>
+
+    <table class="concept-table">
+      <tr>
+        <th>システム</th>
+        <th>使うノード</th>
+        <th>場所</th>
+      </tr>
+      <tr>
+        <td>ヒット検出</td>
+        <td><code>Sphere Trace For Objects</code></td>
+        <td>GA_Attack のグラフ</td>
+      </tr>
+      <tr>
+        <td>ダメージ</td>
+        <td><code>Apply Damage</code> / <code>Event AnyDamage</code></td>
+        <td>GA_Attack / 相手 Character BP</td>
+      </tr>
+      <tr>
+        <td>エフェクト</td>
+        <td><code>Execute GameplayCue On Actor (Burst)</code> / <code>GC_AttackHit</code></td>
+        <td>GA_Attack / GameplayCueNotify BP</td>
+      </tr>
+    </table>
+
+    <h3>全体の流れ</h3>
+
+    <div class="bp-flow">
+      <div class="bp-row">
+        <span class="bp-node orange">AN_AttackHit（AnimNotify）</span>
+        <span class="bp-arrow">→</span>
+        <span class="bp-node">Send Gameplay Event<br><span style="color:#6a8a6a;font-size:0.75em;">Event.Attack.Hit</span></span>
+        <span class="bp-arrow">→</span>
+        <span class="bp-node event">Wait Gameplay Event（GA内）</span>
+        <span class="bp-arrow">→ Event Received →</span>
+      </div>
+      <div class="bp-row bp-indent" style="margin-top:8px;">
+        <span class="bp-node">Sphere Trace For Objects</span>
+        <span class="bp-arrow">→ Out Hits →</span>
+        <span class="bp-node">ForEach Loop</span>
+      </div>
+      <div class="bp-row bp-indent2" style="margin-top:6px;">
+        <span class="bp-arrow">Loop Body →</span>
+        <span class="bp-node">Apply Damage</span>
+        <span class="bp-arrow">→</span>
+        <span class="bp-node event">Event AnyDamage（相手 BP）</span>
+        <span class="bp-arrow">→</span>
+        <span class="bp-node">HP 減算</span>
+      </div>
+      <div class="bp-row bp-indent2" style="margin-top:6px;">
+        <span style="color:#4a6a8a;margin-right:8px;">同時に →</span>
+        <span class="bp-node">Make Cue Params from Hit Result</span>
+        <span class="bp-arrow">→</span>
+        <span class="bp-node">Execute GameplayCue (Burst)</span>
+        <span class="bp-arrow">→</span>
+        <span class="bp-node green">GC_AttackHit<br><span style="color:#4a7040;font-size:0.75em;">パーティクル・サウンド</span></span>
+      </div>
+      <div class="bp-comment">攻撃フレームの瞬間にトレースし、当たった相手全員にダメージとエフェクトを発生させる。</div>
+    </div>
+
+    <h3>UE 標準ダメージ vs GAS ネイティブ</h3>
+
+    <p>
+      UE のダメージ管理には 2 種類のアプローチがあります。
+      このページでは <strong style="color:#fff">UE 標準（Apply Damage / Event AnyDamage）</strong> を採用し、HP を相手の <code>float</code> 変数で管理します。
+      Blueprint のみで完結する代わりに、GAS の Modifier やクールダウン計算とは連動しません。
+    </p>
+    <p>
+      GAS ネイティブなダメージ管理（GameplayEffect の Modifier で AttributeSet.HP を変化させる）には C++ が必要です。
+      このページ末尾の「次のステップへ」セクションで C++ 編 STEP 04〜05 を案内します。
+    </p>
+
+    <h2>STEP 1 — 相手キャラクターを準備する</h2>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">1</div>
+        <div class="step-title">HP 変数を追加する</div>
+      </div>
+      <div class="step-body">
+        <p>攻撃を受ける相手の Character Blueprint（例: <code>BP_Enemy</code>）を開きます。</p>
+        <p>My Blueprint パネル → VARIABLES の「+」から変数を追加します。</p>
+        <table class="concept-table">
+          <tr><th>変数名</th><th>型</th><th>デフォルト値</th></tr>
+          <tr><td><code>HP</code></td><td>Float</td><td>100.0</td></tr>
+        </table>
+        <p>変数を追加したら <strong style="color:#fff">Compile（コンパイル）</strong> して保存します。</p>
+      </div>
+    </div>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">2</div>
+        <div class="step-title">Event AnyDamage を設定する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          相手 Character Blueprint のイベントグラフで右クリック →
+          <strong style="color:#fff">「Event AnyDamage」</strong> を検索して配置します。
+        </p>
+        <p>以下のノードを接続します。</p>
+
+        <div class="bp-flow">
+          <div class="bp-row">
+            <span class="bp-node event">Event AnyDamage</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">HP = HP - Damage</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Clamp（Min: 0, Max: 100）</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Set HP</span>
+          </div>
+          <div class="bp-comment">Event AnyDamage の「Damage」ピンを減算に、結果を Clamp してから HP 変数にセットする。</div>
+        </div>
+
+        <div class="note-box">
+          <div class="note-label">HP の上限を変数にする場合</div>
+          <p>MaxHP 変数を別途追加して Clamp の Max ピンに繋ぐと、キャラクターごとに上限を変えられます。このチュートリアルでは固定値 <code>100.0</code> を使います。</p>
+        </div>
+
+        <div class="note-box">
+          <div class="note-label">ダメージを Print String で確認する</div>
+          <p>Set HP のあとに <code>Print String（HP）</code> を繋いでおくと、画面にリアルタイムで HP 値が表示されて動作確認が楽になります。確認が終わったら削除してください。</p>
+        </div>
+      </div>
+    </div>
+
+    <h2>STEP 2 — GameplayCue アセットを作る</h2>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">3</div>
+        <div class="step-title">GC_AttackHit を作成する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          Content Browser（コンテンツブラウザ）で右クリック → Blueprint Class（Blueprintクラス）。
+          親クラスの検索窓に
+          <strong style="color:#fff"><code>GameplayCueNotify_Static</code></strong>
+          と入力して選択し、名前を <strong style="color:#fff"><code>GC_AttackHit</code></strong> とします。
+        </p>
+        <p>
+          作成した <code>GC_AttackHit</code> を開き、
+          Class Defaults（クラスデフォルト）の詳細パネルで
+          <strong style="color:#fff">Gameplay Cue Tag</strong> フィールドをクリックします。
+          タグブラウザが開くので、新規タグ <strong style="color:#fff"><code>GameplayCue.Attack.Hit</code></strong> を作成して設定します。
+        </p>
+
+        <div class="note-box">
+          <div class="note-label">GameplayCue タグの命名規則</div>
+          <p>GameplayCue で使うタグは必ず <code>GameplayCue.</code> プレフィックスが必要です。このプレフィックスがないと GAS が GameplayCue として認識しません。また GameplayCue タグは通常の Gameplay Tag と同じシステムに登録されます。</p>
+        </div>
+
+        <div class="note-box">
+          <div class="note-label">GameplayCueNotify_Static とは</div>
+          <p>一回だけ発火するエフェクト（ヒットフラッシュ・サウンドなど）に使います。持続するエフェクト（炎上・氷結など）には <code>GameplayCueNotify_Actor</code> を使いますが、このページでは Static を使います。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">4</div>
+        <div class="step-title">On Execute を組む</div>
+      </div>
+      <div class="step-body">
+        <p>
+          <code>GC_AttackHit</code> のイベントグラフを開き、
+          My Blueprint パネル → FUNCTIONS → Override（+）→
+          <strong style="color:#fff">On Execute</strong> を選択します。
+          グラフに <code>On Execute</code> イベントノードが追加されます。
+        </p>
+        <p>
+          <code>On Execute</code> ノードは <code>MyTarget</code>（Actor）と <code>Parameters</code>（GameplayCueParameters）の 2 つの出力ピンを持ちます。
+          <code>Parameters</code> から位置情報を取り出し、エフェクトを再生します。
+        </p>
+
+        <div class="bp-flow">
+          <div class="bp-row">
+            <span class="bp-node event">On Execute（MyTarget, Parameters）</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Break GameplayCueParameters<br><span style="color:#6a8a6a;font-size:0.75em;">Parameters ピンを右ドラッグ → Break</span></span>
+          </div>
+          <div class="bp-row bp-indent" style="margin-top:6px;">
+            <span class="bp-arrow">Location →</span>
+            <span class="bp-node green">Spawn System at Location<br><span style="color:#4a7040;font-size:0.75em;">Niagara System: お好みのエフェクト</span></span>
+          </div>
+          <div class="bp-row bp-indent" style="margin-top:6px;">
+            <span class="bp-arrow">Location →</span>
+            <span class="bp-node green">Play Sound at Location<br><span style="color:#4a7040;font-size:0.75em;">Sound: お好みの SE</span></span>
+          </div>
+          <div class="bp-comment">Break GameplayCueParameters → Location フィールドがヒット位置（ImpactPoint）になる。Spawn と Play Sound はどちらも On Execute の実行ピンから繋ぐ。</div>
+        </div>
+
+        <div class="note-box">
+          <div class="note-label">パーティクルとサウンドのアセットについて</div>
+          <p>このチュートリアルでは使用するアセットを指定しません。エンジンコンテンツ（Starter Content など）に含まれる既存の Niagara System やサウンドアセットを使うと手軽に確認できます。UE 5.5 では <code>Spawn System at Location</code>（Niagara）が標準ですが、Cascade の <code>Spawn Emitter at Location</code> も同様に使えます。</p>
+        </div>
+
+        <div class="note-box">
+          <div class="note-label">Normal を使った回転</div>
+          <p>Break GameplayCueParameters の <code>Normal</code> フィールドにはヒット面の法線方向が入ります。<code>Make Rot from X</code> で回転に変換し、Spawn のパラメータに渡すと、エフェクトがヒット面の法線方向に向いて発生します。</p>
+        </div>
+      </div>
+    </div>
+
+    <h2>STEP 3 — GA_Attack を改修する</h2>
+
+    <p>
+      bp06 で作った <code>GA_Attack</code> のグラフには <code>Wait Gameplay Event（Event.Attack.Hit）</code> の
+      <code>Event Received</code> 出力がすでにあります。
+      この出力に Sphere Trace → Apply Damage → Execute GameplayCue の処理を追加します。
+    </p>
+
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">5</div>
+        <div class="step-title">ヒット検出・ダメージ・GameplayCue を追加する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          <code>GA_Attack</code> を開きます。
+          <code>Wait Gameplay Event（Event.Attack.Hit）</code> の <code>Event Received</code> 実行ピンから以下のグラフを組みます。
+        </p>
+
+        <div class="bp-flow">
+          <div class="bp-comment" style="color:#7ec8e3;margin-bottom:12px;">GA_Attack の Then 1（Wait Gameplay Event の Event Received 以降）</div>
+
+          <div class="bp-row">
+            <span class="bp-node event">Event Received</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node new">Get Avatar Actor from Actor Info</span>
+            <span class="bp-arrow">→ (Avatar として保持)</span>
+          </div>
+
+          <div class="bp-row" style="margin-top:10px;">
+            <span class="bp-node new">Sphere Trace For Objects</span>
+          </div>
+          <div class="bp-row bp-indent" style="margin-top:4px; flex-direction:column; align-items:flex-start; gap:4px;">
+            <span style="color:#6a8a6a;font-size:0.78em;">Start: Avatar → Get Actor Location</span>
+            <span style="color:#6a8a6a;font-size:0.78em;">End: Start + Avatar → Get Actor Forward Vector × 150</span>
+            <span style="color:#6a8a6a;font-size:0.78em;">Radius: 60.0</span>
+            <span style="color:#6a8a6a;font-size:0.78em;">Object Types: [Pawn]</span>
+            <span style="color:#6a8a6a;font-size:0.78em;">Actors to Ignore: [Avatar]（Make Array）</span>
+          </div>
+
+          <div class="bp-row" style="margin-top:10px;">
+            <span class="bp-arrow">Out Hits →</span>
+            <span class="bp-node new">ForEach Loop（Hit Results）</span>
+          </div>
+          <div class="bp-row bp-indent" style="margin-top:6px;">
+            <span class="bp-arrow">Loop Body →</span>
+            <span class="bp-node">Break Hit Result<br><span style="color:#6a8a6a;font-size:0.75em;">Array Element から</span></span>
+          </div>
+          <div class="bp-row bp-indent2" style="margin-top:4px;">
+            <span class="bp-arrow">Actor →</span>
+            <span class="bp-node new">Apply Damage</span>
+          </div>
+          <div class="bp-row bp-indent3" style="margin-top:2px; flex-direction:column; align-items:flex-start; gap:2px;">
+            <span style="color:#6a8a6a;font-size:0.78em;">Damaged Actor: Hit Actor（Break Hit Result の Actor）</span>
+            <span style="color:#6a8a6a;font-size:0.78em;">Base Damage: 25.0</span>
+            <span style="color:#6a8a6a;font-size:0.78em;">Damage Causer: Avatar</span>
+            <span style="color:#6a8a6a;font-size:0.78em;">Damage Type Class: DamageType（デフォルトのまま）</span>
+          </div>
+          <div class="bp-row bp-indent2" style="margin-top:8px;">
+            <span class="bp-arrow">（同じ Loop Body から）→</span>
+            <span class="bp-node new">Make Gameplay Cue Parameters from Hit Result<br><span style="color:#4a8040;font-size:0.75em;">HitResult: Array Element（ForEach の出力）</span></span>
+          </div>
+          <div class="bp-row bp-indent2" style="margin-top:4px;">
+            <span class="bp-arrow">Return Value →</span>
+            <span class="bp-node new">Execute GameplayCue On Actor (Burst)</span>
+          </div>
+          <div class="bp-row bp-indent3" style="margin-top:2px; flex-direction:column; align-items:flex-start; gap:2px;">
+            <span style="color:#6a8a6a;font-size:0.78em;">Actor: Avatar</span>
+            <span style="color:#6a8a6a;font-size:0.78em;">Gameplay Cue Tag: GameplayCue.Attack.Hit</span>
+            <span style="color:#6a8a6a;font-size:0.78em;">Parameters: Make Cue Parameters の戻り値</span>
+          </div>
+
+          <div class="bp-comment" style="margin-top:12px;">Apply Damage と Execute GameplayCue は同じ Loop Body 実行ピンから順に繋ぐ（Apply Damage → Execute GameplayCue）。ForEach が空配列のときはループ本体が実行されないため、ミス時の無効発火はない。</div>
+        </div>
+
+        <h3>各ノードの配置手順</h3>
+
+        <p><strong style="color:#fff">Get Avatar Actor from Actor Info</strong></p>
+        <p>グラフ空白を右クリック → 「Get Avatar Actor from Actor Info」で検索・配置。GA のオーナーキャラクターへの参照が得られます。</p>
+
+        <p><strong style="color:#fff">Sphere Trace For Objects</strong></p>
+        <p>グラフ空白を右クリック → 「Sphere Trace For Objects」で検索・配置。<code>Object Types</code> ピンの右の「+」を押して要素を追加し、ドロップダウンから <code>Pawn</code> を選択します。<code>Actors to Ignore</code> は Make Array ノードで Avatar Actor を 1 つ渡します。</p>
+
+        <p><strong style="color:#fff">Make Gameplay Cue Parameters from Hit Result</strong></p>
+        <p>グラフ空白を右クリック → 「Make Gameplay Cue Parameters from Hit Result」で検索・配置。<code>HitResult</code> ピンに ForEach の <code>Array Element</code>（HitResult型）を繋ぎます。これによりヒットポイントの位置・法線が Parameters に格納されます。</p>
+
+        <p><strong style="color:#fff">Execute GameplayCue On Actor (Burst)</strong></p>
+        <p>グラフ空白を右クリック → 「Execute GameplayCue On Actor (Burst)」で検索・配置。<code>Actor</code> ピンに Avatar Actor を、<code>Gameplay Cue Tag</code> に <code>GameplayCue.Attack.Hit</code> を設定します。</p>
+
+        <div class="note-box">
+          <div class="note-label">Event Instigator について</div>
+          <p><code>Apply Damage</code> の <code>Event Instigator</code> ピン（Controller 型）は省略可能です。ダメージ元のプレイヤーを識別したい場合は、Avatar Actor から <code>Cast to Pawn → Get Controller</code> で取得して繋いでください。</p>
+        </div>
+
+        <div class="note-box">
+          <div class="note-label">Only Trigger Once の設定</div>
+          <p><code>Wait Gameplay Event（Event.Attack.Hit）</code> の <code>Only Trigger Once</code> を <code>true</code> にすると、1 回発火後にタスクが自動終了します。攻撃アニメーション 1 回につき 1 ヒットの設計では <code>true</code> を推奨します。同一アニメーション中に複数ヒットさせる場合は <code>false</code> のままにしてください。</p>
+        </div>
+      </div>
+    </div>
+
+    <h2>動作確認</h2>
+
+    <p>Play（プレイ）して以下のシナリオを確認します。</p>
+
+    <ul class="check-list">
+      <li><strong>ヒット検出：</strong>攻撃を発動すると、<code>AN_AttackHit</code> が発火するタイミングで相手キャラクターが検出される。Sphere Trace の <code>Draw Debug Type</code> を <code>For Duration</code> にすると範囲が可視化できる。</li>
+      <li><strong>ダメージ：</strong>相手の HP 変数が 25 減算される（Print String などで確認）。</li>
+      <li><strong>GameplayCue：</strong>ヒット位置にパーティクルとサウンドが再生される。</li>
+      <li><strong>ミス（空振り）：</strong>相手がいない状態で攻撃してもエフェクトが発生しない（ForEach が空で実行されない）。</li>
+      <li><strong>複数体：</strong>複数の敵が Sphere 範囲内にいる場合、全員にダメージとエフェクトが発生する。</li>
+    </ul>
+
+    <div class="note-box">
+      <div class="note-label">Sphere Trace のデバッグ表示</div>
+      <p><code>Sphere Trace For Objects</code> の <code>Draw Debug Type</code> を <code>For Duration</code> にすると、ビューポートにトレース範囲が赤いワイヤーフレームで表示されます。ヒット判定の範囲調整に活用し、本番前に <code>None</code> に戻してください。</p>
+    </div>
+
+    <h2>まとめ</h2>
+
+    <ul>
+      <li><strong style="color:#fff">Sphere Trace For Objects：</strong><code>AN_AttackHit</code> の発火タイミングに合わせてキャラクター前方のエリアを検索。<code>Actors to Ignore</code> で自己攻撃を防ぎ、<code>Object Types: Pawn</code> で敵のみを検出する。</li>
+      <li><strong style="color:#fff">Apply Damage / Event AnyDamage：</strong>UE 標準のダメージパイプライン。GA 側で <code>Apply Damage</code> を呼ぶだけで、相手の <code>Event AnyDamage</code> が発火して HP を減算できる。C++ 不要。</li>
+      <li><strong style="color:#fff">Make Gameplay Cue Parameters from Hit Result / Execute GameplayCue On Actor (Burst)：</strong>ヒット結果の位置・法線を Parameters に変換し、<code>GC_AttackHit</code> に渡す。GameplayCueNotify_Static にエフェクトをカプセル化しておくことで、GA 側は Cue タグ 1 つを渡すだけでよい。</li>
+    </ul>
+
+    <p>
+      この「GA が Sphere Trace → Apply Damage → Execute GameplayCue」のパターンは、
+      コンボ攻撃の各段・スキル攻撃・範囲攻撃など幅広い攻撃アビリティに応用できます。
+    </p>
+
+    <div class="next-track-box">
+      <div class="next-track-label">次のステップへ — C++ 編</div>
+      <p>
+        このページでは HP を <code>float</code> 変数で管理し、UE 標準の <code>Apply Damage</code> でダメージを適用しました。
+        この方法は Blueprint のみで動作しますが、GAS の Modifier・GameplayEffect のスタッキング・クールダウン計算とは連動しません。
+      </p>
+      <p>
+        HP・MaxHP などのステータスを GAS ネイティブに管理するには
+        C++ の <strong>AttributeSet</strong> と <strong>GameplayEffect</strong> が必要です。
+        C++ 編の STEP 04〜05 では AttributeSet の定義から GameplayEffect によるダメージ適用まで順を追って解説します。
+      </p>
+      <a href="step04.html">C++ 編 STEP 04 AttributeSet の基本へ →</a>
+    </div>
+
+    <div class="page-nav">
+      <a href="bpEx1.html">&#8592; BP EX 01 コンボ先行入力</a>
+      <a class="next" href="./">チュートリアル一覧へ &#8594;</a>
+    </div>
+
+  </main>
+
+  </div><!-- /.content-col -->
+
+</div><!-- /.layout -->
+
+<footer>
+  <p>GameplayAbilities 入門 &mdash; UchidenoIndustry</p>
+</footer>
+
+<script>
+  const toggle  = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  toggle.addEventListener('click', function () { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
+  overlay.addEventListener('click', function () { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+</script>
+
+</body>
+</html>
