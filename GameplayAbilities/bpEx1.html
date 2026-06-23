@@ -324,18 +324,18 @@
       </tr>
       <tr>
         <td>入力のタイミング</td>
-        <td class="col-bp08">当たり判定フレームの後（GE_ComboWindow 中）に押す</td>
-        <td class="col-ex1">当たり判定フレームの前（受付ウィンドウ中）に押しておく</td>
+        <td class="col-bp08">AN_ComboReady（点通知）が発火した後に Q を押す。受付前の入力は無視される。</td>
+        <td class="col-ex1">ANS_ComboBuffer の Begin〜End（受付ウィンドウ）内に Q を押しておく。End が来た瞬間に自動発動。</td>
       </tr>
       <tr>
         <td>難易度</td>
         <td class="col-bp08">画面を見てから反応が必要。ウィンドウを逃すと再スタート。</td>
-        <td class="col-ex1">アニメーションのリズムに合わせて早めに押せばよい。</td>
+        <td class="col-ex1">アニメーションのリズムに合わせて早めに押せばよい。ANS End 後の反応型フォールバックもある。</td>
       </tr>
       <tr>
-        <td>Character BP の複雑さ</td>
-        <td class="col-bp08">cascading TryActivate（条件分岐あり）</td>
-        <td class="col-ex1">Send Event + TryActivate Combo1 の 2 ノードのみ</td>
+        <td>GA の構成</td>
+        <td class="col-bp08">Then 1 のみ（ComboReady → Input と直列に待機して TryActivate）</td>
+        <td class="col-ex1">Then 1（先行入力バッファ）＋ Then 2（ComboReady → Branch → 先行 or 反応型）の 2 パス</td>
       </tr>
     </table>
 
@@ -462,11 +462,6 @@
       Character BP をまたいだアクセスが不要になるため、Cast ノードも不要です。
     </p>
 
-    <div class="note-box">
-      <div class="note-label">GE_ComboWindow は不要になる</div>
-      <p>bp08 で作成した GE_ComboWindow1/2 はこの設計では使用しません。GA が直接入力イベントを待つため、タグによるウィンドウ管理が不要になります。アセットはそのままにしておいても構いません（使われないだけです）。</p>
-      <p>同様に、GA_Combo2/3 の <code>Activation Required Tags（Status.ComboWindow.1/2）</code> も不要です。後述の STEP で削除します。</p>
-    </div>
 
     <h2>STEP 1 — ANS_ComboBuffer を作る</h2>
 
@@ -570,11 +565,11 @@
     <div class="step-block">
       <div class="step-head">
         <div class="step-num">4</div>
-        <div class="step-title">Q キーを 2 ノードに簡略化する</div>
+        <div class="step-title">Character BP の Q キーは変更不要</div>
       </div>
       <div class="step-body">
         <p>
-          bp08 で実装した cascading TryActivate ロジックをすべて削除し、以下の 2 ノードに置き換えます。
+          bp08 で Q キーをすでに 2 ノード構成にしている場合、Character BP の変更は不要です。確認のため以下の構成になっているかチェックしてください。
         </p>
 
         <div class="bp-flow">
@@ -589,11 +584,6 @@
             Send Event → アクティブな GA があれば受け取る（バッファ処理 or 反応型フォールバック）。<br>
             TryActivate → どのコンボも動いていなければ Combo1 を起動。動いていれば失敗するだけ。
           </div>
-        </div>
-
-        <div class="note-box">
-          <div class="note-label">cascading TryActivate はもう不要</div>
-          <p>bp08 では Character BP が「どの段を起動するか」を判断していましたが、このページからはその役割が GA 側に移ります。TryActivate GA_Combo1 のみ残し、Combo2 / Combo3 への TryActivate は Character BP から削除します。</p>
         </div>
       </div>
     </div>
@@ -755,24 +745,11 @@
           </tr>
         </table>
 
-        <p>次に GA_Combo2 の Class Defaults → Tags セクションを以下のように変更します。</p>
-        <table class="concept-table">
-          <tr>
-            <th>フィールド</th>
-            <th>bp08 の設定</th>
-            <th>変更後</th>
-          </tr>
-          <tr>
-            <td><code>Activation Required Tags</code></td>
-            <td><code>Status.ComboWindow.1</code></td>
-            <td><strong style="color:#e8c080;">削除</strong>（GA 内で制御するため不要）</td>
-          </tr>
-          <tr>
-            <td><code>Block Abilities with Tag</code></td>
-            <td><code>Ability.Combo.2</code>（自己ブロックのみ）</td>
-            <td><code>Ability.Combo.2</code>（既存） + <strong style="color:#80d060;"><code>Ability.Combo.1</code> を追加</strong></td>
-          </tr>
-        </table>
+        <p>GA_Combo2 の Class Defaults → Tags セクションは bp08 の設定のままで変更不要です。</p>
+        <div class="note-box">
+          <div class="note-label">タグ設定の確認</div>
+          <p>bp08 で以下のように設定済みであれば変更不要です：<code>AssetTags: Ability.Combo.2</code> / <code>Cancel Abilities with Tag: Ability.Combo.1</code> / <code>Block Abilities with Tag: Ability.Combo.2 + Ability.Combo.1</code></p>
+        </div>
 
         <div class="note-box">
           <div class="note-label">Block Abilities with Tag: Ability.Combo.1 を追加する理由</div>
@@ -787,25 +764,11 @@
         <div class="step-title">GA_Combo3 のタグを更新する</div>
       </div>
       <div class="step-body">
-        <p>GA_Combo3 のグラフ変更は不要です（最後の段なので次段へのバッファは持ちません）。<br>
-        Class Defaults → Tags セクションのみ変更します。</p>
-        <table class="concept-table">
-          <tr>
-            <th>フィールド</th>
-            <th>bp08 の設定</th>
-            <th>変更後</th>
-          </tr>
-          <tr>
-            <td><code>Activation Required Tags</code></td>
-            <td><code>Status.ComboWindow.2</code></td>
-            <td><strong style="color:#e8c080;">削除</strong></td>
-          </tr>
-          <tr>
-            <td><code>Block Abilities with Tag</code></td>
-            <td><code>Ability.Combo.3</code>（自己ブロックのみ）</td>
-            <td><code>Ability.Combo.3</code>（既存） + <strong style="color:#80d060;"><code>Ability.Combo.1</code>, <code>Ability.Combo.2</code> を追加</strong></td>
-          </tr>
-        </table>
+        <p>GA_Combo3 はグラフ・タグともに変更不要です。最後の段なので次段へのバッファは持ちません。</p>
+        <div class="note-box">
+          <div class="note-label">タグ設定の確認</div>
+          <p>bp08 で以下のように設定済みであれば変更不要です：<code>AssetTags: Ability.Combo.3</code> / <code>Cancel Abilities with Tag: Ability.Combo.2</code> / <code>Block Abilities with Tag: Ability.Combo.3 + Ability.Combo.1 + Ability.Combo.2</code></p>
+        </div>
       </div>
     </div>
 
