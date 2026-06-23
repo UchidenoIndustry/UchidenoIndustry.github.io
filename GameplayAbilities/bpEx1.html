@@ -153,7 +153,9 @@
     .tl-seg.attack-start { background: #1a2a4a; color: #7ec8e3; flex: 1; }
     .tl-seg.buffer-zone  { background: #1a2a10; color: #80d060; border-left: 2px solid #3a6a20; border-right: 2px solid #3a6a20; flex: 2; }
     .tl-seg.reactive-zone { background: #2a1a00; color: #e8c080; border-right: 2px solid #6a4a00; flex: 1.5; }
+    .tl-seg.recovery-zone { background: #1a1010; color: #884050; border-left: 2px solid #4a1020; flex: 1.5; }
     .tl-seg.attack-end   { background: #1a1a2e; color: #4a5068; flex: 1; }
+    .bp-indent4 { padding-left: 8em; }
     .tl-label { font-size: 0.7rem; margin-top: 4px; font-family: "Hiragino Kaku Gothic ProN","Meiryo",sans-serif; }
 
     .ss { max-width: 100%; height: auto; border-radius: 6px; margin: 16px auto 4px; display: block; }
@@ -365,9 +367,14 @@
           <div class="tl-label">この間の Q を GA が記憶</div>
         </div>
         <div class="tl-seg reactive-zone">
-          ANS End 以降<br>
+          ANS End 〜 WindowEnd<br>
           <strong>反応型フォールバック</strong>
           <div class="tl-label">この間の Q も GA が処理</div>
+        </div>
+        <div class="tl-seg recovery-zone">
+          WindowEnd 〜 終了<br>
+          <strong>リカバリー（硬直）</strong>
+          <div class="tl-label">Q は無視される</div>
         </div>
         <div class="tl-seg attack-end">
           モンタージュ終了
@@ -379,7 +386,8 @@
     <p>
       <code>ANS_ComboBuffer</code> の <strong>Begin</strong>（受付ウィンドウ開始）から
       <strong>End</strong>（実行タイミング）までに Q を押すと GA がバッファとして記憶します。
-      End が来た瞬間に記憶があれば即座に次段へ。なければ、その後モンタージュが終わるまで反応型として Q を待ち続けます。
+      End が来た瞬間に記憶があれば即座に次段へ。なければ、<code>AN_ComboWindowEnd</code> が発火するまでの間を反応型ウィンドウとして Q を待ち続けます。
+      <code>AN_ComboWindowEnd</code> 通過後はリカバリー（硬直）フレームとなり、Q を押しても次段には繋がりません。
     </p>
 
     <h3>設計の核心：GA が Q の入力イベントを直接受け取る</h3>
@@ -420,12 +428,26 @@
       </div>
       <div class="bp-row bp-indent">
         <span style="color:#e94560;font-size:0.85em;margin-right:8px;">False →</span>
-        <span class="bp-node">Wait Gameplay Event (Event.Combo.Input)</span>
+        <span class="bp-node new">Set bReactiveWindowOpen = true</span>
         <span class="bp-arrow">→</span>
-        <span class="bp-node green">TryActivate GA_Combo2（反応型）</span>
+        <span class="bp-node">Sequence</span>
+      </div>
+      <div class="bp-row bp-indent2" style="margin-top:4px;">
+        <span class="bp-arrow">Then 0 →</span>
+        <span class="bp-node">Wait Combo.Input (Once:true)</span>
+        <span class="bp-arrow">→</span>
+        <span class="bp-node">Branch (bReactiveWindowOpen)</span>
+        <span class="bp-arrow">True →</span>
+        <span class="bp-node green">TryActivate GA_Combo2</span>
+      </div>
+      <div class="bp-row bp-indent2" style="margin-top:4px;">
+        <span class="bp-arrow">Then 1 →</span>
+        <span class="bp-node new">Wait Combo.WindowEnd (Once:true)</span>
+        <span class="bp-arrow">→</span>
+        <span class="bp-node new">Set bReactiveWindowOpen = false</span>
       </div>
 
-      <div class="bp-comment">False パスでの Wait は GA（モンタージュ）が終了すると自動的にキャンセルされる。</div>
+      <div class="bp-comment">AN_ComboWindowEnd が来ると bReactiveWindowOpen が false になる。その後に Q が届いても Branch が False 側へ流れるため次段には繋がらない。</div>
     </div>
 
     <h2>設計する</h2>
@@ -448,6 +470,11 @@
         <td>Q が押されたときに Character BP が送る Gameplay Event。GA が直接受け取り、バッファセットまたは TryActivate のトリガーとして使う。</td>
         <td>Character BP</td>
       </tr>
+      <tr>
+        <td><code>Event.Combo.WindowEnd</code></td>
+        <td>AN_ComboWindowEnd が送る Gameplay Event。反応型フォールバックウィンドウの終了を GA に通知する。これ以降の Q 入力はコンボに繋がらない。</td>
+        <td>AN_ComboWindowEnd</td>
+      </tr>
     </table>
 
     <div class="note-box">
@@ -463,7 +490,7 @@
     </p>
 
 
-    <h2>STEP 1 — ANS_ComboBuffer を作る</h2>
+    <h2>STEP 1 — Notify アセットとタグを準備する</h2>
 
     <div class="step-block">
       <div class="step-head">
@@ -478,6 +505,7 @@
         <ul>
           <li><code>Event.Combo.BufferStart</code></li>
           <li><code>Event.Combo.Input</code></li>
+          <li><code>Event.Combo.WindowEnd</code></li>
         </ul>
       </div>
     </div>
@@ -530,11 +558,30 @@
       </div>
     </div>
 
+    <div class="step-block">
+      <div class="step-head">
+        <div class="step-num">3</div>
+        <div class="step-title">AN_ComboWindowEnd を作成する</div>
+      </div>
+      <div class="step-body">
+        <p>
+          Content Browser で <code>AN_ComboReady</code> を右クリック →
+          <strong style="color:#fff">Duplicate（複製）</strong> し、
+          名前を <strong style="color:#fff"><code>AN_ComboWindowEnd</code></strong> に変更します。
+        </p>
+        <p>
+          <code>AN_ComboWindowEnd</code> を開き、<code>Send Gameplay Event to Actor</code> ノードの
+          Event Tag を <strong style="color:#fff"><code>Event.Combo.WindowEnd</code></strong> に変更します。
+          それ以外のノード接続はそのままで構いません。
+        </p>
+      </div>
+    </div>
+
     <h2>STEP 2 — アニメーションを更新する</h2>
 
     <div class="step-block">
       <div class="step-head">
-        <div class="step-num">3</div>
+        <div class="step-num">4</div>
         <div class="step-title">AM_Combo1 と AM_Combo2 の Notifies を置き換える</div>
       </div>
       <div class="step-body">
@@ -546,11 +593,12 @@
           <li>Notifies トラックを右クリック → <strong style="color:#fff">Add Notify State（通知ステートを追加）</strong> → <code>ANS_ComboBuffer</code> を選択。</li>
           <li>配置された <code>ANS_ComboBuffer</code> の <strong>End 位置</strong>（右端）を、削除した <code>AN_ComboReady</code> があったフレームに合わせます。</li>
           <li><strong>Begin 位置</strong>（左端）を End より 5〜10 フレーム手前に設定します。この区間が受付ウィンドウになります。</li>
+          <li>ANS_ComboBuffer の End 位置（= ComboReady 発火点）より後ろのフレームに <code>AN_ComboWindowEnd</code> を Notifies トラックへ追加します。この位置がリカバリー開始点になります。</li>
         </ol>
 
         <div class="note-box">
-          <div class="note-label">Begin 位置の目安</div>
-          <p>Begin を早めると先行入力できる余裕が増えます。攻撃モーションの前半から受け付けると自然な操作感になります。ANS End 以降のフォールバックもあるため、Begin は比較的早めに設定してかまいません。</p>
+          <div class="note-label">各 Notify の位置の目安</div>
+          <p>ANS Begin（早め）→ ANS End＝ComboReady（当たり判定フレーム付近）→ AN_ComboWindowEnd（数フレーム後）。Begin を早めると先行入力の余裕が増え、AN_ComboWindowEnd を遅らせると反応型ウィンドウが広がります。</p>
         </div>
 
         <div class="note-box">
@@ -564,7 +612,7 @@
 
     <div class="step-block">
       <div class="step-head">
-        <div class="step-num">4</div>
+        <div class="step-num">5</div>
         <div class="step-title">Character BP の Q キーは変更不要</div>
       </div>
       <div class="step-body">
@@ -592,8 +640,8 @@
 
     <div class="step-block">
       <div class="step-head">
-        <div class="step-num">5</div>
-        <div class="step-title">bComboBuffered 変数を GA に追加する</div>
+        <div class="step-num">6</div>
+        <div class="step-title">GA 変数を追加する</div>
       </div>
       <div class="step-body">
         <p>
@@ -602,14 +650,15 @@
         <table class="concept-table">
           <tr><th>変数名</th><th>型</th><th>デフォルト値</th></tr>
           <tr><td><code>bComboBuffered</code></td><td>Boolean</td><td>false</td></tr>
+          <tr><td><code>bReactiveWindowOpen</code></td><td>Boolean</td><td>false</td></tr>
         </table>
-        <p>Cast ノードは不要です。GA 自身の変数を直接参照するだけです。</p>
+        <p>Cast ノードは不要です。GA 自身の変数を直接参照するだけです。Event ActivateAbility の先頭で両変数を false にリセットします。</p>
       </div>
     </div>
 
     <div class="step-block">
       <div class="step-head">
-        <div class="step-num">6</div>
+        <div class="step-num">7</div>
         <div class="step-title">GA_Combo1 のグラフを更新する</div>
       </div>
       <div class="step-body">
@@ -625,6 +674,8 @@
             <span class="bp-node event">Event ActivateAbility</span>
             <span class="bp-arrow">→</span>
             <span class="bp-node new">Set bComboBuffered = false</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node new">Set bReactiveWindowOpen = false</span>
             <span class="bp-arrow">→</span>
             <span class="bp-node green">Commit Ability</span>
             <span class="bp-arrow">→</span>
@@ -668,14 +719,27 @@
           </div>
           <div class="bp-row bp-indent3" style="margin-top:4px;">
             <span style="color:#e94560;font-size:0.85em;margin-right:8px;">False →</span>
-            <span class="bp-node new">Wait Gameplay Event<br><span style="color:#4a8040;font-size:0.75em;">Event.Combo.Input / Only Trigger Once: true</span></span>
+            <span class="bp-node new">Set bReactiveWindowOpen = true</span>
+            <span class="bp-arrow">→</span>
+            <span class="bp-node">Sequence</span>
+          </div>
+          <div class="bp-row bp-indent4" style="margin-top:4px;">
+            <span class="bp-arrow">Then 0 →</span>
+            <span class="bp-node new">Wait Combo.Input<br><span style="color:#4a8040;font-size:0.75em;">Only Trigger Once: true</span></span>
             <span class="bp-arrow">Event Received →</span>
-            <span class="bp-node green">Try Activate Ability By Class（GA_Combo2）</span>
+            <span class="bp-node">Branch (bReactiveWindowOpen)</span>
+            <span class="bp-arrow">True →</span>
+            <span class="bp-node green">TryActivate GA_Combo2</span>
+          </div>
+          <div class="bp-row bp-indent4" style="margin-top:4px;">
+            <span class="bp-arrow">Then 1 →</span>
+            <span class="bp-node new">Wait Combo.WindowEnd<br><span style="color:#4a8040;font-size:0.75em;">Only Trigger Once: true</span></span>
+            <span class="bp-arrow">Event Received →</span>
+            <span class="bp-node new">Set bReactiveWindowOpen = false</span>
           </div>
 
           <div class="bp-comment">
-            Then 1 は「バッファパス」、Then 2 False は「反応型フォールバックパス」。両方とも最終的に TryActivate GA_Combo2 に繋がる。<br>
-            Then 2 False の Wait は Play Montage and Wait が終了して End Ability が呼ばれると自動的にキャンセルされる。
+            Then 1（バッファパス）と Then 2 True（先行入力）が GA_Combo2 へ繋がる。Then 2 False の Sequence Then 1 で WindowEnd が来ると bReactiveWindowOpen が false になり、その後の Q 入力は Branch False 側へ流れて無視される。
           </div>
         </div>
 
@@ -689,14 +753,15 @@
         <div class="note-box">
           <div class="note-label">bp08 からの変更点まとめ（GA_Combo1）</div>
           <p>
-            <strong style="color:#c8d0e0;">追加：</strong>
-            ActivateAbility 先頭で <code>bComboBuffered = false</code>（リセット）。
-            Then 1 新規追加（BufferStart → Input のチェーン Wait → bComboBuffered = true）。
-            Then 2 の False パスに反応型フォールバック Wait を追加。
+            <strong style="color:#c8d0e0;">追加変数：</strong>
+            <code>bComboBuffered</code>（受付ウィンドウ内の入力を記憶）・
+            <code>bReactiveWindowOpen</code>（反応型ウィンドウが有効かのフラグ）の 2 つ。
+            ActivateAbility 先頭で両変数を false にリセット。
           </p>
           <p>
-            <strong style="color:#c8d0e0;">削除：</strong>
-            <code>Apply Gameplay Effect to Owner（GE_ComboWindow1）</code>（不要になったため）。
+            <strong style="color:#c8d0e0;">追加ロジック：</strong>
+            Then 1 新規追加（BufferStart → Input のチェーン Wait → bComboBuffered = true）。
+            Then 2 False パスを Sequence に変更し、Then 0（Wait Input → Branch → TryActivate）と Then 1（Wait WindowEnd → bReactiveWindowOpen = false）を並行待機。
           </p>
         </div>
 
@@ -717,11 +782,11 @@
 
     <div class="step-block">
       <div class="step-head">
-        <div class="step-num">7</div>
+        <div class="step-num">8</div>
         <div class="step-title">GA_Combo2 を改修する</div>
       </div>
       <div class="step-body">
-        <p>GA_Combo1 と同じ変更を GA_Combo2 に適用します。異なるのは以下の 3 点のみです。</p>
+        <p>GA_Combo1 と同じ変更を GA_Combo2 に適用します（<code>bComboBuffered</code>・<code>bReactiveWindowOpen</code> 変数の追加、ActivateAbility リセット、Then 1/Then 2 グラフを含む）。異なるのは以下の 3 点のみです。</p>
         <table class="concept-table">
           <tr>
             <th>変更箇所</th>
@@ -760,8 +825,8 @@
 
     <div class="step-block">
       <div class="step-head">
-        <div class="step-num">8</div>
-        <div class="step-title">GA_Combo3 のタグを更新する</div>
+        <div class="step-num">9</div>
+        <div class="step-title">GA_Combo3 の確認</div>
       </div>
       <div class="step-body">
         <p>GA_Combo3 はグラフ・タグともに変更不要です。最後の段なので次段へのバッファは持ちません。</p>
@@ -782,6 +847,7 @@
       <li><strong>ウィンドウ外：</strong>Combo1 のモンタージュが終了してから Q を押すと Combo1 から再スタートする。</li>
       <li><strong>3 連撃：</strong>Combo1 → Combo2 → Combo3 と先行入力で全段完走できる。</li>
       <li><strong>Combo2 中の誤 Combo1 起動なし：</strong>Combo2 発動中に Q を押しても Combo1 は起動しない（Block Abilities with Tag が機能している）。</li>
+      <li><strong>リカバリー（硬直）：</strong><code>AN_ComboWindowEnd</code> 通過後に Q を押しても次段に繋がらない。モンタージュ終了後は Combo1 から再スタートできる。</li>
     </ul>
 
     <div class="note-box">
@@ -797,7 +863,7 @@
       <li><strong style="color:#fff">Character BP の Q キーは 2 ノードに</strong>：<code>Send Gameplay Event</code> と <code>TryActivate GA_Combo1</code> のみ。条件分岐なし・Cast なし。</li>
       <li><strong style="color:#fff">判定はすべて GA 内部に</strong>：バッファフラグ（<code>bComboBuffered</code>）を GA クラス変数として持ち、受付ウィンドウ内の Q 入力を GA が直接 Gameplay Event として受け取る。</li>
       <li><strong style="color:#fff">チェーン Wait パターン</strong>：<code>Wait BufferStart → Wait Combo.Input</code> と直列に繋ぐことで「ウィンドウが開いてから Q を待つ」動作が自然に実現する。</li>
-      <li><strong style="color:#fff">2 パスの設計</strong>：先行入力パス（バッファあり→即発動）と反応型フォールバック（バッファなし→その後モンタージュ中に Q を待つ）を両立。GE_ComboWindow によるウィンドウ管理は不要になった。</li>
+      <li><strong style="color:#fff">3 ゾーンの設計</strong>：①先行入力バッファ（ANS Begin〜End）②反応型ウィンドウ（ANS End〜AN_ComboWindowEnd）③リカバリー（AN_ComboWindowEnd〜モンタージュ終了）。ゾーン境界をすべて AnimNotify で定義するためデザイナーが調整しやすい。</li>
       <li><strong style="color:#fff">同時発動の防止</strong>：GA_Combo2/3 に <code>Block Abilities with Tag: Ability.Combo.1</code>（および 2）を追加し、Character BP からの TryActivate が誤って下位コンボを起動しないよう保護する。</li>
     </ul>
 
