@@ -529,6 +529,29 @@
       <p><code>Sphere Trace For Objects</code> の <code>Draw Debug Type</code> を <code>For Duration</code> にすると、ビューポートにトレース範囲が赤いワイヤーフレームで表示されます。ヒット判定の範囲調整に活用し、本番前に <code>None</code> に戻してください。</p>
     </div>
 
+    <div class="note-box">
+      <div class="note-label">手や剣の位置からトレースしたい場合</div>
+      <p>
+        現在の実装はキャラクターの Actor Location（足元中心）を起点にしています。
+        実際のゲームでは手先や剣の刃先からトレースしたいことがほとんどです。
+        その場合は <strong>Skeleton に Socket を作成</strong>し、そのワールド座標を Start／End に使います。
+      </p>
+      <p>
+        <strong>Socket の作り方：</strong>
+        Skeleton エディタを開き（キャラクターのメッシュをダブルクリック → Skeleton ツールを選択）、
+        対象のボーン（例: <code>hand_r</code>）を右クリック → Add Socket。
+        剣の刃元と刃先に 2 つ作ると、その間をトレースできます。
+      </p>
+      <p>
+        <strong>GA 内での取得：</strong>
+        <code>Get Avatar Actor from Actor Info</code> → <code>Cast to Character</code> → <code>Get Mesh</code> → <code>Get Socket Location（Socket Name: hand_r）</code>
+        で Socket のワールド座標が得られます。これを Sphere Trace の Start に使い、End を刃先の Socket 座標にすれば剣のスウィング範囲をトレースできます。
+      </p>
+      <p>
+        剣が別の Actor としてアタッチされている場合は、武器 Actor の参照を取得して同様に <code>Get Mesh → Get Socket Location</code> を呼びます。
+      </p>
+    </div>
+
     <h2>まとめ</h2>
 
     <ul>
