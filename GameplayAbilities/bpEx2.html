@@ -448,12 +448,12 @@
           </div>
 
           <div class="bp-row" style="margin-top:10px;">
-            <span class="bp-arrow">Out Hits →</span>
-            <span class="bp-node new">ForEach Loop（Hit Results）</span>
+            <span class="bp-arrow">Return Value →</span>
+            <span class="bp-node new">Branch</span>
           </div>
           <div class="bp-row bp-indent" style="margin-top:6px;">
-            <span class="bp-arrow">Loop Body →</span>
-            <span class="bp-node">Break Hit Result<br><span style="color:#6a8a6a;font-size:0.75em;">Array Element から</span></span>
+            <span class="bp-arrow">True →</span>
+            <span class="bp-node">Break Hit Result<br><span style="color:#6a8a6a;font-size:0.75em;">Out Hit から</span></span>
           </div>
           <div class="bp-row bp-indent2" style="margin-top:4px;">
             <span class="bp-arrow">Actor →</span>
@@ -466,8 +466,8 @@
             <span style="color:#6a8a6a;font-size:0.78em;">Damage Type Class: DamageType（デフォルトのまま）</span>
           </div>
           <div class="bp-row bp-indent2" style="margin-top:8px;">
-            <span class="bp-arrow">（同じ Loop Body から）→</span>
-            <span class="bp-node new">Make Gameplay Cue Parameters from Hit Result<br><span style="color:#4a8040;font-size:0.75em;">HitResult: Array Element（ForEach の出力）</span></span>
+            <span class="bp-arrow">（同じ True から）→</span>
+            <span class="bp-node new">Make Gameplay Cue Parameters from Hit Result<br><span style="color:#4a8040;font-size:0.75em;">HitResult: Out Hit（Sphere Trace の出力）</span></span>
           </div>
           <div class="bp-row bp-indent2" style="margin-top:4px;">
             <span class="bp-arrow">Return Value →</span>
@@ -479,7 +479,7 @@
             <span style="color:#6a8a6a;font-size:0.78em;">Parameters: Make Cue Parameters の戻り値</span>
           </div>
 
-          <div class="bp-comment" style="margin-top:12px;">Apply Damage と Execute GameplayCue は同じ Loop Body 実行ピンから順に繋ぐ（Apply Damage → Execute GameplayCue）。ForEach が空配列のときはループ本体が実行されないため、ミス時の無効発火はない。</div>
+          <div class="bp-comment" style="margin-top:12px;">Apply Damage と Execute GameplayCue は同じ True 実行ピンから順に繋ぐ（Apply Damage → Execute GameplayCue）。Return Value が false（空振り）のときは Branch の False パスに進むため、無効発火はない。</div>
         </div>
 
         <h3>各ノードの配置手順</h3>
@@ -491,7 +491,7 @@
         <p>グラフ空白を右クリック → 「Sphere Trace For Objects」で検索・配置。<code>Object Types</code> ピンの右の「+」を押して要素を追加し、ドロップダウンから <code>Pawn</code> を選択します。<code>Actors to Ignore</code> は Make Array ノードで Avatar Actor を 1 つ渡します。</p>
 
         <p><strong style="color:#fff">Make Gameplay Cue Parameters from Hit Result</strong></p>
-        <p>グラフ空白を右クリック → 「Make Gameplay Cue Parameters from Hit Result」で検索・配置。<code>HitResult</code> ピンに ForEach の <code>Array Element</code>（HitResult型）を繋ぎます。これによりヒットポイントの位置・法線が Parameters に格納されます。</p>
+        <p>グラフ空白を右クリック → 「Make Gameplay Cue Parameters from Hit Result」で検索・配置。<code>HitResult</code> ピンに Sphere Trace の <code>Out Hit</code>（HitResult 型）を繋ぎます。これによりヒットポイントの位置・法線が Parameters に格納されます。</p>
 
         <p><strong style="color:#fff">Execute GameplayCue On Actor (Burst)</strong></p>
         <p>グラフ空白を右クリック → 「Execute GameplayCue On Actor (Burst)」で検索・配置。<code>Actor</code> ピンに Avatar Actor を、<code>Gameplay Cue Tag</code> に <code>GameplayCue.Attack.Hit</code> を設定します。</p>
@@ -516,8 +516,7 @@
       <li><strong>ヒット検出：</strong>攻撃を発動すると、<code>AN_AttackHit</code> が発火するタイミングで相手キャラクターが検出される。Sphere Trace の <code>Draw Debug Type</code> を <code>For Duration</code> にすると範囲が可視化できる。</li>
       <li><strong>ダメージ：</strong>相手の HP 変数が 25 減算される（Print String などで確認）。</li>
       <li><strong>GameplayCue：</strong>ヒット位置にパーティクルとサウンドが再生される。</li>
-      <li><strong>ミス（空振り）：</strong>相手がいない状態で攻撃してもエフェクトが発生しない（ForEach が空で実行されない）。</li>
-      <li><strong>複数体：</strong>複数の敵が Sphere 範囲内にいる場合、全員にダメージとエフェクトが発生する。</li>
+      <li><strong>ミス（空振り）：</strong>相手がいない状態で攻撃してもエフェクトが発生しない（Return Value が false のため Branch の True パスが実行されない）。</li>
     </ul>
 
     <div class="note-box">
